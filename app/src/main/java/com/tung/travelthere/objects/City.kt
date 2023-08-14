@@ -6,6 +6,9 @@ import android.app.DownloadManager
 import android.media.Image
 import android.os.Debug
 import android.util.Log
+import com.tung.travelthere.controller.AppController
+import com.tung.travelthere.controller.collectionCities
+import com.tung.travelthere.controller.locationsField
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -14,9 +17,14 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 
-class City(val name: String) {
+class City(val name: String, val country: String) {
     private var imageUrl: String?=null
     private var description: String?=null
+
+    companion object{
+        @JvmField
+        val recommendationsRepository: RecommendationsRepository?=null
+    }
     suspend fun getImageUrl(): String = withContext(Dispatchers.IO) {
         if (imageUrl!=null){
             return@withContext imageUrl!!
@@ -70,8 +78,32 @@ class City(val name: String) {
         }
     }
 
-    suspend fun getLocalRecommendations(): List<Location> = withContext(Dispatchers.IO){
+    inner class RecommendationsRepository{
 
+        var recommendations = ArrayList<Location>()
+
+        private constructor()
+
+        suspend fun refreshRecommendations(){
+            withContext(Dispatchers.IO){
+                val ref = AppController.db.collection(collectionCities).whereEqualTo("city-name",name).whereEqualTo("country",country)
+                    .limit(1).get()
+
+                ref.addOnSuccessListener {
+                    documents ->
+                    for (document in documents){
+                        document.reference.collection(locationsField).get().addOnSuccessListener {
+                            //lấy từng địa điểm của thành phố hiện tại
+                            documents ->
+                            for (document in documents){
+                                val name = document.getString("location-name")
+                                //thêm toạ độ
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
 }

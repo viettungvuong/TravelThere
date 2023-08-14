@@ -65,13 +65,13 @@ fun Home(context: Context) {
             Box(
                 modifier = Modifier.weight(1f)
             ) {
-                CityIntroduction(context, City("Ho Chi Minh City"))
+                CityIntroduction(context, City("Ho Chi Minh City","Vietnam"))
             }
 
             Box(
                 modifier = Modifier.weight(1f)
             ) {
-                DetailCity(City("Ho Chi Minh City"))
+                DetailCity(City("Ho Chi Minh City","Vietnam"))
             }
         }
     }
