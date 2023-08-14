@@ -82,8 +82,6 @@ class City(val name: String, val country: String) {
 
         var recommendations = ArrayList<Location>()
 
-        private constructor()
-
         suspend fun refreshRecommendations(){
             withContext(Dispatchers.IO){
                 val ref = AppController.db.collection(collectionCities).whereEqualTo("city-name",name).whereEqualTo("country",country)
