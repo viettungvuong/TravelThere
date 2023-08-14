@@ -49,7 +49,7 @@ fun Home(context: Context) {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ){
-            CityIntroduction(context,City("Ho Chi Minh City"))
+            CityIntroduction(context,City("London"))
         }
     }
 
@@ -65,16 +65,11 @@ fun CityIntroduction(context: Context, city: City) {
 
     var bitmap: Bitmap? = null
 
-    LaunchedEffect(true){
-        city.getImageUrl().collect{
-            url ->
-            imageUrl = url
-            bitmap = BitmapFactory.decodeStream(URL(url).openConnection().getInputStream())
-        }
 
-        city.getDescription().collect{
-            desc -> description=desc
-        }
+    LaunchedEffect(true){
+        imageUrl = city.getImageUrl()
+        bitmap = BitmapFactory.decodeStream(URL(imageUrl).openConnection().getInputStream())
+        description = city.getDescription()
 
     }
 
@@ -114,7 +109,7 @@ fun CityIntroduction(context: Context, city: City) {
                     .background(backgroundColor)
             ) {
                 Text(
-                text = "Ho Chi Minh City",
+                text = "${city.name}",
                 color = Color.White,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
