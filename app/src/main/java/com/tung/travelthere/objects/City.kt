@@ -70,4 +70,8 @@ class City(val name: String) {
         }
     }
 
+    suspend fun getLocalRecommendations(): List<Location> = withContext(Dispatchers.IO){
+
+    }
+
 }

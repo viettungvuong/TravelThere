@@ -9,6 +9,8 @@ import androidx.compose.foundation.background
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
@@ -32,6 +34,7 @@ import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter.State.Empty.painter
 import com.tung.travelthere.controller.getResourceIdFromName
 import com.tung.travelthere.objects.City
+import com.tung.travelthere.objects.Location
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
@@ -68,7 +71,7 @@ fun Home(context: Context) {
             Box(
                 modifier = Modifier.weight(1f)
             ) {
-                Text("Hello")
+                DetailCity(City("Ho Chi Minh City"))
             }
         }
     }
@@ -97,6 +100,7 @@ fun CityIntroduction(context: Context, city: City) {
 
         bitmap = BitmapFactory.decodeResource(context.resources, imageUrl)
         //đặt bitmap từ resources
+
         description="Ho Chi Minh City is the biggest city in Vietnam"
 
         if (bitmap!=null){
@@ -170,6 +174,43 @@ fun CityIntroduction(context: Context, city: City) {
             }
         }
     }
+}
+
+@Composable
+fun DetailCity(city: City){
+    Box(modifier = Modifier.fillMaxSize()){
+
+    }
+}
+
+@Composable
+fun LocalRecommended(city: City){
+    var listState = remember { mutableStateListOf<Location>() }
+    LazyRow{
+        itemsIndexed(listState){
+                index, string -> //xuất ra location adapter
+        }
+    }
+}
+
+@Composable
+fun PlacesToGo(city: City){
+
+}
+
+@Composable
+fun Transportation(city: City){
+
+}
+
+@Composable
+fun Discussion(city: City){
+
+}
+
+@Composable
+fun InteractLocal(city: City){
+
 }
 
 @Preview(showBackground = true)
