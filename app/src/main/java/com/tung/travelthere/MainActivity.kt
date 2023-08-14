@@ -9,6 +9,8 @@ import androidx.compose.foundation.background
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -47,27 +49,42 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun Home(context: Context) {
+    //scroll state
+    val scrollState = rememberScrollState()
+    val scope = rememberCoroutineScope()
+
     MaterialTheme{
         Column(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ){
-            CityIntroduction(context,City("Ho Chi Minh City"))
+            Box(
+                modifier = Modifier.weight(1f)
+            ) {
+                CityIntroduction(context, City("Ho Chi Minh City"))
+            }
+
+            Box(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Hello")
+            }
         }
     }
-
-
 }
 
 @Composable
 fun CityIntroduction(context: Context, city: City) {
+    //phần cho city
     var imageUrl by remember{ mutableStateOf(getResourceIdFromName("hcmc")) }
     var description by remember{ mutableStateOf("") }
 
-    var backgroundColor by remember{ mutableStateOf(Color.Gray) }
+    //background color của text
+    var textBgColor by remember{ mutableStateOf(Color.Gray) }
 
-    var bitmap: Bitmap? = null
+    //bitmap hình nền
+    var bitmap: Bitmap?
 
 
     LaunchedEffect(true){
@@ -87,12 +104,13 @@ fun CityIntroduction(context: Context, city: City) {
             val colorExtracted = palette.dominantSwatch?.let {
                 Color(it.rgb)
             } ?: Color.Transparent
-            backgroundColor = colorExtracted //đặt màu nền phần box gần với màu cái ảnh
+            textBgColor = colorExtracted //đặt màu nền phần box gần với màu cái ảnh
         }
     }
 
     Box(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
     ) {
         // Background Image
 //        AsyncImage(model = imageUrl
@@ -112,7 +130,6 @@ fun CityIntroduction(context: Context, city: City) {
             verticalArrangement = Arrangement.Center,
 
         ) {
-
             Box(
                 modifier = Modifier
                     .padding(
@@ -121,7 +138,7 @@ fun CityIntroduction(context: Context, city: City) {
                         end = 16.dp,
                         bottom = 8.dp,
                     )
-                    .background(backgroundColor)
+                    .background(textBgColor)
             ) {
                 Text(
                 text = "${city.name}",
@@ -141,7 +158,7 @@ fun CityIntroduction(context: Context, city: City) {
                         end = 16.dp,
                         bottom = 8.dp,
                     )
-                    .background(backgroundColor)
+                    .background(textBgColor)
             ) {
                 Text(
                     text = "$description",
