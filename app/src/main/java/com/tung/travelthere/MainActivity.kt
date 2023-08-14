@@ -27,9 +27,13 @@ import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.palette.graphics.Palette
 import coil.compose.AsyncImage
+import coil.compose.AsyncImagePainter.State.Empty.painter
 import com.tung.travelthere.controller.getResourceIdFromName
 import com.tung.travelthere.objects.City
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import java.net.URL
 
 class MainActivity : ComponentActivity() {
@@ -49,7 +53,7 @@ fun Home(context: Context) {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ){
-            CityIntroduction(context,City("London"))
+            CityIntroduction(context,City("Ho Chi Minh City"))
         }
     }
 
@@ -58,7 +62,7 @@ fun Home(context: Context) {
 
 @Composable
 fun CityIntroduction(context: Context, city: City) {
-    var imageUrl by remember{ mutableStateOf("") }
+    var imageUrl by remember{ mutableStateOf(getResourceIdFromName("hcmc")) }
     var description by remember{ mutableStateOf("") }
 
     var backgroundColor by remember{ mutableStateOf(Color.Gray) }
@@ -67,13 +71,17 @@ fun CityIntroduction(context: Context, city: City) {
 
 
     LaunchedEffect(true){
-        imageUrl = city.getImageUrl()
-        bitmap = BitmapFactory.decodeStream(URL(imageUrl).openConnection().getInputStream())
-        description = city.getDescription()
+//        CoroutineScope(Dispatchers.IO)
+//            .launch {
+//            imageUrl = city.getImageUrl()
+//            bitmap = BitmapFactory.decodeStream(URL(imageUrl).openConnection().getInputStream())
+//            description = city.getDescription()
+//        }
 
-    }
+        bitmap = BitmapFactory.decodeResource(context.resources, imageUrl)
+        //đặt bitmap từ resources
+        description="Ho Chi Minh City is the biggest city in Vietnam"
 
-    SideEffect {
         if (bitmap!=null){
             val palette = Palette.Builder(bitmap!!).generate()
             val colorExtracted = palette.dominantSwatch?.let {
@@ -87,8 +95,15 @@ fun CityIntroduction(context: Context, city: City) {
         modifier = Modifier.fillMaxSize()
     ) {
         // Background Image
-        AsyncImage(model = imageUrl
-            , contentDescription = null)
+//        AsyncImage(model = imageUrl
+//            , contentDescription = null)
+
+        Image(
+            painter = painterResource(id = imageUrl),
+            contentDescription = "Image from Drawable",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
+        )
 
         // Text on top of the image
         Column(

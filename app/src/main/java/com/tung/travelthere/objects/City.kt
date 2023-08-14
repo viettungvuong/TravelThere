@@ -15,12 +15,13 @@ import kotlinx.coroutines.withContext
 import org.json.JSONObject
 
 class City(val name: String) {
-    private var imageUrl =""
-    private var description = ""
+    private var imageUrl: String?=null
+    private var description: String?=null
     suspend fun getImageUrl(): String = withContext(Dispatchers.IO) {
-        if (imageUrl!=""){
-            return@withContext imageUrl
+        if (imageUrl!=null){
+            return@withContext imageUrl!!
         }
+        Log.d("url has","false")
         val client = OkHttpClient()
         val url =
             "https://en.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages&titles=$name&pithumbsize=500"
@@ -37,6 +38,7 @@ class City(val name: String) {
             val json = pages.getJSONObject(pageId).optJSONObject("thumbnail")
             val url = json?.getString("source") ?: ""
             imageUrl=url
+            Log.d("url",url)
             return@use url
         }
 
@@ -44,9 +46,10 @@ class City(val name: String) {
 
 
     suspend fun getDescription(): String = withContext(Dispatchers.IO) {
-        if (description!=""){
-            return@withContext description
+        if (description!=null){
+            return@withContext description!!
         }
+        Log.d("desc has","false")
         val client = OkHttpClient()
         val url =
             "https://en.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&exintro=true&titles=$name"
@@ -62,6 +65,7 @@ class City(val name: String) {
             val pageId = pages.keys().next()
             val desc = pages.getJSONObject(pageId).getString("extract")
             description=desc
+            Log.d("desc",desc)
             return@use desc
         }
     }

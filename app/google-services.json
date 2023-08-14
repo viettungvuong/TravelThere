@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "605084263680",
+    "project_id": "travelthere-9f19a",
+    "storage_bucket": "travelthere-9f19a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:605084263680:android:756dd747af1c5058c13fe5",
+        "android_client_info": {
+          "package_name": "com.tung.travelthere"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "605084263680-u0aea6nh6te37ah7ckrmpffrh2p08ftn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD5jFBmMOSm3-_Vgbkx2HsWFeIotYshOq0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "605084263680-u0aea6nh6te37ah7ckrmpffrh2p08ftn.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
