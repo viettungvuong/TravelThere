@@ -26,57 +26,39 @@ import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.ktx.storage
 
 class City(val name: String, val country: String) {
-    private var imageUrl: String?=null
-    private var description: String?=null
 
     val recommendationsRepository= RecommendationsRepository()
 
-    fun setDescription(description: String){
-        this.description=description
+    suspend fun fetchImageUrl(): String?{
+        var res: String?=null
+
+        val query = AppController.db.collection(collectionCities).whereEqualTo(cityNameField,name).limit(1).get().await()
+
+        val document = query.documents.firstOrNull()
+        if (document!=null){
+            res = document.getString("file-name")
+            val storageRef = Firebase.storage.reference
+            val imageRef = storageRef.child(res!!)
+            res = imageRef.downloadUrl.await().toString()
+        }
+
+        return res
+
     }
 
 
-    fun getDescription(): String?{
-        return description
-    }
+    suspend fun fetchDescription(): String?{
 
-    fun getImageUrl(): String?{
-        return imageUrl
-    }
+        var res: String?=null
 
-    fun fetchImageUrl(){
-        AppController.db.collection(collectionCities).whereEqualTo(cityNameField,name).limit(1).get()
-            .addOnSuccessListener {
-                    documents ->
-                for (document in documents){
-                    val storage = Firebase.storage
-                    val storageRef = storage.reference
-                    val fileRef = storageRef.child(document.getString("file-name")!!)
+        val query = AppController.db.collection(collectionCities).whereEqualTo(cityNameField,name).limit(1).get().await()
 
-                    fileRef.downloadUrl
-                        .addOnSuccessListener { uri ->
-                            val downloadUrl = uri.toString()
-                            description = downloadUrl
-                        }
-                        .addOnFailureListener { exception ->
-                            Log.d("Error","Error getting download URL: $exception")
-                        }
-                }
-            }
-    }
+        val document = query.documents.firstOrNull()
+        if (document!=null){
+            res = document.getString("description")
+        }
 
-
-    fun fetchDescription(){
-
-        AppController.db.collection(collectionCities).whereEqualTo(cityNameField,name).limit(1).get()
-            .addOnSuccessListener {
-                documents ->
-                for (document in documents){
-                    description = document.getString("description")
-                }
-            }
-
-
+        return res
     }
 
     inner class RecommendationsRepository{

@@ -58,7 +58,6 @@ fun Home(context: Context) {
     val scope = rememberCoroutineScope()
     val city = City("Ho Chi Minh City", "Vietnam")
 
-    city.setDescription("Ho Chi Minh City is the biggest city in Vietnam")
 
     MaterialTheme{
         Column(
@@ -85,8 +84,8 @@ fun Home(context: Context) {
 @Composable
 fun CityIntroduction(context: Context, city: City) {
     //phần cho city
-    var imageUrl by remember{ mutableStateOf("") }
-    var description by remember{ mutableStateOf("") }
+    var imageUrl by remember{ mutableStateOf<String?>(null) }
+    var description by remember{ mutableStateOf<String?>(null) }
 
     //background color của text
     var textBgColor by remember{ mutableStateOf(Color.Gray) }
@@ -97,17 +96,19 @@ fun CityIntroduction(context: Context, city: City) {
     //dùng cho vụ quẹt màn hình
     val pagerState = rememberPagerState(initialPage = 0)
 
+    val coroutineScope = rememberCoroutineScope()
 
-
-    LaunchedEffect(true){
-        description = city.getDescription()?:""
-        imageUrl = city.getImageUrl()?:""
-
-
+    LaunchedEffect(city){
+        coroutineScope.launch {
+            withContext(Dispatchers.IO) {
+                description = city.fetchDescription()
+                imageUrl = city.fetchDescription()
+            }
+        }
     }
 
     SideEffect {
-        bitmap = if (imageUrl=="")
+        bitmap = if (imageUrl==null)
             null
         else
             BitmapFactory.decodeStream(URL(imageUrl).openConnection().getInputStream())
@@ -125,16 +126,16 @@ fun CityIntroduction(context: Context, city: City) {
         modifier = Modifier
             .fillMaxSize()
     ) {
-        // Background Image
-//        AsyncImage(model = imageUrl
-//            , contentDescription = null)
         HorizontalPager(state = pagerState, pageCount = 10) { page ->
-            AsyncImage(
-                model = imageUrl,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize()
-            )
+            if (imageUrl != null){
+                AsyncImage(
+                    model = imageUrl,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+
         }
 
 
@@ -175,13 +176,19 @@ fun CityIntroduction(context: Context, city: City) {
                     )
                     .background(textBgColor)
             ) {
-                Text(
-                    text = "$description",
-                    color = Color.White,
-                    fontSize = 18.sp,
-                    textAlign = TextAlign.Start,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis)
+                if (description!=null){
+                    Text(
+                        text = "$description",
+                        color = Color.White,
+                        fontSize = 18.sp,
+                        textAlign = TextAlign.Start,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis)
+                }
+                else{
+                    Text(text = "Loading")
+                }
+
             }
         }
     }
