@@ -35,39 +35,47 @@ class City(val name: String, val country: String) {
         this.description=description
     }
 
-    suspend fun getImageUrl(): String = withContext(Dispatchers.IO) {
-        if (imageUrl!=null){
-            return@withContext imageUrl!!
-        }
 
-        val query = AppController.db.collection(collectionCities).whereEqualTo(cityNameField,name).limit(1).get().await()
+    fun getDescription(): String?{
+        return description
+    }
 
-        val fileName = query.documents.firstOrNull()?.getString("file-name")
-        val storageRef= Firebase.storage.reference.child("$name/$fileName")
+    fun getImageUrl(): String?{
+        return imageUrl
+    }
 
-        try {
-            val url = storageRef.downloadUrl.await() // lấy link ảnh từ firestore
-            imageUrl=url.toString()
-            Log.d("url",url.toString())
-            url.toString()!!
-        } catch (e: Exception) {
-           ""
-        }
+    fun fetchImageUrl(){
+        AppController.db.collection(collectionCities).whereEqualTo(cityNameField,name).limit(1).get()
+            .addOnSuccessListener {
+                    documents ->
+                for (document in documents){
+                    val storage = Firebase.storage
+                    val storageRef = storage.reference
+                    val fileRef = storageRef.child(document.getString("file-name")!!)
+
+                    fileRef.downloadUrl
+                        .addOnSuccessListener { uri ->
+                            val downloadUrl = uri.toString()
+                            description = downloadUrl
+                        }
+                        .addOnFailureListener { exception ->
+                            Log.d("Error","Error getting download URL: $exception")
+                        }
+                }
+            }
     }
 
 
-    suspend fun getDescription(): String = withContext(Dispatchers.IO) {
-        if (description!=null){
-            return@withContext description!!
-        }
+    fun fetchDescription(){
 
-        val query = AppController.db.collection(collectionCities).whereEqualTo(cityNameField,name).limit(1).get().await()
+        AppController.db.collection(collectionCities).whereEqualTo(cityNameField,name).limit(1).get()
+            .addOnSuccessListener {
+                documents ->
+                for (document in documents){
+                    description = document.getString("description")
+                }
+            }
 
-        val desc = query.documents.firstOrNull()?.getString("description")
-
-        description = desc
-
-        return@withContext desc?:""
 
     }
 

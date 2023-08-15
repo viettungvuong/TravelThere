@@ -100,12 +100,17 @@ fun CityIntroduction(context: Context, city: City) {
 
 
     LaunchedEffect(true){
-        CoroutineScope(Dispatchers.IO)
-            .launch {
-            imageUrl = city.getImageUrl()
-            bitmap = BitmapFactory.decodeStream(URL(imageUrl).openConnection().getInputStream())
-            description = city.getDescription()
-        }
+        description = city.getDescription()?:""
+        imageUrl = city.getImageUrl()?:""
+
+
+    }
+
+    SideEffect {
+        bitmap = if (imageUrl=="")
+            null
+        else
+            BitmapFactory.decodeStream(URL(imageUrl).openConnection().getInputStream())
 
         if (bitmap!=null){
             val palette = Palette.Builder(bitmap!!).generate()
