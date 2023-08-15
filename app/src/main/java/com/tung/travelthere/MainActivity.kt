@@ -1,18 +1,17 @@
-package com.tung.travelthere.layouts
+package com.tung.travelthere
 
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -30,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.palette.graphics.Palette
+import androidx.viewpager2.widget.ViewPager2
 import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter.State.Empty.painter
 import com.tung.travelthere.controller.getResourceIdFromName
@@ -39,6 +39,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.net.URL
 
 class MainActivity : ComponentActivity() {
@@ -55,6 +56,9 @@ fun Home(context: Context) {
     //scroll state
     val scrollState = rememberScrollState()
     val scope = rememberCoroutineScope()
+    val city = City("Ho Chi Minh City", "Vietnam")
+
+    city.setDescription("Ho Chi Minh City is the biggest city in Vietnam")
 
     MaterialTheme{
         Column(
@@ -71,37 +75,37 @@ fun Home(context: Context) {
             Box(
                 modifier = Modifier.weight(1f)
             ) {
-                DetailCity(City("Ho Chi Minh City","Vietnam"))
+                DetailCity(city)
             }
         }
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CityIntroduction(context: Context, city: City) {
     //phần cho city
-    var imageUrl by remember{ mutableStateOf(getResourceIdFromName("hcmc")) }
+    var imageUrl by remember{ mutableStateOf("") }
     var description by remember{ mutableStateOf("") }
 
     //background color của text
     var textBgColor by remember{ mutableStateOf(Color.Gray) }
 
     //bitmap hình nền
-    var bitmap: Bitmap?
+    var bitmap: Bitmap?=null
+
+    //dùng cho vụ quẹt màn hình
+    val pagerState = rememberPagerState(initialPage = 0)
+
 
 
     LaunchedEffect(true){
-//        CoroutineScope(Dispatchers.IO)
-//            .launch {
-//            imageUrl = city.getImageUrl()
-//            bitmap = BitmapFactory.decodeStream(URL(imageUrl).openConnection().getInputStream())
-//            description = city.getDescription()
-//        }
-
-        bitmap = BitmapFactory.decodeResource(context.resources, imageUrl)
-        //đặt bitmap từ resources
-
-        description="Ho Chi Minh City is the biggest city in Vietnam"
+        CoroutineScope(Dispatchers.IO)
+            .launch {
+            imageUrl = city.getImageUrl()
+            bitmap = BitmapFactory.decodeStream(URL(imageUrl).openConnection().getInputStream())
+            description = city.getDescription()
+        }
 
         if (bitmap!=null){
             val palette = Palette.Builder(bitmap!!).generate()
@@ -119,13 +123,15 @@ fun CityIntroduction(context: Context, city: City) {
         // Background Image
 //        AsyncImage(model = imageUrl
 //            , contentDescription = null)
+        HorizontalPager(state = pagerState, pageCount = 10) { page ->
+            AsyncImage(
+                model = imageUrl,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+        }
 
-        Image(
-            painter = painterResource(id = imageUrl),
-            contentDescription = "Image from Drawable",
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
-        )
 
         // Text on top of the image
         Column(

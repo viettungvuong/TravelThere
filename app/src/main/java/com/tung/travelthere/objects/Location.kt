@@ -1,5 +1,7 @@
 package com.tung.travelthere.objects
 
+import java.net.URL
+
 class Position(var lat: Float, var long: Float)
 
 class Dish(var name: String, var type: String)
@@ -7,12 +9,21 @@ class Dish(var name: String, var type: String)
 
 //không cho phép tạo object từ class Location
 open class Location protected constructor(private val name: String, private val pos: Position): java.io.Serializable{
+    private var imageUrl : URL?=null
     fun getName(): String{
         return name
     }
 
     fun getPos(): Position{
         return pos
+    }
+
+    fun setImageUrl(url: URL){
+        imageUrl=url
+    }
+
+    fun getImageUrl(): URL?{
+        return imageUrl
     }
 
     override fun toString(): String {

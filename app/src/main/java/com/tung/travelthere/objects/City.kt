@@ -6,7 +6,9 @@ import android.app.DownloadManager
 import android.media.Image
 import android.os.Debug
 import android.util.Log
+import com.google.firebase.ktx.Firebase
 import com.tung.travelthere.controller.AppController
+import com.tung.travelthere.controller.cityNameField
 import com.tung.travelthere.controller.collectionCities
 import com.tung.travelthere.controller.locationsField
 import kotlinx.coroutines.Dispatchers
@@ -14,8 +16,14 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import org.json.JSONArray
 import org.json.JSONObject
+import java.net.HttpURLConnection
+import java.net.URL
+import com.google.firebase.storage.StorageReference
+import com.google.firebase.storage.ktx.storage
 
 class City(val name: String, val country: String) {
     private var imageUrl: String?=null
@@ -23,31 +31,28 @@ class City(val name: String, val country: String) {
 
     val recommendationsRepository= RecommendationsRepository()
 
+    fun setDescription(description: String){
+        this.description=description
+    }
+
     suspend fun getImageUrl(): String = withContext(Dispatchers.IO) {
         if (imageUrl!=null){
             return@withContext imageUrl!!
         }
-        Log.d("url has","false")
-        val client = OkHttpClient()
-        val url =
-            "https://en.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages&titles=$name&pithumbsize=500"
-        val request = Request.Builder()
-            .url(url)
-            .build()
 
-        client.newCall(request).execute().use { response ->
-            if (!response.isSuccessful) throw Exception("$response")
-            val jsonResponse = response.body?.string() ?: ""
-            val jsonObject = JSONObject(jsonResponse)
-            val pages = jsonObject.getJSONObject("query").getJSONObject("pages")
-            val pageId = pages.keys().next()
-            val json = pages.getJSONObject(pageId).optJSONObject("thumbnail")
-            val url = json?.getString("source") ?: ""
-            imageUrl=url
-            Log.d("url",url)
-            return@use url
+        val query = AppController.db.collection(collectionCities).whereEqualTo(cityNameField,name).limit(1).get().await()
+
+        val fileName = query.documents.firstOrNull()?.getString("file-name")
+        val storageRef= Firebase.storage.reference.child("$name/$fileName")
+
+        try {
+            val url = storageRef.downloadUrl.await() // lấy link ảnh từ firestore
+            imageUrl=url.toString()
+            Log.d("url",url.toString())
+            url.toString()!!
+        } catch (e: Exception) {
+           ""
         }
-
     }
 
 
@@ -55,25 +60,15 @@ class City(val name: String, val country: String) {
         if (description!=null){
             return@withContext description!!
         }
-        Log.d("desc has","false")
-        val client = OkHttpClient()
-        val url =
-            "https://en.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&exintro=true&titles=$name"
-        val request = Request.Builder()
-            .url(url)
-            .build()
 
-        client.newCall(request).execute().use { response ->
-            if (!response.isSuccessful) throw Exception("$response")
-            val jsonResponse = response.body?.string() ?: ""
-            val jsonObject = JSONObject(jsonResponse)
-            val pages = jsonObject.getJSONObject("query").getJSONObject("pages")
-            val pageId = pages.keys().next()
-            val desc = pages.getJSONObject(pageId).getString("extract")
-            description=desc
-            Log.d("desc",desc)
-            return@use desc
-        }
+        val query = AppController.db.collection(collectionCities).whereEqualTo(cityNameField,name).limit(1).get().await()
+
+        val desc = query.documents.firstOrNull()?.getString("description")
+
+        description = desc
+
+        return@withContext desc?:""
+
     }
 
     inner class RecommendationsRepository{
@@ -82,7 +77,7 @@ class City(val name: String, val country: String) {
 
         suspend fun refreshRecommendations(){
             withContext(Dispatchers.IO){
-                val ref = AppController.db.collection(collectionCities).whereEqualTo("city-name",name).whereEqualTo("country",country)
+                val ref = AppController.db.collection(collectionCities).whereEqualTo(cityNameField,name).whereEqualTo("country",country)
                     .limit(1).get()
 
                 ref.addOnSuccessListener {

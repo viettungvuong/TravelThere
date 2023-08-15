@@ -8,6 +8,8 @@ const val collectionCities = "cities"
 
 const val locationsField = "locations"
 
+const val cityNameField = "city-name"
+
 class AppController {
     companion object{
         @JvmStatic
