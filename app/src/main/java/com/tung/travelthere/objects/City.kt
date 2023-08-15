@@ -21,10 +21,8 @@ class City(val name: String, val country: String) {
     private var imageUrl: String?=null
     private var description: String?=null
 
-    companion object{
-        @JvmField
-        val recommendationsRepository: RecommendationsRepository?=null
-    }
+    val recommendationsRepository= RecommendationsRepository()
+
     suspend fun getImageUrl(): String = withContext(Dispatchers.IO) {
         if (imageUrl!=null){
             return@withContext imageUrl!!

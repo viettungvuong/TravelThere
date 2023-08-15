@@ -185,7 +185,13 @@ fun DetailCity(city: City){
 
 @Composable
 fun LocalRecommended(city: City){
-    var listState = remember { mutableStateListOf<Location>() }
+    var listState by remember { mutableStateOf(ArrayList<Location>()) }
+
+    LaunchedEffect(true){
+        listState.addAll(city.recommendationsRepository.recommendations)
+        //thêm toàn bộ list vào listState
+    }
+
     LazyRow{
         itemsIndexed(listState){
                 index, string -> //xuất ra location adapter
