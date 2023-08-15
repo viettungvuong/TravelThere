@@ -98,12 +98,12 @@ fun CityIntroduction(context: Context, city: City) {
 
     val coroutineScope = rememberCoroutineScope()
 
-    LaunchedEffect(city){
+
+
+    LaunchedEffect(description, imageUrl){
         coroutineScope.launch {
-            withContext(Dispatchers.IO) {
-                description = city.fetchDescription()
-                imageUrl = city.fetchDescription()
-            }
+            description = city.fetchDescription()
+            imageUrl = city.fetchImageUrl()
         }
     }
 

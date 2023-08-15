@@ -48,7 +48,6 @@ class City(val name: String, val country: String) {
 
 
     suspend fun fetchDescription(): String?{
-
         var res: String?=null
 
         val query = AppController.db.collection(collectionCities).whereEqualTo(cityNameField,name).limit(1).get().await()
@@ -59,6 +58,7 @@ class City(val name: String, val country: String) {
         }
 
         return res
+
     }
 
     inner class RecommendationsRepository{
