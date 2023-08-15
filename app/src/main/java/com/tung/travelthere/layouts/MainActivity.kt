@@ -1,4 +1,4 @@
-package com.tung.travelthere
+package com.tung.travelthere.layouts
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -194,7 +194,8 @@ fun LocalRecommended(city: City){
 
     LazyRow{
         itemsIndexed(listState){
-                index, string -> //xuất ra location adapter
+                index, location -> //tương tự xuất ra location adapter
+
         }
     }
 }
