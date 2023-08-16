@@ -25,6 +25,8 @@ import com.tung.travelthere.controller.*
 class City private constructor() {
     private var name: String?=null
     private var country: String?=null
+    private var description: String?=null
+    private var imageUrl: String?=null
 
     fun setName(name: String){
         this.name = name
@@ -40,6 +42,22 @@ class City private constructor() {
 
     fun getCountry(): String?{
         return country
+    }
+
+    fun setDescription(description: String){
+        this.description = description
+    }
+
+    fun getDescription(): String?{
+        return description
+    }
+
+    fun setImageUrl(imageUrl: String){
+        this.imageUrl = imageUrl
+    }
+
+    fun getImageUrl(): String?{
+        return imageUrl
     }
 
     companion object{
@@ -61,7 +79,7 @@ class City private constructor() {
 
         val query = AppController.db.collection(collectionCities).whereEqualTo(cityNameField, name)
             .whereEqualTo("country", country).limit(1).get().await()
-
+        Log.d("fetched", "true")
         val document = query.documents.firstOrNull()
         if (document != null) {
             res = document.getString("file-name")
@@ -69,7 +87,7 @@ class City private constructor() {
             val imageRef = storageRef.child(res!!)
             res = imageRef.downloadUrl.await().toString()
         }
-
+        Log.d("image url", res?:"")
         return res
 
     }
@@ -80,12 +98,12 @@ class City private constructor() {
 
         val query = AppController.db.collection(collectionCities).whereEqualTo(cityNameField, name)
             .whereEqualTo("country", country).limit(1).get().await()
-
+        Log.d("fetched", "true")
         val document = query.documents.firstOrNull()
         if (document != null) {
             res = document.getString("description")
         }
-
+        Log.d("description", res?:"")
         return res
 
     }

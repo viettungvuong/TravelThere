@@ -33,6 +33,8 @@ import androidx.palette.graphics.Palette
 import androidx.viewpager2.widget.ViewPager2
 import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter.State.Empty.painter
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import com.tung.travelthere.controller.getResourceIdFromName
 import com.tung.travelthere.objects.City
 import com.tung.travelthere.objects.Location
@@ -54,6 +56,8 @@ class MainActivity : ComponentActivity() {
 fun Home(context: Context) {
     City.getSingleton().setName("Ho Chi Minh City")
     City.getSingleton().setCountry("Vietnam")
+    City.getSingleton().setDescription("Ho Chi Minh City is the biggest city in Vietnam")
+    City.getSingleton().setImageUrl("https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/DJI_0550-HDR-Pano.jpg/640px-DJI_0550-HDR-Pano.jpg")
 
 
     MaterialTheme {
@@ -81,8 +85,8 @@ fun Home(context: Context) {
 @Composable
 fun CityIntroduction(context: Context, city: City) {
     //phần cho city
-    var imageUrl by remember { mutableStateOf<String?>(null) }
-    var description by remember { mutableStateOf<String?>(null) }
+    var imageUrl by remember { mutableStateOf<String?>(city.getImageUrl()) }
+    var description by remember { mutableStateOf<String?>(city.getDescription()) }
 
     //background color của text
     var textBgColor by remember { mutableStateOf(Color.Gray) }
@@ -90,24 +94,32 @@ fun CityIntroduction(context: Context, city: City) {
     //bitmap hình nền
     var bitmap: Bitmap? = null
 
-
     val coroutineScope = rememberCoroutineScope()
 
-    LaunchedEffect(description, imageUrl) {
+    Log.d("image url",imageUrl.toString())
+
+    LaunchedEffect(bitmap) {
+//        coroutineScope.launch {
+//            description = city.fetchDescription()
+//            Log.d("description", description?:"")
+//            imageUrl = city.fetchImageUrl()
+//            Log.d("imageUrl", imageUrl?:"")
+//        }
+
         coroutineScope.launch {
-            description = city.fetchDescription()
-            Log.d("fetching description", "true")
-            imageUrl = city.fetchImageUrl()
-            Log.d("fetching image", "true")
+            bitmap = if (imageUrl == null) {
+                null
+            }
+            else {
+                withContext(Dispatchers.IO){
+                    BitmapFactory.decodeStream(URL(imageUrl).openConnection().getInputStream())
+                }
+
+            }
         }
     }
 
     SideEffect {
-        bitmap = if (imageUrl == null)
-            null
-        else
-            BitmapFactory.decodeStream(URL(imageUrl).openConnection().getInputStream())
-
         if (bitmap != null) {
             val palette = Palette.Builder(bitmap!!).generate()
             val colorExtracted = palette.dominantSwatch?.let {
@@ -121,8 +133,12 @@ fun CityIntroduction(context: Context, city: City) {
         modifier = Modifier
             .fillMaxSize()
     ) {
-        AsyncImage(
-            model = imageUrl,
+        Image(
+            painter = rememberAsyncImagePainter(
+                model = ImageRequest.Builder(context)
+                .data(imageUrl)
+                .crossfade(true)
+                .build(),),
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
