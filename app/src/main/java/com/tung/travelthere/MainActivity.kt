@@ -58,7 +58,12 @@ fun Home(context: Context) {
     City.getSingleton().setDescription("Ho Chi Minh City is the biggest city in Vietnam")
     City.getSingleton()
         .setImageUrl("https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/DJI_0550-HDR-Pano.jpg/640px-DJI_0550-HDR-Pano.jpg")
-    City.getSingleton().recommendationsRepository.recommendations.add(TouristPlace("Ben Thanh Market",Position(1f,1f)))
+    val t1 = TouristPlace("Ben Thanh Market",Position(1f,1f))
+    t1.setDrawableName("benthanh")
+    val t2 = TouristPlace("Nhà thờ Đức bà",Position(1f,1f))
+    t2.setDrawableName("nhathoducba")
+    City.getSingleton().recommendationsRepository.recommendations.add(t1)
+    City.getSingleton().recommendationsRepository.recommendations.add(t2)
 
 
     MaterialTheme {
@@ -231,16 +236,14 @@ fun SneakViewPlace(location: Location) {
     Card(
         modifier = Modifier
             .padding(
-                start = 16.dp,
-                top = 8.dp,
-                end = 16.dp,
-                bottom = 8.dp,
+                horizontal = 20.dp,
+                vertical = 20.dp
             ),
         elevation = 10.dp
     ) {
         Column {
             Image(
-                painter = painterResource(id = R.drawable.hcmc),
+                painter = painterResource(id = location.getResourceId(LocalContext.current)!!),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier

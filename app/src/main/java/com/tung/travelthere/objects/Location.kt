@@ -1,5 +1,6 @@
 package com.tung.travelthere.objects
 
+import android.content.Context
 import java.net.URL
 
 class Position(var lat: Float, var long: Float)
@@ -9,7 +10,32 @@ class Dish(var name: String, var type: String)
 
 //không cho phép tạo object từ class Location
 open class Location protected constructor(private val name: String, private val pos: Position): java.io.Serializable{
-    private var imageUrl : URL?=null
+//    private var imageUrl : URL?=null
+//fun setImageUrl(url: URL) {
+//    imageUrl = url
+//}
+//
+//    fun getImageUrl(): URL? {
+//        return imageUrl
+//    }
+
+    private var drawableName: String?=null
+    fun setDrawableName(name: String){
+        drawableName=name
+    }
+
+    fun getDrawableName(): String?{
+        return drawableName
+    }
+
+    fun getResourceId(context: Context): Int?{
+        if (drawableName==null){
+            return null
+        }
+        val resourceId = context.resources.getIdentifier(drawableName,"drawable",context.packageName)
+        return resourceId
+    }
+
     fun getName(): String{
         return name
     }
@@ -18,13 +44,7 @@ open class Location protected constructor(private val name: String, private val 
         return pos
     }
 
-    fun setImageUrl(url: URL){
-        imageUrl=url
-    }
 
-    fun getImageUrl(): URL?{
-        return imageUrl
-    }
 
     override fun toString(): String {
         return name + "," + pos.lat.toString() + "," + pos.long.toString()

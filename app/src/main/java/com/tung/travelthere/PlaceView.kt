@@ -32,7 +32,7 @@ fun PlaceView(location: Location){
             .background(Color.White)
     ){
         Column{
-            AsyncImage(model = location.getImageUrl(), contentDescription = null)
+//            AsyncImage(model = location.getImageUrl(), contentDescription = null)
         }
     }
 }
