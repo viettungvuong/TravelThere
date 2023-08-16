@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.*
@@ -35,12 +36,10 @@ import coil.compose.AsyncImagePainter.State.Empty.painter
 import com.tung.travelthere.controller.getResourceIdFromName
 import com.tung.travelthere.objects.City
 import com.tung.travelthere.objects.Location
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.net.URL
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,28 +52,26 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun Home(context: Context) {
-    //scroll state
-    val scrollState = rememberScrollState()
-    val scope = rememberCoroutineScope()
-    val city = City("Ho Chi Minh City", "Vietnam")
+    City.getSingleton().setName("Ho Chi Minh City")
+    City.getSingleton().setCountry("Vietnam")
 
 
-    MaterialTheme{
+    MaterialTheme {
         Column(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
-        ){
+        ) {
             Box(
                 modifier = Modifier.weight(1f)
             ) {
-                CityIntroduction(context, City("Ho Chi Minh City","Vietnam"))
+                CityIntroduction(context, City.getSingleton())
             }
 
             Box(
                 modifier = Modifier.weight(1f)
             ) {
-                DetailCity(city)
+                DetailCity(City.getSingleton())
             }
         }
     }
@@ -84,36 +81,34 @@ fun Home(context: Context) {
 @Composable
 fun CityIntroduction(context: Context, city: City) {
     //phần cho city
-    var imageUrl by remember{ mutableStateOf<String?>(null) }
-    var description by remember{ mutableStateOf<String?>(null) }
+    var imageUrl by remember { mutableStateOf<String?>(null) }
+    var description by remember { mutableStateOf<String?>(null) }
 
     //background color của text
-    var textBgColor by remember{ mutableStateOf(Color.Gray) }
+    var textBgColor by remember { mutableStateOf(Color.Gray) }
 
     //bitmap hình nền
-    var bitmap: Bitmap?=null
+    var bitmap: Bitmap? = null
 
-    //dùng cho vụ quẹt màn hình
-    val pagerState = rememberPagerState(initialPage = 0)
 
     val coroutineScope = rememberCoroutineScope()
 
-
-
-    LaunchedEffect(description, imageUrl){
+    LaunchedEffect(description, imageUrl) {
         coroutineScope.launch {
             description = city.fetchDescription()
+            Log.d("fetching description", "true")
             imageUrl = city.fetchImageUrl()
+            Log.d("fetching image", "true")
         }
     }
 
     SideEffect {
-        bitmap = if (imageUrl==null)
+        bitmap = if (imageUrl == null)
             null
         else
             BitmapFactory.decodeStream(URL(imageUrl).openConnection().getInputStream())
 
-        if (bitmap!=null){
+        if (bitmap != null) {
             val palette = Palette.Builder(bitmap!!).generate()
             val colorExtracted = palette.dominantSwatch?.let {
                 Color(it.rgb)
@@ -126,115 +121,111 @@ fun CityIntroduction(context: Context, city: City) {
         modifier = Modifier
             .fillMaxSize()
     ) {
-        HorizontalPager(state = pagerState, pageCount = 10) { page ->
-            if (imageUrl != null){
-                AsyncImage(
-                    model = imageUrl,
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                )
-            }
-
-        }
+        AsyncImage(
+            model = imageUrl,
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
+        )
+    }
 
 
-        // Text on top of the image
-        Column(
-            modifier = Modifier
-                .fillMaxSize() ,
-            verticalArrangement = Arrangement.Center,
+    // Text on top of the image
+    Column(
+        modifier = Modifier
+            .fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
 
         ) {
-            Box(
-                modifier = Modifier
-                    .padding(
-                        start = 16.dp,
-                        top = 8.dp,
-                        end = 16.dp,
-                        bottom = 8.dp,
-                    )
-                    .background(textBgColor)
-            ) {
-                Text(
-                text = "${city.name}",
+        Box(
+            modifier = Modifier
+                .padding(
+                    start = 16.dp,
+                    top = 8.dp,
+                    end = 16.dp,
+                    bottom = 8.dp,
+                )
+                .background(textBgColor)
+        ) {
+            Text(
+                text = "${city.getName()}",
                 color = Color.White,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Start,
                 maxLines = 2,
-                overflow = TextOverflow.Ellipsis)
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .padding(
+                    start = 16.dp,
+                    top = 8.dp,
+                    end = 16.dp,
+                    bottom = 8.dp,
+                )
+                .background(textBgColor)
+        ) {
+            if (description != null) {
+                Text(
+                    text = "$description",
+                    color = Color.White,
+                    fontSize = 18.sp,
+                    textAlign = TextAlign.Start,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            } else {
+                Text(text = "Loading")
             }
 
-            Box(
-                modifier = Modifier
-                    .padding(
-                        start = 16.dp,
-                        top = 8.dp,
-                        end = 16.dp,
-                        bottom = 8.dp,
-                    )
-                    .background(textBgColor)
-            ) {
-                if (description!=null){
-                    Text(
-                        text = "$description",
-                        color = Color.White,
-                        fontSize = 18.sp,
-                        textAlign = TextAlign.Start,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis)
-                }
-                else{
-                    Text(text = "Loading")
-                }
-
-            }
         }
     }
 }
 
+
 @Composable
-fun DetailCity(city: City){
-    Box(modifier = Modifier.fillMaxSize()){
+fun DetailCity(city: City) {
+    Box(modifier = Modifier.fillMaxSize()) {
 
     }
 }
 
 @Composable
-fun LocalRecommended(city: City){
+fun LocalRecommended(city: City) {
     var listState by remember { mutableStateOf(ArrayList<Location>()) }
 
-    LaunchedEffect(true){
+    LaunchedEffect(true) {
         listState.addAll(city.recommendationsRepository.recommendations)
         //thêm toàn bộ list vào listState
     }
 
-    LazyRow{
-        itemsIndexed(listState){
-                index, location -> //tương tự xuất ra location adapter
+    LazyRow {
+        itemsIndexed(listState) { index, location -> //tương tự xuất ra location adapter
 
         }
     }
 }
 
 @Composable
-fun PlacesToGo(city: City){
+fun PlacesToGo(city: City) {
 
 }
 
 @Composable
-fun Transportation(city: City){
+fun Transportation(city: City) {
 
 }
 
 @Composable
-fun Discussion(city: City){
+fun Discussion(city: City) {
 
 }
 
 @Composable
-fun InteractLocal(city: City){
+fun InteractLocal(city: City) {
 
 }
 

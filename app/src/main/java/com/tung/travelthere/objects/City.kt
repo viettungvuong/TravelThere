@@ -7,10 +7,6 @@ import android.media.Image
 import android.os.Debug
 import android.util.Log
 import com.google.firebase.ktx.Firebase
-import com.tung.travelthere.controller.AppController
-import com.tung.travelthere.controller.cityNameField
-import com.tung.travelthere.controller.collectionCities
-import com.tung.travelthere.controller.locationsField
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -24,18 +20,50 @@ import java.net.HttpURLConnection
 import java.net.URL
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.ktx.storage
+import com.tung.travelthere.controller.*
 
-class City(val name: String, val country: String) {
+class City private constructor() {
+    private var name: String?=null
+    private var country: String?=null
 
-    val recommendationsRepository= RecommendationsRepository()
+    fun setName(name: String){
+        this.name = name
+    }
 
-    suspend fun fetchImageUrl(): String?{
-        var res: String?=null
+    fun setCountry(country: String){
+        this.country = country
+    }
 
-        val query = AppController.db.collection(collectionCities).whereEqualTo(cityNameField,name).limit(1).get().await()
+    fun getName(): String?{
+        return name
+    }
+
+    fun getCountry(): String?{
+        return country
+    }
+
+    companion object{
+        private var singleton: City?=null
+
+        @JvmStatic
+        fun getSingleton(): City{
+            if (singleton==null){
+                singleton=City()
+            }
+            return singleton!!
+        }
+    }
+
+    val recommendationsRepository = RecommendationsRepository()
+
+    suspend fun fetchImageUrl(): String? {
+        var res: String? = null
+
+        val query = AppController.db.collection(collectionCities).whereEqualTo(cityNameField, name)
+            .whereEqualTo("country", country).limit(1).get().await()
 
         val document = query.documents.firstOrNull()
-        if (document!=null){
+        if (document != null) {
             res = document.getString("file-name")
             val storageRef = Firebase.storage.reference
             val imageRef = storageRef.child(res!!)
@@ -47,13 +75,14 @@ class City(val name: String, val country: String) {
     }
 
 
-    suspend fun fetchDescription(): String?{
-        var res: String?=null
+    suspend fun fetchDescription(): String? {
+        var res: String? = null
 
-        val query = AppController.db.collection(collectionCities).whereEqualTo(cityNameField,name).limit(1).get().await()
+        val query = AppController.db.collection(collectionCities).whereEqualTo(cityNameField, name)
+            .whereEqualTo("country", country).limit(1).get().await()
 
         val document = query.documents.firstOrNull()
-        if (document!=null){
+        if (document != null) {
             res = document.getString("description")
         }
 
@@ -61,30 +90,31 @@ class City(val name: String, val country: String) {
 
     }
 
-    inner class RecommendationsRepository{
+    inner class RecommendationsRepository {
 
         var recommendations = ArrayList<Location>()
 
-        suspend fun refreshRecommendations(){
-            withContext(Dispatchers.IO){
-                val ref = AppController.db.collection(collectionCities).whereEqualTo(cityNameField,name).whereEqualTo("country",country)
-                    .limit(1).get()
+        suspend fun refreshRecommendations() {
+            withContext(Dispatchers.IO) {
+                val query =
+                    AppController.db.collection(collectionCities).whereEqualTo(cityNameField, name)
+                        .whereEqualTo("country", country)
+                        .limit(1).get().await()
 
-                ref.addOnSuccessListener {
-                    documents ->
-                    for (document in documents){
-                        document.reference.collection(locationsField).get().addOnSuccessListener {
-                            //lấy từng địa điểm của thành phố hiện tại
+                val documents = query.documents
+
+                for (document in documents) {
+                    document.reference.collection(collectionLocations).get().addOnSuccessListener {
+                        //lấy từng địa điểm của thành phố hiện tại
                             documents ->
-                            for (document in documents){
-                                val name = document.getString("location-name")
-                                //thêm toạ độ
-                            }
+                        for (document in documents) {
+                            val name = document.getString("location-name")
+                            //thêm toạ độ
                         }
                     }
                 }
             }
         }
     }
-
 }
+
