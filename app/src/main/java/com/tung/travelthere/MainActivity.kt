@@ -57,7 +57,8 @@ fun Home(context: Context) {
     City.getSingleton().setName("Ho Chi Minh City")
     City.getSingleton().setCountry("Vietnam")
     City.getSingleton().setDescription("Ho Chi Minh City is the biggest city in Vietnam")
-    City.getSingleton().setImageUrl("https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/DJI_0550-HDR-Pano.jpg/640px-DJI_0550-HDR-Pano.jpg")
+    City.getSingleton()
+        .setImageUrl("https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/DJI_0550-HDR-Pano.jpg/640px-DJI_0550-HDR-Pano.jpg")
 
 
     MaterialTheme {
@@ -96,7 +97,7 @@ fun CityIntroduction(context: Context, city: City) {
 
     val coroutineScope = rememberCoroutineScope()
 
-    Log.d("image url",imageUrl.toString())
+    Log.d("image url", imageUrl.toString())
 
     LaunchedEffect(bitmap) {
 //        coroutineScope.launch {
@@ -106,20 +107,16 @@ fun CityIntroduction(context: Context, city: City) {
 //            Log.d("imageUrl", imageUrl?:"")
 //        }
 
-        coroutineScope.launch {
-            bitmap = if (imageUrl == null) {
-                null
-            }
-            else {
-                withContext(Dispatchers.IO){
-                    BitmapFactory.decodeStream(URL(imageUrl).openConnection().getInputStream())
-                }
-
-            }
+        bitmap = if (imageUrl == null) {
+            null
+        } else {
+//                withContext(Dispatchers.IO){
+//                    BitmapFactory.decodeStream(URL(imageUrl).openConnection().getInputStream())
+//                }
+            BitmapFactory.decodeResource(context.resources, R.drawable.hcmc)
         }
-    }
 
-    SideEffect {
+
         if (bitmap != null) {
             val palette = Palette.Builder(bitmap!!).generate()
             val colorExtracted = palette.dominantSwatch?.let {
@@ -129,16 +126,16 @@ fun CityIntroduction(context: Context, city: City) {
         }
     }
 
+    SideEffect {
+
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
     ) {
         Image(
-            painter = rememberAsyncImagePainter(
-                model = ImageRequest.Builder(context)
-                .data(imageUrl)
-                .crossfade(true)
-                .build(),),
+            painter = painterResource(id = R.drawable.hcmc),
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
