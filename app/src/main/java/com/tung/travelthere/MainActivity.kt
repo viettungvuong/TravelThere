@@ -264,7 +264,7 @@ fun SneakViewPlace(location: Location) {
     }
 }
 
-@ComposableC
+@Composable
 fun Weather(city: City) {
 
 }
