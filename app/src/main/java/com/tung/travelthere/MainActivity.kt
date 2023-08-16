@@ -68,13 +68,13 @@ fun Home(context: Context) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Box(
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(0.5f)
             ) {
                 CityIntroduction(context, City.getSingleton())
             }
 
             Box(
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1.5f)
             ) {
                 DetailCity(City.getSingleton())
             }
