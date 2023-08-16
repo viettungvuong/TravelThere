@@ -73,14 +73,15 @@ fun Home(context: Context) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Box(
-                modifier = Modifier.weight(0.5f)
+                modifier = Modifier.weight(0.8f)
             ) {
                 CityIntroduction(context, City.getSingleton())
             }
 
             Box(
-                modifier = Modifier.weight(1.5f)
+                modifier = Modifier.weight(1.2f)
             ) {
+
                 DetailCity(City.getSingleton())
             }
         }
@@ -207,7 +208,17 @@ fun CityIntroduction(context: Context, city: City) {
 @Composable
 fun DetailCity(city: City) {
     Box(modifier = Modifier.fillMaxSize()) {
-        LocalRecommended(city = city)
+        Column{
+            Box(modifier = Modifier
+                .padding(
+                    horizontal = 20.dp,
+                    vertical = 5.dp
+                ),){
+                Text("Locals recommended", fontWeight = FontWeight.Bold)
+            }
+
+            LocalRecommended(city = city)
+        }
     }
 }
 
