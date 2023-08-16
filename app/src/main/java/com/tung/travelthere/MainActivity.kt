@@ -242,14 +242,19 @@ fun SneakViewPlace(location: Location) {
         elevation = 10.dp
     ) {
         Column {
-            Image(
-                painter = painterResource(id = location.getResourceId(LocalContext.current)!!),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(150.dp)
-                    .border(BorderStroke(1.dp, Color.Black))
-            )
+            val id = location.getResourceId(LocalContext.current)
+
+            if (id!=null){
+                Image(
+                    painter = painterResource(id = id!!),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(150.dp)
+                        .border(BorderStroke(1.dp, Color.Black))
+                )
+            }
+
 
             Text(
                 text = location.getName()
@@ -259,7 +264,7 @@ fun SneakViewPlace(location: Location) {
     }
 }
 
-@Composable
+@ComposableC
 fun Weather(city: City) {
 
 }
