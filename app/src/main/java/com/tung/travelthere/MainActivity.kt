@@ -36,8 +36,7 @@ import coil.compose.AsyncImagePainter.State.Empty.painter
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.tung.travelthere.controller.getResourceIdFromName
-import com.tung.travelthere.objects.City
-import com.tung.travelthere.objects.Location
+import com.tung.travelthere.objects.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import java.net.URL
@@ -59,6 +58,7 @@ fun Home(context: Context) {
     City.getSingleton().setDescription("Ho Chi Minh City is the biggest city in Vietnam")
     City.getSingleton()
         .setImageUrl("https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/DJI_0550-HDR-Pano.jpg/640px-DJI_0550-HDR-Pano.jpg")
+    City.getSingleton().recommendationsRepository.recommendations.add(TouristPlace("Ben Thanh Market",Position(1f,1f)))
 
 
     MaterialTheme {
@@ -202,7 +202,7 @@ fun CityIntroduction(context: Context, city: City) {
 @Composable
 fun DetailCity(city: City) {
     Box(modifier = Modifier.fillMaxSize()) {
-
+        LocalRecommended(city = city)
     }
 }
 
@@ -210,14 +210,13 @@ fun DetailCity(city: City) {
 fun LocalRecommended(city: City) {
     var listState by remember { mutableStateOf(ArrayList<Location>()) }
 
-    LaunchedEffect(true) {
-        listState.addAll(city.recommendationsRepository.recommendations)
-        //thêm toàn bộ list vào listState
-    }
+    listState.addAll(city.recommendationsRepository.recommendations)
+    //thêm toàn bộ list vào listState
+    Log.d("list size",listState.size.toString())
 
     LazyRow {
         itemsIndexed(listState) { index, location -> //tương tự xuất ra location adapter
-
+            SneakViewPlace(location)
         }
     }
 }
@@ -241,13 +240,16 @@ fun SneakViewPlace(location: Location) {
     ) {
         Column {
             Image(
-                painter=painterResource(id = R.drawable.hcmc),
+                painter = painterResource(id = R.drawable.hcmc),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(150.dp)
+                    .border(BorderStroke(1.dp, Color.Black))
             )
 
             Text(
-                text=location.getName()
+                text = location.getName()
             )
 
         }
@@ -255,7 +257,7 @@ fun SneakViewPlace(location: Location) {
 }
 
 @Composable
-fun Weather(city: City){
+fun Weather(city: City) {
 
 }
 
