@@ -226,6 +226,8 @@ fun DetailCity(city: City) {
                 ),){
                 Text("Places near you", fontWeight = FontWeight.Bold)
             }
+
+            NearbyPlaces(userPos = , city = city) //cho phần đề xuất điểm đến gần đây
         }
     }
 }
