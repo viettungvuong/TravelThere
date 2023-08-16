@@ -218,6 +218,14 @@ fun DetailCity(city: City) {
             }
 
             LocalRecommended(city = city)
+
+            Box(modifier = Modifier
+                .padding(
+                    horizontal = 20.dp,
+                    vertical = 5.dp
+                ),){
+                Text("Places near you", fontWeight = FontWeight.Bold)
+            }
         }
     }
 }
@@ -276,6 +284,11 @@ fun SneakViewPlace(location: Location) {
 }
 
 @Composable
+fun NearbyPlaces(userPos: Position, city: City) { //đề xuất địa điểm gần với nơi đang đứng
+
+}
+
+@Composable
 fun Weather(city: City) {
 
 }
@@ -283,11 +296,6 @@ fun Weather(city: City) {
 
 @Composable
 fun Transportation(city: City) {
-
-}
-
-@Composable
-fun Discussion(city: City) {
 
 }
 
