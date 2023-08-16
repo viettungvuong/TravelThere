@@ -222,10 +222,43 @@ fun LocalRecommended(city: City) {
     }
 }
 
+
 @Composable
-fun PlacesToGo(city: City) {
+fun SneakViewPlace(location: Location) {
+    var locationName = remember {
+        mutableStateOf<String?>(location.getName())
+    }
+
+    Card(
+        modifier = Modifier
+            .padding(
+                start = 16.dp,
+                top = 8.dp,
+                end = 16.dp,
+                bottom = 8.dp,
+            ),
+        elevation = 10.dp
+    ) {
+        Column {
+            Image(
+                painter=painterResource(id = R.drawable.hcmc),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+            )
+
+            Text(
+                text=location.getName()
+            )
+
+        }
+    }
+}
+
+@Composable
+fun Weather(city: City){
 
 }
+
 
 @Composable
 fun Transportation(city: City) {
