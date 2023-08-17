@@ -25,7 +25,6 @@ import com.tung.travelthere.controller.*
 class City private constructor() {
     private var name: String?=null
     private var country: String?=null
-    private var description: String?=null
     private var imageUrl: String?=null
 
     fun setName(name: String){
@@ -44,13 +43,6 @@ class City private constructor() {
         return country
     }
 
-    fun setDescription(description: String){
-        this.description = description
-    }
-
-    fun getDescription(): String?{
-        return description
-    }
 
     fun setImageUrl(imageUrl: String){
         this.imageUrl = imageUrl
@@ -92,21 +84,6 @@ class City private constructor() {
 
     }
 
-
-    suspend fun fetchDescription(): String? {
-        var res: String? = null
-
-        val query = AppController.db.collection(collectionCities).whereEqualTo(cityNameField, name)
-            .whereEqualTo("country", country).limit(1).get().await()
-        Log.d("fetched", "true")
-        val document = query.documents.firstOrNull()
-        if (document != null) {
-            res = document.getString("description")
-        }
-        Log.d("description", res?:"")
-        return res
-
-    }
 
     inner class RecommendationsRepository {
 

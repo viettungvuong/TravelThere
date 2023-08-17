@@ -55,7 +55,6 @@ class MainActivity : ComponentActivity() {
 fun Home(context: Context) {
     City.getSingleton().setName("Ho Chi Minh City")
     City.getSingleton().setCountry("Vietnam")
-    City.getSingleton().setDescription("Ho Chi Minh City is the biggest city in Vietnam")
     City.getSingleton()
         .setImageUrl("https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/DJI_0550-HDR-Pano.jpg/640px-DJI_0550-HDR-Pano.jpg")
     val t1 = TouristPlace("Ben Thanh Market",Position(1f,1f))
@@ -73,13 +72,13 @@ fun Home(context: Context) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Box(
-                modifier = Modifier.weight(0.8f)
+                modifier = Modifier.weight(0.5f)
             ) {
                 CityIntroduction(context, City.getSingleton())
             }
 
             Box(
-                modifier = Modifier.weight(1.2f)
+                modifier = Modifier.weight(1.5f)
             ) {
 
                 DetailCity(City.getSingleton())
@@ -93,7 +92,6 @@ fun Home(context: Context) {
 fun CityIntroduction(context: Context, city: City) {
     //phần cho city
     var imageUrl by remember { mutableStateOf<String?>(city.getImageUrl()) }
-    var description by remember { mutableStateOf<String?>(city.getDescription()) }
 
     //background color của text
     var textBgColor by remember { mutableStateOf(Color.Gray) }
@@ -140,6 +138,7 @@ fun CityIntroduction(context: Context, city: City) {
         modifier = Modifier
             .fillMaxSize()
     ) {
+
         Image(
             painter = painterResource(id = R.drawable.hcmc),
             contentDescription = null,
@@ -153,7 +152,7 @@ fun CityIntroduction(context: Context, city: City) {
     Column(
         modifier = Modifier
             .fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.Bottom,
 
         ) {
         Box(
@@ -177,30 +176,6 @@ fun CityIntroduction(context: Context, city: City) {
             )
         }
 
-        Box(
-            modifier = Modifier
-                .padding(
-                    start = 16.dp,
-                    top = 8.dp,
-                    end = 16.dp,
-                    bottom = 8.dp,
-                )
-                .background(textBgColor)
-        ) {
-            if (description != null) {
-                Text(
-                    text = "$description",
-                    color = Color.White,
-                    fontSize = 18.sp,
-                    textAlign = TextAlign.Start,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-            } else {
-                Text(text = "Loading")
-            }
-
-        }
     }
 }
 
@@ -227,7 +202,7 @@ fun DetailCity(city: City) {
                 Text("Places near you", fontWeight = FontWeight.Bold)
             }
 
-            NearbyPlaces(userPos = , city = city) //cho phần đề xuất điểm đến gần đây
+            //NearbyPlaces(userPos = , city = city) //cho phần đề xuất điểm đến gần đây
         }
     }
 }
