@@ -62,6 +62,7 @@ fun Home(context: Context) {
     val tabTitles = listOf("Nearby", "Recommended", "Tourist attractions")
     val pagerState = rememberPagerState(initialPage = 0)
     val coroutineScope = rememberCoroutineScope()
+    val colorBlue = Color(android.graphics.Color.parseColor("#5980b3"))
 
     //phần initialize cho city
     City.getSingleton().setName("Ho Chi Minh City")
@@ -76,7 +77,11 @@ fun Home(context: Context) {
     City.getSingleton().recommendationsRepository.recommendations.add(t2)
 
 
-    MaterialTheme {
+    Scaffold(
+        bottomBar = {
+            BottomAppBar(backgroundColor = colorBlue) {  }
+        }
+    ) {padding ->
         Column(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.Center,
@@ -92,11 +97,9 @@ fun Home(context: Context) {
                 modifier = Modifier.weight(1.5f)
             ) {
                 Column {
-
-
                     TabRow(
                         selectedTabIndex = pagerState.currentPage,
-                        backgroundColor = Color(android.graphics.Color.parseColor("#5980b3")),
+                        backgroundColor = colorBlue,
                         contentColor = Color.White,
                         modifier = Modifier
                             .padding(vertical = 4.dp, horizontal = 8.dp)
@@ -132,7 +135,10 @@ fun Home(context: Context) {
                 }
             }
         }
+
     }
+
+
 }
 
 @OptIn(ExperimentalFoundationApi::class)
