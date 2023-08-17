@@ -53,13 +53,17 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun Home(context: Context) {
+    val tabTitles = listOf("Nearby", "Locals recommended", "Tourist attractions")
+    var currentIndex by remember { mutableStateOf<Int>(0) }
+
+    //phần initialize cho city
     City.getSingleton().setName("Ho Chi Minh City")
     City.getSingleton().setCountry("Vietnam")
     City.getSingleton()
         .setImageUrl("https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/DJI_0550-HDR-Pano.jpg/640px-DJI_0550-HDR-Pano.jpg")
-    val t1 = TouristPlace("Ben Thanh Market",Position(1f,1f))
+    val t1 = TouristPlace("Ben Thanh Market", Position(1f, 1f))
     t1.setDrawableName("benthanh")
-    val t2 = TouristPlace("Nhà thờ Đức bà",Position(1f,1f))
+    val t2 = TouristPlace("Nhà thờ Đức bà", Position(1f, 1f))
     t2.setDrawableName("nhathoducba")
     City.getSingleton().recommendationsRepository.recommendations.add(t1)
     City.getSingleton().recommendationsRepository.recommendations.add(t2)
@@ -80,8 +84,23 @@ fun Home(context: Context) {
             Box(
                 modifier = Modifier.weight(1.5f)
             ) {
-
-                DetailCity(City.getSingleton())
+                Column {
+                    TabRow(
+                        selectedTabIndex = currentIndex,
+                        backgroundColor = Color.White,
+                        contentColor = Color.Gray
+                    ) {
+                        tabTitles.forEachIndexed { index, title ->
+                            Tab(
+                                selected = (currentIndex == index), //current index có phải là index
+                                onClick = {
+                                    currentIndex = index
+                                },
+                                text = { Text(text = title) }
+                            )
+                        }
+                    }
+                }
             }
         }
     }
@@ -100,8 +119,6 @@ fun CityIntroduction(context: Context, city: City) {
     var bitmap: Bitmap? = null
 
     val coroutineScope = rememberCoroutineScope()
-
-    Log.d("image url", imageUrl.toString())
 
     LaunchedEffect(bitmap) {
 //        coroutineScope.launch {
@@ -146,9 +163,6 @@ fun CityIntroduction(context: Context, city: City) {
             modifier = Modifier.fillMaxSize()
         )
     }
-
-
-    // Text on top of the image
     Column(
         modifier = Modifier
             .fillMaxSize(),
@@ -183,22 +197,26 @@ fun CityIntroduction(context: Context, city: City) {
 @Composable
 fun DetailCity(city: City) {
     Box(modifier = Modifier.fillMaxSize()) {
-        Column{
-            Box(modifier = Modifier
-                .padding(
-                    horizontal = 20.dp,
-                    vertical = 5.dp
-                ),){
+        Column {
+            Box(
+                modifier = Modifier
+                    .padding(
+                        horizontal = 20.dp,
+                        vertical = 5.dp
+                    ),
+            ) {
                 Text("Locals recommended", fontWeight = FontWeight.Bold)
             }
 
             LocalRecommended(city = city)
 
-            Box(modifier = Modifier
-                .padding(
-                    horizontal = 20.dp,
-                    vertical = 5.dp
-                ),){
+            Box(
+                modifier = Modifier
+                    .padding(
+                        horizontal = 20.dp,
+                        vertical = 5.dp
+                    ),
+            ) {
                 Text("Places near you", fontWeight = FontWeight.Bold)
             }
 
@@ -213,7 +231,7 @@ fun LocalRecommended(city: City) {
 
     listState.addAll(city.recommendationsRepository.recommendations)
     //thêm toàn bộ list vào listState
-    Log.d("list size",listState.size.toString())
+    Log.d("list size", listState.size.toString())
 
     LazyRow {
         itemsIndexed(listState) { index, location -> //tương tự xuất ra location adapter
@@ -240,7 +258,7 @@ fun SneakViewPlace(location: Location) {
         Column {
             val id = location.getResourceId(LocalContext.current)
 
-            if (id!=null){
+            if (id != null) {
                 Image(
                     painter = painterResource(id = id!!),
                     contentDescription = null,
