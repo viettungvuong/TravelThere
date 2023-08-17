@@ -13,10 +13,13 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
@@ -28,8 +31,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.core.net.toUri
 import androidx.palette.graphics.Palette
+import androidx.viewpager.widget.ViewPager
 import androidx.viewpager2.widget.ViewPager2
 import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter.State.Empty.painter
@@ -51,10 +56,12 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun Home(context: Context) {
-    val tabTitles = listOf("Nearby", "Locals recommended", "Tourist attractions")
-    var currentIndex by remember { mutableStateOf<Int>(0) }
+    val tabTitles = listOf("Nearby", "Recommended", "Tourist attractions")
+    val pagerState = rememberPagerState(initialPage = 0)
+    val coroutineScope = rememberCoroutineScope()
 
     //phần initialize cho city
     City.getSingleton().setName("Ho Chi Minh City")
@@ -85,19 +92,41 @@ fun Home(context: Context) {
                 modifier = Modifier.weight(1.5f)
             ) {
                 Column {
+
+
                     TabRow(
-                        selectedTabIndex = currentIndex,
-                        backgroundColor = Color.White,
-                        contentColor = Color.Gray
+                        selectedTabIndex = pagerState.currentPage,
+                        backgroundColor = Color.Blue,
+                        contentColor = Color.White,
+                        modifier = Modifier
+                            .padding(vertical = 4.dp, horizontal = 8.dp)
+                            .clip(RoundedCornerShape(50))
+                            .shadow(AppBarDefaults.TopAppBarElevation)
+                            .zIndex(10f),
                     ) {
                         tabTitles.forEachIndexed { index, title ->
                             Tab(
-                                selected = (currentIndex == index), //current index có phải là index
+                                selected = (pagerState.currentPage == index), //current index có phải là index
                                 onClick = {
-                                    currentIndex = index
+                                    run {
+                                        coroutineScope.launch {
+                                            pagerState.animateScrollToPage(
+                                                index
+                                            )
+                                        }
+                                    }
                                 },
                                 text = { Text(text = title) }
                             )
+                        }
+                    }
+
+
+                    HorizontalPager(state = pagerState, pageCount = tabTitles.size) { page ->
+
+                        when (page) {
+                            0 -> LocalRecommended(city = City.getSingleton())
+                            1 -> LocalRecommended(city = City.getSingleton())
                         }
                     }
                 }
