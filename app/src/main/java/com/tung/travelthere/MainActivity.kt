@@ -96,7 +96,7 @@ fun Home(context: Context) {
 
                     TabRow(
                         selectedTabIndex = pagerState.currentPage,
-                        backgroundColor = Color.Blue,
+                        backgroundColor = Color(android.graphics.Color.parseColor("#5980b3")),
                         contentColor = Color.White,
                         modifier = Modifier
                             .padding(vertical = 4.dp, horizontal = 8.dp)
