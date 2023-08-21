@@ -15,6 +15,9 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -79,7 +82,15 @@ fun Home(context: Context) {
 
     Scaffold(
         bottomBar = {
-            BottomAppBar(backgroundColor = colorBlue) {  }
+            BottomAppBar(backgroundColor = colorBlue) {
+                IconButton(onClick = { /* Handle click action */ }) {
+                    Icon(imageVector = Icons.Default.Home, tint = Color.White, contentDescription = "Home")
+                }
+                Spacer(modifier = Modifier.weight(1f))
+                IconButton(onClick = { /* Handle click action */ }) {
+                    Icon(imageVector = Icons.Default.Favorite, tint = Color.White, contentDescription = "Favorite")
+                }
+            }
         }
     ) {padding ->
         Column(
@@ -265,8 +276,6 @@ fun LocalRecommended(city: City) {
     var listState by remember { mutableStateOf(ArrayList<Location>()) }
 
     listState.addAll(city.recommendationsRepository.recommendations)
-    //thêm toàn bộ list vào listState
-    Log.d("list size", listState.size.toString())
 
     LazyRow {
         itemsIndexed(listState) { index, location -> //tương tự xuất ra location adapter
