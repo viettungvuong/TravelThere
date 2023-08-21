@@ -3,9 +3,9 @@ package com.tung.travelthere.objects
 import android.content.Context
 import java.net.URL
 
-class Position(var lat: Float, var long: Float)
+class Position(var lat: Float, var long: Float): java.io.Serializable
 
-class Dish(var name: String, var type: String)
+class Dish(var name: String, var type: String): java.io.Serializable
 
 
 //không cho phép tạo object từ class Location
@@ -24,11 +24,7 @@ open class Location protected constructor(private val name: String, private val 
         drawableName=name
     }
 
-    fun getDrawableName(): String?{
-        return drawableName
-    }
-
-    fun getResourceId(context: Context): Int?{
+    fun getDrawableName(context: Context): Int?{
         if (drawableName==null){
             return null
         }

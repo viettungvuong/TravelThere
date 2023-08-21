@@ -1,6 +1,7 @@
 package com.tung.travelthere
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
@@ -47,7 +48,7 @@ import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter.State.Empty.painter
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
-import com.tung.travelthere.controller.getResourceIdFromName
+import com.tung.travelthere.controller.getDrawableNameFromName
 import com.tung.travelthere.objects.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
@@ -74,8 +75,6 @@ fun Home(context: Context) {
     //phần initialize cho city
     City.getSingleton().setName("Ho Chi Minh City")
     City.getSingleton().setCountry("Vietnam")
-    City.getSingleton()
-        .setImageUrl("https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/DJI_0550-HDR-Pano.jpg/640px-DJI_0550-HDR-Pano.jpg")
     val t1 = TouristPlace("Ben Thanh Market", Position(1f, 1f))
     t1.setDrawableName("benthanh")
     val t2 = TouristPlace("Nhà thờ Đức bà", Position(1f, 1f))
@@ -88,13 +87,21 @@ fun Home(context: Context) {
 
     Scaffold(
         bottomBar = {
-            BottomAppBar(cutoutShape = CircleShape,backgroundColor = colorBlue) {
+            BottomAppBar(cutoutShape = CircleShape, backgroundColor = colorBlue) {
                 IconButton(onClick = { /* Handle click action */ }) {
-                    Icon(imageVector = Icons.Default.Home, tint = Color.White, contentDescription = "Home")
+                    Icon(
+                        imageVector = Icons.Default.Home,
+                        tint = Color.White,
+                        contentDescription = "Home"
+                    )
                 }
                 Spacer(modifier = Modifier.weight(1f))
                 IconButton(onClick = { /* Handle click action */ }) {
-                    Icon(imageVector = Icons.Default.Favorite, tint = Color.White, contentDescription = "Favorite")
+                    Icon(
+                        imageVector = Icons.Default.Favorite,
+                        tint = Color.White,
+                        contentDescription = "Favorite"
+                    )
                 }
             }
         },
@@ -103,13 +110,17 @@ fun Home(context: Context) {
                 onClick = { /* Handle FAB click */ },
                 backgroundColor = Color(android.graphics.Color.parseColor("#b3821b"))
             ) {
-                Icon(imageVector = Icons.Default.Search, contentDescription = "Search", tint = Color.White)
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = "Search",
+                    tint = Color.White
+                )
             }
         },
         floatingActionButtonPosition = FabPosition.Center,
         isFloatingActionButtonDocked = true,
         scaffoldState = scaffoldState
-    ) {padding ->
+    ) { padding ->
         Column(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.Center,
@@ -156,8 +167,8 @@ fun Home(context: Context) {
                     HorizontalPager(state = pagerState, pageCount = tabTitles.size) { page ->
 
                         when (page) {
-                            0 -> LocalRecommended(city = City.getSingleton())
-                            1 -> LocalRecommended(city = City.getSingleton())
+                            0 -> LocalRecommended(context, city = City.getSingleton())
+                            1 -> LocalRecommended(context, city = City.getSingleton())
                         }
                     }
                 }
@@ -258,7 +269,7 @@ fun CityIntroduction(context: Context, city: City) {
 
 
 @Composable
-fun DetailCity(city: City) {
+fun DetailCity(context: Context, city: City) {
     Box(modifier = Modifier.fillMaxSize()) {
         Column {
             Box(
@@ -271,7 +282,7 @@ fun DetailCity(city: City) {
                 Text("Locals recommended", fontWeight = FontWeight.Bold)
             }
 
-            LocalRecommended(city = city)
+            LocalRecommended(context, city = city)
 
             Box(
                 modifier = Modifier
@@ -289,35 +300,37 @@ fun DetailCity(city: City) {
 }
 
 @Composable
-fun LocalRecommended(city: City) {
+fun LocalRecommended(context: Context, city: City) {
     var listState by remember { mutableStateOf(ArrayList<Location>()) }
 
     listState.addAll(city.recommendationsRepository.recommendations)
 
     LazyRow {
         itemsIndexed(listState) { index, location -> //tương tự xuất ra location adapter
-            SneakViewPlace(location)
+            SneakViewPlace(context, location)
         }
     }
 }
 
 
 @Composable
-fun SneakViewPlace(location: Location) {
-    var locationName = remember {
-        mutableStateOf<String?>(location.getName())
-    }
-
+fun SneakViewPlace(context: Context, location: Location) {
     Card(
         modifier = Modifier
             .padding(
                 horizontal = 20.dp,
                 vertical = 20.dp
-            ),
+            )
+            .clickable(onClick =
+            {
+                val intent = Intent(context, PlaceView::class.java)
+                intent.putExtra("location",location)
+                context.startActivity(intent)
+            }),
         elevation = 10.dp
     ) {
         Column {
-            val id = location.getResourceId(LocalContext.current)
+            val id = location.getDrawableName(context)
 
             if (id != null) {
                 Image(
