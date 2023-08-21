@@ -43,8 +43,8 @@ class PlaceView: ComponentActivity(){
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ){
-//            AsyncImage(model = location.getImageUrl(), contentDescription = null)
-                Image(painter = painterResource(id = id!!), contentDescription = null)
+                Image(painter = painterResource(id = id!!), contentDescription = null, modifier =
+                Modifier.height(400.dp), contentScale = ContentScale.Crop,)
 
             }
         }
