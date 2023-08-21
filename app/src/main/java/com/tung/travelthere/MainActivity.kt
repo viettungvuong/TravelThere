@@ -13,11 +13,15 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -79,10 +83,12 @@ fun Home(context: Context) {
     City.getSingleton().recommendationsRepository.recommendations.add(t1)
     City.getSingleton().recommendationsRepository.recommendations.add(t2)
 
+    val scaffoldState = rememberScaffoldState()
+
 
     Scaffold(
         bottomBar = {
-            BottomAppBar(backgroundColor = colorBlue) {
+            BottomAppBar(cutoutShape = CircleShape,backgroundColor = colorBlue) {
                 IconButton(onClick = { /* Handle click action */ }) {
                     Icon(imageVector = Icons.Default.Home, tint = Color.White, contentDescription = "Home")
                 }
@@ -91,7 +97,17 @@ fun Home(context: Context) {
                     Icon(imageVector = Icons.Default.Favorite, tint = Color.White, contentDescription = "Favorite")
                 }
             }
-        }
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { /* Handle FAB click */ },
+            ) {
+                Icon(imageVector = Icons.Default.Search, contentDescription = "Search")
+            }
+        },
+        floatingActionButtonPosition = FabPosition.Center,
+        isFloatingActionButtonDocked = true,
+        scaffoldState = scaffoldState
     ) {padding ->
         Column(
             modifier = Modifier.fillMaxWidth(),
@@ -152,7 +168,7 @@ fun Home(context: Context) {
 
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+
 @Composable
 fun CityIntroduction(context: Context, city: City) {
     //phần cho city
