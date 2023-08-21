@@ -101,8 +101,9 @@ fun Home(context: Context) {
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { /* Handle FAB click */ },
+                backgroundColor = Color(android.graphics.Color.parseColor("#b3821b"))
             ) {
-                Icon(imageVector = Icons.Default.Search, contentDescription = "Search")
+                Icon(imageVector = Icons.Default.Search, contentDescription = "Search", tint = Color.White)
             }
         },
         floatingActionButtonPosition = FabPosition.Center,
