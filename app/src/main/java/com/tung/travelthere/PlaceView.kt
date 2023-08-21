@@ -9,11 +9,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
@@ -108,6 +106,23 @@ class PlaceView: ComponentActivity(){
                             Spacer(modifier = Modifier.width(20.dp))
                             
                             Text(text = "18 đường số 7")
+                        }
+
+                        Button(onClick = { /*TODO*/ },
+                            colors = ButtonDefaults.buttonColors(backgroundColor = Color.Red)) {
+                            Row(
+                            ){
+                                Icon(
+                                    imageVector = Icons.Default.Favorite,
+                                    contentDescription = "Favorite",
+                                    tint = Color.White
+                                )
+
+                                Spacer(modifier = Modifier.width(20.dp))
+
+                                Text(text = "Add to favorites", color = Color.White)
+                            }
+
                         }
 
                     }
