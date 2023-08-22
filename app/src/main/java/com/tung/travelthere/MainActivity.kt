@@ -184,7 +184,7 @@ fun Home(context: Context) {
 @Composable
 fun CityIntroduction(context: Context, city: City) {
     //phần cho city
-    var imageUrl by remember { mutableStateOf<String?>(city.getImageUrl()) }
+    var imageUrl by remember { mutableStateOf(city.getImageUrl()) }
 
     //background color của text
     var textBgColor by remember { mutableStateOf(Color.Gray) }
