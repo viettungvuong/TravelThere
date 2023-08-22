@@ -4,14 +4,19 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Column
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.pointer.PointerIcon.Companion.Text
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.tung.travelthere.objects.Location
 
 class SuggestPlace : ComponentActivity() {
@@ -23,17 +28,29 @@ class SuggestPlace : ComponentActivity() {
         }
     }
 
+
     @Composable
     fun suggestPlace(){
         var searchPlace by remember { mutableStateOf("") }
 
-        MaterialTheme {
-            Column {
+        MaterialTheme{
+            Column(modifier = Modifier.padding(16.dp)) {
                 Text(
                     text = "Find your place"
                 )
 
-                TextField(value = searchPlace, onValueChange = )
+                Spacer(
+                    Modifier.height(20.dp)
+                )
+
+                Layouts.getSingleton().CustomTextFieldWithStroke(
+                    value = searchPlace,
+                    onValueChange = { searchPlace = it },
+                    strokeColor = Color.Black,
+                    textColor = Color.Black,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                )
             }
         }
     }
