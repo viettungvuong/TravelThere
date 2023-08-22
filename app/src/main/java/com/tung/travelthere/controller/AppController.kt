@@ -1,7 +1,9 @@
 package com.tung.travelthere.controller
 
+import androidx.compose.ui.platform.LocalContext
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.tung.travelthere.PlaceAutocompleteViewModel
 import com.tung.travelthere.objects.City
 import com.tung.travelthere.objects.User
 
@@ -18,5 +20,6 @@ class AppController {
 
         val currentUser = User()
 
+        lateinit var placeViewModel: PlaceAutocompleteViewModel
     }
 }

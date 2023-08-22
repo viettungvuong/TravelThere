@@ -6,6 +6,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.*
 import androidx.compose.runtime.*
@@ -17,6 +19,8 @@ import androidx.compose.ui.input.pointer.PointerIcon.Companion.Text
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.google.android.gms.maps.model.LatLng
+import com.tung.travelthere.controller.AppController
 import com.tung.travelthere.objects.Location
 
 class SuggestPlace : ComponentActivity() {
@@ -32,6 +36,7 @@ class SuggestPlace : ComponentActivity() {
     @Composable
     fun suggestPlace(){
         var searchPlace by remember { mutableStateOf("") }
+        val placeSuggestions by AppController.placeViewModel.placeSuggestions
 
         MaterialTheme{
             Column(modifier = Modifier.padding(16.dp).fillMaxSize()) {
@@ -43,28 +48,21 @@ class SuggestPlace : ComponentActivity() {
                     Modifier.height(20.dp)
                 )
 
-                Box(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    BasicTextField(
-                        value = searchPlace,
-                        onValueChange = {searchPlace = it},
-                        textStyle = LocalTextStyle.current.copy(color = Color.Black),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 4.dp),
-                        decorationBox = { innerTextField ->
-                            Column {
-                                innerTextField()
-                                Spacer(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(2.dp)
-                                        .background(Color.Black)
-                                )
-                            }
-                        }
-                    )
+                OutlinedTextField(
+                    value = searchPlace,
+                    onValueChange = {
+                        searchPlace = it
+                        AppController.placeViewModel.fetchPlaceSuggestions(searchPlace)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                )
+
+                LazyColumn {
+                    items(placeSuggestions) { suggestion ->
+                        Text(text = suggestion.getFullText(null).toString())
+                    }
                 }
 
             }

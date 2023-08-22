@@ -48,6 +48,8 @@ import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter.State.Empty.painter
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
+import com.google.android.libraries.places.api.Places
+import com.tung.travelthere.controller.AppController
 import com.tung.travelthere.controller.getDrawableNameFromName
 import com.tung.travelthere.objects.*
 import kotlinx.coroutines.*
@@ -58,6 +60,11 @@ import java.net.URL
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        Places.initialize(applicationContext, "AIzaSyBdvj-1cTzfZm6vEwYMJ_ehfv_xscV1-Go")
+
+        AppController.placeViewModel = PlaceAutocompleteViewModel(this)
+
         setContent {
             Home(this)
         }
