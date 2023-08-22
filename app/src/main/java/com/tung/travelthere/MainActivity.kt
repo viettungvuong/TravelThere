@@ -61,9 +61,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        Places.initialize(applicationContext, "AIzaSyBdvj-1cTzfZm6vEwYMJ_ehfv_xscV1-Go")
+        Places.initialize(applicationContext, "AIzaSyD5jFBmMOSm3-_Vgbkx2HsWFeIotYshOq0")
 
-        AppController.placeViewModel = PlaceAutocompleteViewModel(this)
+        AppController.placeViewModel = PlaceAutocompleteViewModel(applicationContext)
 
         //phần initialize cho city
         City.getSingleton().setName("Ho Chi Minh City")

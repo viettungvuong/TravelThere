@@ -30,4 +30,9 @@
         <activity android:name=".PlaceView" />
     </application>
 
+    <meta-data
+        android:name="com.google.android.geo.API_KEY"
+        android:value="AIzaSyD5jFBmMOSm3-_Vgbkx2HsWFeIotYshOq0"/>
+
+
 </manifest>

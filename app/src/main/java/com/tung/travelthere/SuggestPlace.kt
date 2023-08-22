@@ -2,6 +2,7 @@ package com.tung.travelthere
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -32,11 +33,9 @@ class SuggestPlace : ComponentActivity() {
         }
     }
 
-
     @Composable
     fun suggestPlace(){
-        var searchPlace by remember { mutableStateOf("") }
-        val placeSuggestions by AppController.placeViewModel.placeSuggestions
+        var searchPlace = remember { mutableStateOf("") }
 
         MaterialTheme{
             Column(modifier = Modifier.padding(16.dp).fillMaxSize()) {
@@ -49,10 +48,11 @@ class SuggestPlace : ComponentActivity() {
                 )
 
                 OutlinedTextField(
-                    value = searchPlace,
+                    value = searchPlace.value,
                     onValueChange = {
-                        searchPlace = it
-                        AppController.placeViewModel.fetchPlaceSuggestions(searchPlace)
+                        newString ->
+                        searchPlace.value = newString
+                        AppController.placeViewModel.fetchPlaceSuggestions(newString)
                     },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -60,8 +60,8 @@ class SuggestPlace : ComponentActivity() {
                 )
 
                 LazyColumn {
-                    items(placeSuggestions) { suggestion ->
-                        Text(text = suggestion.getFullText(null).toString())
+                    items(AppController.placeViewModel.placeSuggestions.value) {
+                        Text(text = it.getFullText(null).toString())
                     }
                 }
 
