@@ -100,12 +100,23 @@ fun Home(context: Context) {
                         contentDescription = "Home"
                     )
                 }
-                Spacer(modifier = Modifier.weight(1f))
+                Spacer(modifier = Modifier.width(10.dp))
                 IconButton(onClick = { /* Handle click action */ }) {
                     Icon(
                         imageVector = Icons.Default.Favorite,
                         tint = Color.White,
                         contentDescription = "Favorite"
+                    )
+                }
+                Spacer(modifier = Modifier.width(10.dp))
+                IconButton(onClick = {
+                    val intent = Intent(context, SuggestPlace::class.java)
+                    context.startActivity(intent)
+                }) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        tint = Color.White,
+                        contentDescription = "Add"
                     )
                 }
             }
@@ -122,7 +133,7 @@ fun Home(context: Context) {
                 )
             }
         },
-        floatingActionButtonPosition = FabPosition.Center,
+        floatingActionButtonPosition = FabPosition.End,
         isFloatingActionButtonDocked = true,
         scaffoldState = scaffoldState
     ) { padding ->
@@ -329,7 +340,7 @@ fun SneakViewPlace(context: Context, location: Location) {
             .clickable(onClick =
             {
                 val intent = Intent(context, PlaceView::class.java)
-                intent.putExtra("location",location)
+                intent.putExtra("location", location)
                 context.startActivity(intent)
             }),
         elevation = 10.dp

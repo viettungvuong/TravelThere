@@ -21,6 +21,7 @@ class PlaceAutocompleteViewModel(private val context: Context): ViewModel() {
 
         placesClient.findAutocompletePredictions(request)
             .addOnSuccessListener { response ->
+                Log.d("Lấy thành công","Lấy thành công")
                 placeSuggestions.value = response.autocompletePredictions
             }
             .addOnFailureListener { exception ->
