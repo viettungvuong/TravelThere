@@ -70,7 +70,7 @@ class MainActivity : ComponentActivity() {
         City.getSingleton().setCountry("Vietnam")
         val t1 = TouristPlace("Ben Thanh Market", Position(1f, 1f))
         t1.setDrawableName("benthanh")
-        val t2 = TouristPlace("Nhà thờ Đức bà", Position(1f, 1f))
+        val t2 = TouristPlace("The Cathedral", Position(1f, 1f))
         t2.setDrawableName("nhathoducba")
         City.getSingleton().recommendationsRepository.recommendations.add(t1)
         City.getSingleton().recommendationsRepository.recommendations.add(t2)
@@ -319,7 +319,10 @@ fun DetailCity(context: Context, city: City) {
 fun LocalRecommended(context: Context, city: City) {
     var listState by remember { mutableStateOf(ArrayList<Location>()) }
 
+    listState.clear()
     listState.addAll(city.recommendationsRepository.recommendations)
+
+    Log.d("list state size",listState.size.toString())
 
     LazyRow {
         itemsIndexed(listState) { index, location -> //tương tự xuất ra location adapter
