@@ -65,6 +65,16 @@ class MainActivity : ComponentActivity() {
 
         AppController.placeViewModel = PlaceAutocompleteViewModel(this)
 
+        //phần initialize cho city
+        City.getSingleton().setName("Ho Chi Minh City")
+        City.getSingleton().setCountry("Vietnam")
+        val t1 = TouristPlace("Ben Thanh Market", Position(1f, 1f))
+        t1.setDrawableName("benthanh")
+        val t2 = TouristPlace("Nhà thờ Đức bà", Position(1f, 1f))
+        t2.setDrawableName("nhathoducba")
+        City.getSingleton().recommendationsRepository.recommendations.add(t1)
+        City.getSingleton().recommendationsRepository.recommendations.add(t2)
+
         setContent {
             Home(this)
         }
@@ -78,19 +88,7 @@ fun Home(context: Context) {
     val pagerState = rememberPagerState(initialPage = 0)
     val coroutineScope = rememberCoroutineScope()
     val colorBlue = Color(android.graphics.Color.parseColor("#5980b3"))
-
-    //phần initialize cho city
-    City.getSingleton().setName("Ho Chi Minh City")
-    City.getSingleton().setCountry("Vietnam")
-    val t1 = TouristPlace("Ben Thanh Market", Position(1f, 1f))
-    t1.setDrawableName("benthanh")
-    val t2 = TouristPlace("Nhà thờ Đức bà", Position(1f, 1f))
-    t2.setDrawableName("nhathoducba")
-    City.getSingleton().recommendationsRepository.recommendations.add(t1)
-    City.getSingleton().recommendationsRepository.recommendations.add(t2)
-
     val scaffoldState = rememberScaffoldState()
-
 
     Scaffold(
         bottomBar = {
