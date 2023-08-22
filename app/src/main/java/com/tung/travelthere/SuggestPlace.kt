@@ -34,7 +34,7 @@ class SuggestPlace : ComponentActivity() {
         var searchPlace by remember { mutableStateOf("") }
 
         MaterialTheme{
-            Column(modifier = Modifier.padding(16.dp)) {
+            Column(modifier = Modifier.padding(16.dp).fillMaxSize()) {
                 Text(
                     text = "Find your place"
                 )
@@ -43,14 +43,30 @@ class SuggestPlace : ComponentActivity() {
                     Modifier.height(20.dp)
                 )
 
-                Layouts.getSingleton().CustomTextFieldWithStroke(
-                    value = searchPlace,
-                    onValueChange = { searchPlace = it },
-                    strokeColor = Color.Black,
-                    textColor = Color.Black,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                )
+                Box(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    BasicTextField(
+                        value = searchPlace,
+                        onValueChange = {searchPlace = it},
+                        textStyle = LocalTextStyle.current.copy(color = Color.Black),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 4.dp),
+                        decorationBox = { innerTextField ->
+                            Column {
+                                innerTextField()
+                                Spacer(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(2.dp)
+                                        .background(Color.Black)
+                                )
+                            }
+                        }
+                    )
+                }
+
             }
         }
     }

@@ -28,38 +28,5 @@ class Layouts {
             return singleton!!
         }
     }
-    @Composable
-    fun CustomTextFieldWithStroke(
-        value: String,
-        onValueChange: (String) -> Unit,
-        modifier: Modifier = Modifier,
-        shape: Shape = RectangleShape,
-        strokeWidth: Int = 1,
-        strokeColor: Color = Color.Black,
-        textColor: Color = LocalContentColor.current.copy(alpha = ContentAlpha.high)
-    ) {
-        Box(
-            modifier = modifier
-        ) {
-            BasicTextField(
-                value = value,
-                onValueChange = onValueChange,
-                textStyle = LocalTextStyle.current.copy(color = textColor),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 4.dp),
-                decorationBox = { innerTextField ->
-                    Column {
-                        innerTextField()
-                        Spacer(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(strokeWidth.dp)
-                                .background(strokeColor)
-                        )
-                    }
-                }
-            )
-        }
-    }
+
 }
