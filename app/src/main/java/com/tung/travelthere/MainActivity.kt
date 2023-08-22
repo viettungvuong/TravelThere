@@ -61,7 +61,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        Places.initialize(applicationContext, "AIzaSyD5jFBmMOSm3-_Vgbkx2HsWFeIotYshOq0")
+        Places.initialize(applicationContext, apikey)
 
         AppController.placeViewModel = PlaceAutocompleteViewModel(applicationContext)
 
