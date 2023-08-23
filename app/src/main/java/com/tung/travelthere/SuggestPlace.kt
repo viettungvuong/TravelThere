@@ -1,53 +1,63 @@
 package com.tung.travelthere
 
-import android.graphics.drawable.Icon
-import androidx.appcompat.app.AppCompatActivity
+import android.content.Context
+import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.input.pointer.PointerIcon.Companion.Text
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.google.android.gms.maps.model.LatLng
 import com.tung.travelthere.controller.AppController
-import com.tung.travelthere.objects.Location
+import androidx.compose.foundation.Image
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 
 class SuggestPlace : ComponentActivity() {
+    companion object {
+        lateinit var imageViewModel: ImageViewModel
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        imageViewModel = ImageViewModel()
+
         setContent {
-            suggestPlace()
+            suggestPlace(LocalContext.current)
         }
     }
 
+    inner class ImageViewModel {
+        var chosenImages = mutableStateListOf<Bitmap>()
+    }
+
     @Composable
-    fun suggestPlace() {
+    fun suggestPlace(context: Context) {
         var searchPlace by remember { mutableStateOf("") }
         var chosenPlaceAddress by remember { mutableStateOf("") }
         var chosenPlaceName by remember { mutableStateOf("") }
 
-        LaunchedEffect(AppController.placeViewModel.currentName){
+
+        LaunchedEffect(AppController.placeViewModel.currentName) {
             chosenPlaceName = AppController.placeViewModel.currentName
         }
 
@@ -119,21 +129,59 @@ class SuggestPlace : ComponentActivity() {
                     }
                 }
 
-                Box(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(10.dp)) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp)
+                ) {
                     Text(
                         text = "Address: $chosenPlaceAddress",
                         fontWeight = FontWeight.Bold
                     )
                 }
 
-                Box(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(10.dp)) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp)
+                ) {
                     Text(
                         text = "Name: $chosenPlaceName",
                     )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp)
+                ) {
+                    Button(colors = ButtonDefaults.buttonColors(backgroundColor = Color.Blue),
+                        onClick = {
+                            chooseImage { uri ->
+                                val bitmap =
+                                    MediaStore.Images.Media.getBitmap(
+                                        context.getContentResolver(),
+                                        uri
+                                    )
+                                imageViewModel.chosenImages.add(bitmap)
+                            }
+                        }) {
+                        Text(text = "Choose image about this place")
+                    }
+                }
+
+                LazyRow{
+                    items(imageViewModel.chosenImages){
+                        Box(
+                            modifier = Modifier
+                                .padding(10.dp)
+                        ){
+                            Image(
+                                bitmap =  it.asImageBitmap(),
+                                contentDescription = null
+                            )
+                        }
+                    }
                 }
 
 
@@ -142,9 +190,22 @@ class SuggestPlace : ComponentActivity() {
     }
 
 
+
     @Preview(showBackground = true)
     @Composable
     fun DefaultPreview() {
-        suggestPlace()
+        suggestPlace(LocalContext.current)
+    }
+
+    fun chooseImage(callback: (Uri) -> Unit) {
+        val pickMedia =
+            registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+                if (uri != null) {
+                    callback(uri)
+                } else {
+                    Log.d("không chọn ảnh", "chưa chọn ảnh")
+                }
+            }
+        pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
     }
 }
