@@ -1,5 +1,6 @@
 package com.tung.travelthere
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -44,6 +45,7 @@ class PlaceView: ComponentActivity(){
         }
     }
 
+    @SuppressLint("NotConstructor")
     @Composable
     fun PlaceView(location: Location){
         val id = location.getDrawableName(LocalContext.current)

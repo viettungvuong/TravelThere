@@ -2,22 +2,36 @@ package com.tung.travelthere
 
 import android.content.Context
 import android.util.Log
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.AutocompletePrediction
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken
+import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.model.PlaceTypes
+import com.google.android.libraries.places.api.net.FetchPlaceRequest
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse
+import java.util.*
+
+data class AutocompleteResult(
+    val address: String,
+    val placeId: String
+)
 
 class PlaceAutocompleteViewModel(private val context: Context): ViewModel() {
     private val placesClient = Places.createClient(context)
 
-    var placeSuggestions: MutableState<List<AutocompletePrediction>> = mutableStateOf(emptyList())
+    var placeSuggestions= mutableStateListOf<AutocompleteResult>()
+
+    var currentName by mutableStateOf("")
+
 
     fun fetchPlaceSuggestions(query: String) {
+        placeSuggestions.clear()
+
         val token = AutocompleteSessionToken.newInstance()
         val request = FindAutocompletePredictionsRequest.builder()
             .setTypesFilter(listOf(PlaceTypes.ESTABLISHMENT))
@@ -27,10 +41,32 @@ class PlaceAutocompleteViewModel(private val context: Context): ViewModel() {
 
         placesClient.findAutocompletePredictions(request)
             .addOnSuccessListener { response: FindAutocompletePredictionsResponse ->
-                placeSuggestions.value = response.autocompletePredictions
+                placeSuggestions += response.autocompletePredictions.map {
+                    AutocompleteResult(
+                        it.getFullText(null).toString(),
+                        it.placeId
+                    )
+                }
             }
             .addOnFailureListener { exception ->
                 Log.d("Lỗi",exception.message.toString())
             }
     }
+
+
+    fun getName(result: AutocompleteResult) {
+        val placeFields = listOf(Place.Field.NAME)
+        val request = FetchPlaceRequest.newInstance(result.placeId, placeFields)
+        placesClient.fetchPlace(request)
+            .addOnSuccessListener {
+                if (it != null) {
+                    currentName = it.place.name?:""
+                    Log.d("current name",it.place.name)
+                }
+            }
+            .addOnFailureListener {
+                exception -> Log.d("Lỗi",exception.message.toString())
+            }
+    }
+
 }

@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.pointer.PointerIcon.Companion.Text
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -43,6 +44,12 @@ class SuggestPlace : ComponentActivity() {
     @Composable
     fun suggestPlace() {
         var searchPlace by remember { mutableStateOf("") }
+        var chosenPlaceAddress by remember { mutableStateOf("") }
+        var chosenPlaceName by remember { mutableStateOf("") }
+
+        LaunchedEffect(AppController.placeViewModel.currentName){
+            chosenPlaceName = AppController.placeViewModel.currentName
+        }
 
         MaterialTheme {
             Column(
@@ -59,10 +66,11 @@ class SuggestPlace : ComponentActivity() {
                 )
 
 
-
-                Box(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(10.dp)) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp)
+                ) {
                     OutlinedTextField(
                         value = searchPlace,
                         onValueChange = { newString ->
@@ -73,31 +81,59 @@ class SuggestPlace : ComponentActivity() {
                             .fillMaxWidth()
                             .padding(8.dp)
                     )
+                }
 
-                    LazyColumn {
-                        items(AppController.placeViewModel.placeSuggestions.value) {
-                            Box(modifier = Modifier.padding(10.dp)) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(16.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Place,
-                                        contentDescription = "Address",
-                                        tint = Color.Black
+                LazyColumn {
+                    items(AppController.placeViewModel.placeSuggestions) {
+                        Box(
+                            modifier = Modifier
+                                .padding(10.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp)
+                                    .clickable(onClick = {
+                                        chosenPlaceAddress = it.address
+                                        AppController.placeViewModel.getName(it)
+                                        AppController.placeViewModel.placeSuggestions.clear()
+                                    }
+
                                     )
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Place,
+                                    contentDescription = "Address",
+                                    tint = Color.Black
+                                )
 
-                                    Spacer(modifier = Modifier.width(20.dp))
+                                Spacer(modifier = Modifier.width(20.dp))
 
-                                    Text(text = it.getFullText(null).toString())
-                                }
-
+                                Text(text = it.address)
 
                             }
 
+
                         }
+
                     }
+                }
+
+                Box(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp)) {
+                    Text(
+                        text = "Address: $chosenPlaceAddress",
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                Box(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp)) {
+                    Text(
+                        text = "Name: $chosenPlaceName",
+                    )
                 }
 
 
