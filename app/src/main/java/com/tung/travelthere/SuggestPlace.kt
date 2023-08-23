@@ -8,6 +8,7 @@ import android.provider.MediaStore
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -30,25 +31,37 @@ import androidx.compose.foundation.Image
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import java.io.File
 
 class SuggestPlace : ComponentActivity() {
-    companion object {
-        lateinit var imageViewModel: ImageViewModel
+
+    inner class ImageViewModel {
+        var currentChosenImage by mutableStateOf("")
+        var chosenImages = mutableStateListOf<Bitmap>()
     }
+
+    lateinit var imageViewModel: ImageViewModel
+    lateinit var pickMedia: ActivityResultLauncher<PickVisualMediaRequest>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+
         imageViewModel = ImageViewModel()
+        pickMedia =
+            registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+                if (uri != null) {
+                    imageViewModel.currentChosenImage = uri.toString()
+                } else {
+                    Log.d("không chọn ảnh", "chưa chọn ảnh")
+                }
+            }
 
         setContent {
             suggestPlace(LocalContext.current)
         }
     }
 
-    inner class ImageViewModel {
-        var chosenImages = mutableStateListOf<Bitmap>()
-    }
 
     @Composable
     fun suggestPlace(context: Context) {
@@ -157,27 +170,27 @@ class SuggestPlace : ComponentActivity() {
                 ) {
                     Button(colors = ButtonDefaults.buttonColors(backgroundColor = Color.Blue),
                         onClick = {
-                            chooseImage { uri ->
+                            chooseImage{
                                 val bitmap =
                                     MediaStore.Images.Media.getBitmap(
                                         context.getContentResolver(),
-                                        uri
+                                        Uri.parse(imageViewModel.currentChosenImage)
                                     )
                                 imageViewModel.chosenImages.add(bitmap)
                             }
                         }) {
-                        Text(text = "Choose image about this place")
+                        Text(text = "Choose image about this place", color = Color.White)
                     }
                 }
 
-                LazyRow{
-                    items(imageViewModel.chosenImages){
+                LazyRow {
+                    items(imageViewModel.chosenImages) {
                         Box(
                             modifier = Modifier
                                 .padding(10.dp)
-                        ){
+                        ) {
                             Image(
-                                bitmap =  it.asImageBitmap(),
+                                bitmap = it.asImageBitmap(),
                                 contentDescription = null
                             )
                         }
@@ -190,22 +203,14 @@ class SuggestPlace : ComponentActivity() {
     }
 
 
-
     @Preview(showBackground = true)
     @Composable
     fun DefaultPreview() {
         suggestPlace(LocalContext.current)
     }
 
-    fun chooseImage(callback: (Uri) -> Unit) {
-        val pickMedia =
-            registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-                if (uri != null) {
-                    callback(uri)
-                } else {
-                    Log.d("không chọn ảnh", "chưa chọn ảnh")
-                }
-            }
+    fun chooseImage(callback: () -> Unit) {
         pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+        callback
     }
 }
