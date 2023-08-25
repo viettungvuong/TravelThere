@@ -66,6 +66,7 @@ class City private constructor() {
 
     val recommendationsRepository = RecommendationsRepository()
 
+    //lấy từ trên firebase
     suspend fun fetchImageUrl(): String? {
         var res: String? = null
 
@@ -87,6 +88,7 @@ class City private constructor() {
 
     inner class RecommendationsRepository {
 
+        //những nơi nên đi tới
         var recommendations = ArrayList<Location>()
 
         suspend fun refreshRecommendations() {
