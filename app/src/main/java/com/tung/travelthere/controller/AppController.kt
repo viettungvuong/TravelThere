@@ -9,8 +9,6 @@ import com.tung.travelthere.objects.User
 
 const val collectionCities = "cities"
 const val collectionLocations = "locations"
-const val collectionDiscussions = "discusisons"
-
 const val cityNameField = "city-name"
 
 const val locationNameField = "location-name"
