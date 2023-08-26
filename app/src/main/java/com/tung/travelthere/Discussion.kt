@@ -135,45 +135,36 @@ class Discussion(val name: String, private val location: Location) : ViewModel()
             "sender" to discussionContent.getSender(),
         )
 
-        if (id == null) {
-            //chưa up discussion này lên trên firebase
-            AppController.db.collection(collectionCities)
-                .whereEqualTo(cityNameField, location.city.getName()).limit(1)
-                .get() //lấy document city tương ứng
-                .addOnSuccessListener { querySnapshot ->
-                    if (!querySnapshot.isEmpty) {
-                        val documentSnapshot = querySnapshot.documents[0]
-                        val locationQuery = documentSnapshot.reference.collection(
-                            collectionLocations
-                        ).whereEqualTo(locationNameField, location.getName()).limit(1)
-                            .get() //lấy document location tương ứng
-                            .addOnSuccessListener { querySnapshot2 ->
-                                if (!querySnapshot2.isEmpty) {
-                                    val documentSnapshot2 = querySnapshot2.documents[0]
-                                    documentSnapshot2.reference.get()
-                                        .addOnSuccessListener { //lấy id (là số lượng discussion đang có + 1)
-                                                document ->
-                                            val newId =
-                                                document.getLong("number-of-discussions") ?: 0 + 1
-                                            this.id = newId.toString()
-                                        }
-                                    documentSnapshot2.reference.collection("discussions")
-                                        .document(this.id).set(newMessageData)
-                                }
+        val locationQuery = AppController.db.collection(collectionCities)
+            .whereEqualTo(cityNameField, location.city.getName()).limit(1)
+            .get() //lấy document city tương ứng
+            .addOnSuccessListener { querySnapshot ->
+                if (!querySnapshot.isEmpty) {
+                    val documentSnapshot = querySnapshot.documents[0]
+                    val locationQuery = documentSnapshot.reference.collection(
+                        collectionLocations
+                    ).whereEqualTo(locationNameField, location.getName()).limit(1)
+                        .get()
+
+                    if (id == null) {
+                        //chưa up discussion này lên trên firebase
+                        //lấy document location tương ứng
+                        locationQuery.addOnSuccessListener { querySnapshot2 ->
+                            if (!querySnapshot2.isEmpty) {
+                                val documentSnapshot2 = querySnapshot2.documents[0]
+                                documentSnapshot2.reference.get()
+                                    .addOnSuccessListener { //lấy id (là số lượng discussion đang có + 1)
+                                            document ->
+                                        val newId =
+                                            document.getLong("number-of-discussions") ?: 0 + 1
+                                        this.id = newId.toString()
+                                    }
+                                documentSnapshot2.reference.collection("discussions")
+                                    .document(this.id).set(newMessageData)
                             }
-                    }
-                }
-        } else {
-            AppController.db.collection(collectionCities)
-                .whereEqualTo(cityNameField, location.city.getName()).limit(1)
-                .get() //lấy document city tương ứng
-                .addOnSuccessListener { querySnapshot ->
-                    if (!querySnapshot.isEmpty) {
-                        val documentSnapshot = querySnapshot.documents[0]
-                        documentSnapshot.reference.collection(
-                            collectionLocations
-                        ).whereEqualTo(locationNameField, location.getName()).limit(1)
-                            .get() //lấy document location tương ứng
+                        }
+                    } else {
+                        locationQuery //lấy document location tương ứng
                             .addOnSuccessListener { querySnapshot2 ->
                                 if (!querySnapshot2.isEmpty) {
                                     val documentSnapshot2 = querySnapshot2.documents[0]
@@ -190,25 +181,24 @@ class Discussion(val name: String, private val location: Location) : ViewModel()
                             }
                     }
                 }
-        }
+            }
     }
-}
 
-class DiscussionsViewModel : ViewModel() {
+    class DiscussionsViewModel : ViewModel() {
 
-}
+    }
 
-@Composable
-fun discussionUI() {
+    @Composable
+    fun discussionUI() {
 
-}
+    }
 
-@Composable
-fun discussionList() {
-}
+    @Composable
+    fun discussionList() {
+    }
 
-@Composable
-fun discussionView() {
+    @Composable
+    fun discussionView() {
 
-}
+    }
 
