@@ -68,9 +68,9 @@ class MainActivity : ComponentActivity() {
         //phần initialize cho city
         City.getSingleton().setName("Ho Chi Minh City")
         City.getSingleton().setCountry("Vietnam")
-        val t1 = TouristPlace("Ben Thanh Market", Position(1f, 1f))
+        val t1 = TouristPlace("Ben Thanh Market", Position(1f, 1f),City.getSingleton())
         t1.setDrawableName("benthanh")
-        val t2 = TouristPlace("The Cathedral", Position(1f, 1f))
+        val t2 = TouristPlace("The Cathedral", Position(1f, 1f),City.getSingleton())
         t2.setDrawableName("nhathoducba")
         City.getSingleton().recommendationsRepository.recommendations.add(t1)
         City.getSingleton().recommendationsRepository.recommendations.add(t2)

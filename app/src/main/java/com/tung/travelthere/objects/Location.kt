@@ -9,7 +9,7 @@ class Dish(var name: String, var type: String): java.io.Serializable
 
 
 //không cho phép tạo object từ class Location
-open class Location protected constructor(private val name: String, private val pos: Position): java.io.Serializable{
+open class Location protected constructor(private val name: String, private val pos: Position, val city: City): java.io.Serializable{
 //    private var imageUrl : URL?=null
 //fun setImageUrl(url: URL) {
 //    imageUrl = url
@@ -47,7 +47,7 @@ open class Location protected constructor(private val name: String, private val 
     }
 }
 
-class Restaurant(name: String, pos: Position, private val specializeIn: Dish): Location(name,pos){
+class Restaurant(name: String, pos: Position, city: City, private val specializeIn: Dish): Location(name,pos,city){
     private var ratings = ArrayList<Rating>()
     private var ratingScore = 0f
 
@@ -77,6 +77,6 @@ class Restaurant(name: String, pos: Position, private val specializeIn: Dish): L
 
 }
 
-class PlaceOfInterest(name: String, pos: Position): Location(name,pos)
+class PlaceOfInterest(name: String, pos: Position, city: City): Location(name,pos,city)
 
-class TouristPlace(name: String, pos: Position): Location(name,pos)
+class TouristPlace(name: String, pos: Position, city: City): Location(name,pos,city)

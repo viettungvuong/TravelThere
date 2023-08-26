@@ -6,6 +6,7 @@ import android.app.DownloadManager
 import android.media.Image
 import android.os.Debug
 import android.util.Log
+import androidx.lifecycle.ViewModel
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -85,8 +86,7 @@ class City private constructor() {
 
     }
 
-
-    inner class RecommendationsRepository {
+    inner class RecommendationsRepository: ViewModel() {
 
         //những nơi nên đi tới
         var recommendations = ArrayList<Location>()
