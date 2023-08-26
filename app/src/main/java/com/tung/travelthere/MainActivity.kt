@@ -50,6 +50,7 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.google.android.libraries.places.api.Places
 import com.tung.travelthere.controller.AppController
+import com.tung.travelthere.controller.ImageFromUrl
 import com.tung.travelthere.controller.getDrawableNameFromName
 import com.tung.travelthere.objects.*
 import kotlinx.coroutines.*
@@ -192,8 +193,6 @@ fun Home(context: Context) {
         }
 
     }
-
-
 }
 
 
@@ -210,21 +209,17 @@ fun CityIntroduction(context: Context, city: City) {
 
     val coroutineScope = rememberCoroutineScope()
 
-    LaunchedEffect(bitmap) {
-//        coroutineScope.launch {
-//            description = city.fetchDescription()
-//            Log.d("description", description?:"")
-//            imageUrl = city.fetchImageUrl()
-//            Log.d("imageUrl", imageUrl?:"")
-//        }
+    LaunchedEffect(imageUrl) {
+        coroutineScope.launch {
+            imageUrl = city.fetchImageUrl()
+        }
 
         bitmap = if (imageUrl == null) {
             null
         } else {
-//                withContext(Dispatchers.IO){
-//                    BitmapFactory.decodeStream(URL(imageUrl).openConnection().getInputStream())
-//                }
-            BitmapFactory.decodeResource(context.resources, R.drawable.hcmc)
+            withContext(Dispatchers.IO){
+                BitmapFactory.decodeStream(URL(imageUrl).openConnection().getInputStream())
+            }
         }
 
 
@@ -237,21 +232,19 @@ fun CityIntroduction(context: Context, city: City) {
         }
     }
 
-    SideEffect {
-
-    }
-
     Box(
         modifier = Modifier
             .fillMaxSize()
     ) {
 
-        Image(
-            painter = painterResource(id = R.drawable.hcmc),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
-        )
+//        Image(
+//            painter = painterResource(id = R.drawable.hcmc),
+//            contentDescription = null,
+//            contentScale = ContentScale.Crop,
+//            modifier = Modifier.fillMaxSize()
+//        )
+
+        ImageFromUrl(url = imageUrl?:"", contentDescription = null)
     }
     Column(
         modifier = Modifier
@@ -322,7 +315,6 @@ fun LocalRecommended(context: Context, city: City) {
     listState.clear()
     listState.addAll(city.recommendationsRepository.recommendations)
 
-    Log.d("list state size",listState.size.toString())
 
     LazyRow {
         itemsIndexed(listState) { index, location -> //tương tự xuất ra location adapter

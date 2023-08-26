@@ -201,4 +201,4 @@ class Discussion(val name: String, private val location: Location) : ViewModel()
     fun discussionView() {
 
     }
-
+}

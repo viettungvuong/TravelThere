@@ -28,6 +28,18 @@ class City private constructor() {
     private var country: String?=null
     private var imageUrl: String?=null
 
+    companion object{
+        private var singleton: City?=null
+
+        @JvmStatic
+        fun getSingleton(): City{
+            if (singleton==null){
+                singleton=City()
+            }
+            return singleton!!
+        }
+    }
+
     fun setName(name: String){
         this.name = name
     }
@@ -53,27 +65,12 @@ class City private constructor() {
         return imageUrl
     }
 
-    companion object{
-        private var singleton: City?=null
-
-        @JvmStatic
-        fun getSingleton(): City{
-            if (singleton==null){
-                singleton=City()
-            }
-            return singleton!!
-        }
-    }
-
-    val recommendationsRepository = RecommendationsRepository()
-
     //lấy từ trên firebase
     suspend fun fetchImageUrl(): String? {
         var res: String? = null
 
         val query = AppController.db.collection(collectionCities).whereEqualTo(cityNameField, name)
             .whereEqualTo("country", country).limit(1).get().await()
-        Log.d("fetched", "true")
         val document = query.documents.firstOrNull()
         if (document != null) {
             res = document.getString("file-name")
@@ -81,10 +78,10 @@ class City private constructor() {
             val imageRef = storageRef.child(res!!)
             res = imageRef.downloadUrl.await().toString()
         }
-        Log.d("image url", res?:"")
         return res
-
     }
+
+    val recommendationsRepository = RecommendationsRepository()
 
     inner class RecommendationsRepository: ViewModel() {
 
