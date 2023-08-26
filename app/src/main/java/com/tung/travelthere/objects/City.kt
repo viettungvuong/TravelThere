@@ -57,16 +57,12 @@ class City private constructor() {
     }
 
 
-    fun setImageUrl(imageUrl: String){
-        this.imageUrl = imageUrl
-    }
-
-    fun getImageUrl(): String?{
-        return imageUrl
-    }
-
     //lấy từ trên firebase
     suspend fun fetchImageUrl(): String? {
+        if (imageUrl!=null){
+            return imageUrl!!
+        }
+
         var res: String? = null
 
         val query = AppController.db.collection(collectionCities).whereEqualTo(cityNameField, name)
@@ -78,6 +74,7 @@ class City private constructor() {
             val imageRef = storageRef.child(res!!)
             res = imageRef.downloadUrl.await().toString()
         }
+        imageUrl = res
         return res
     }
 

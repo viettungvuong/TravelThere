@@ -199,7 +199,7 @@ fun Home(context: Context) {
 @Composable
 fun CityIntroduction(context: Context, city: City) {
     //phần cho city
-    var imageUrl by remember { mutableStateOf(city.getImageUrl()) }
+    var imageUrl by remember { mutableStateOf<String?>(null) }
 
     //background color của text
     var textBgColor by remember { mutableStateOf(Color.Gray) }
@@ -236,14 +236,6 @@ fun CityIntroduction(context: Context, city: City) {
         modifier = Modifier
             .fillMaxSize()
     ) {
-
-//        Image(
-//            painter = painterResource(id = R.drawable.hcmc),
-//            contentDescription = null,
-//            contentScale = ContentScale.Crop,
-//            modifier = Modifier.fillMaxSize()
-//        )
-
         ImageFromUrl(url = imageUrl?:"", contentDescription = null)
     }
     Column(
