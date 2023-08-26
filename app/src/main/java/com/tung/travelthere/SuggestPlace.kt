@@ -41,9 +41,14 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import com.tung.travelthere.controller.colorBlue
+import com.tung.travelthere.objects.Location
+import com.tung.travelthere.objects.PlaceOfInterest
+import com.tung.travelthere.objects.RecommendedPlace
 import java.io.File
 
 class SuggestPlace : ComponentActivity() {
+
+    lateinit var currentLocation: Location //location hiện tại (location người dùng muốn suggest)
 
     inner class ImageViewModel {
         var currentChosenImage by mutableStateOf<String>("")
@@ -211,10 +216,6 @@ class SuggestPlace : ComponentActivity() {
 
             }
         }
-
-
-
-
     }
 
     @OptIn(ExperimentalComposeUiApi::class)
@@ -231,8 +232,8 @@ class SuggestPlace : ComponentActivity() {
                             .fillMaxWidth()
                             .padding(16.dp)
                             .clickable(onClick = {
-                                AppController.placeViewModel.getName(it)
-                                AppController.placeViewModel.retrieveOtherInfo(it)
+                                chooseLocation(it)
+
                                 AppController.placeViewModel.placeSuggestions.clear()
                                 searchPlace.value = ""
                                 keyboardController?.hide()
@@ -268,5 +269,17 @@ class SuggestPlace : ComponentActivity() {
 
     fun chooseImage() {
         pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+    }
+
+    fun chooseLocation(autocompleteResult: AutocompleteResult){
+        //lấy các thông tin của địa điểm chọn
+        AppController.placeViewModel.getName(autocompleteResult)
+        AppController.placeViewModel.retrieveOtherInfo(autocompleteResult)
+
+        val currentName = AppController.placeViewModel.currentName
+        val currentCity = AppController.placeViewModel.currentCity
+        val currentPosition = AppController.placeViewModel.currentPos
+
+        currentLocation = RecommendedPlace(currentName,currentPosition,currentCity) //đặt location đang được suggest
     }
 }

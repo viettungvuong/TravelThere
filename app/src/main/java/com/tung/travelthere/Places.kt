@@ -13,6 +13,8 @@ import com.google.android.libraries.places.api.model.PlaceTypes
 import com.google.android.libraries.places.api.net.FetchPlaceRequest
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse
+import com.tung.travelthere.objects.Location
+import com.tung.travelthere.objects.Position
 import java.util.*
 
 
@@ -28,6 +30,7 @@ class PlaceAutocompleteViewModel(private val context: Context): ViewModel() {
 
     var currentName by mutableStateOf("")
     var currentCity by mutableStateOf("")
+    var currentPos by mutableStateOf(Position(0f,0f))
 
 
     fun fetchPlaceSuggestions(query: String) {
@@ -77,6 +80,7 @@ class PlaceAutocompleteViewModel(private val context: Context): ViewModel() {
                 if (it != null) {
                     val geocoder = Geocoder(context, Locale.getDefault())
                     val latLng = it.place.latLng
+                    currentPos = Position(latLng.latitude.toFloat(),latLng.longitude.toFloat())
                     val addresses = geocoder.getFromLocation(latLng.latitude,latLng.longitude,1)
                     if (addresses != null) {
                         currentCity = addresses[0].locality //lấy tên thành phố

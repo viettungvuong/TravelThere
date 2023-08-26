@@ -76,3 +76,5 @@ class Restaurant(name: String, pos: Position, cityName: String, private val spec
 class PlaceOfInterest(name: String, pos: Position, cityName: String): Location(name,pos,cityName)
 
 class TouristPlace(name: String, pos: Position, cityName: String): Location(name,pos,cityName)
+
+class RecommendedPlace(name: String, pos: Position, cityName: String): Location(name,pos,cityName)
