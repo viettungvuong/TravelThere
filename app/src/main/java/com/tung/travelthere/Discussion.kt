@@ -30,7 +30,7 @@ class Discussion(val name: String, private val location: Location) : ViewModel()
         }
 
         AppController.db.collection(collectionCities)
-            .whereEqualTo(cityNameField, location.city.getName()).limit(1)
+            .whereEqualTo(cityNameField, location.cityName).limit(1)
             .get() //lấy document city tương ứng
             .addOnSuccessListener { querySnapshot ->
                 if (!querySnapshot.isEmpty) {
@@ -79,7 +79,7 @@ class Discussion(val name: String, private val location: Location) : ViewModel()
         }
 
         AppController.db.collection(collectionCities)
-            .whereEqualTo(cityNameField, location.city.getName()).limit(1)
+            .whereEqualTo(cityNameField, location.cityName).limit(1)
             .get() //lấy document city tương ứng
             .addOnSuccessListener { querySnapshot ->
                 if (!querySnapshot.isEmpty) {
@@ -136,7 +136,7 @@ class Discussion(val name: String, private val location: Location) : ViewModel()
         )
 
         val locationQuery = AppController.db.collection(collectionCities)
-            .whereEqualTo(cityNameField, location.city.getName()).limit(1)
+            .whereEqualTo(cityNameField, location.cityName).limit(1)
             .get() //lấy document city tương ứng
             .addOnSuccessListener { querySnapshot ->
                 if (!querySnapshot.isEmpty) {

@@ -107,7 +107,7 @@ class City private constructor() {
         suspend fun suggestPlace(location: Location) {
             val cityDocRef =
                 AppController.db.collection(collectionCities)
-                    .document(location.city.getName()!!)
+                    .document(location.cityName)
 
             AppController.db.runTransaction { transaction ->
                 val cityDocument = transaction.get(cityDocRef)
