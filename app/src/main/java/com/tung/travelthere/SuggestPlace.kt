@@ -34,31 +34,37 @@ import java.io.File
 class SuggestPlace : ComponentActivity() {
 
     inner class ImageViewModel {
-        var currentChosenImage by mutableStateOf("")
+        var currentChosenImage by mutableStateOf<String>("")
         var chosenImages = mutableStateListOf<Bitmap>()
     }
 
     lateinit var imageViewModel: ImageViewModel
-    lateinit var pickMedia: ActivityResultLauncher<PickVisualMediaRequest>
+
+    val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        if (uri != null) {
+            imageViewModel.currentChosenImage = uri.toString()
+            val bitmap =
+                MediaStore.Images.Media.getBitmap(
+                    this.getContentResolver(),
+                    Uri.parse(imageViewModel.currentChosenImage)
+                )
+            imageViewModel.currentChosenImage=""
+            imageViewModel.chosenImages.add(bitmap)
+        } else {
+            Log.d("không chọn ảnh", "chưa chọn ảnh")
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-
         imageViewModel = ImageViewModel()
-        pickMedia =
-            registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-                if (uri != null) {
-                    imageViewModel.currentChosenImage = uri.toString()
-                } else {
-                    Log.d("không chọn ảnh", "chưa chọn ảnh")
-                }
-            }
 
         setContent {
             suggestPlace(LocalContext.current)
         }
     }
+
 
 
     @Composable
@@ -106,18 +112,7 @@ class SuggestPlace : ComponentActivity() {
                     )
                 }
 
-                placeSuggestions(chosenPlaceAddress = chosenPlaceAddress, listState)
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(10.dp)
-                ) {
-                    Text(
-                        text = "Address: $chosenPlaceAddress",
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+                placeSuggestionsAutocomplete(chosenPlaceAddress = chosenPlaceAddress, listState)
 
                 Box(
                     modifier = Modifier
@@ -126,6 +121,7 @@ class SuggestPlace : ComponentActivity() {
                 ) {
                     Text(
                         text = "Name: $chosenPlaceName",
+                        fontWeight = FontWeight.Bold
                     )
                 }
 
@@ -136,14 +132,7 @@ class SuggestPlace : ComponentActivity() {
                 ) {
                     Button(colors = ButtonDefaults.buttonColors(backgroundColor = Color.Blue),
                         onClick = {
-                            chooseImage{
-                                val bitmap =
-                                    MediaStore.Images.Media.getBitmap(
-                                        context.getContentResolver(),
-                                        Uri.parse(imageViewModel.currentChosenImage)
-                                    )
-                                imageViewModel.chosenImages.add(bitmap)
-                            }
+                            chooseImage()
                         }) {
                         Text(text = "Choose image about this place", color = Color.White)
                     }
@@ -169,7 +158,7 @@ class SuggestPlace : ComponentActivity() {
     }
 
     @Composable
-    fun placeSuggestions(chosenPlaceAddress: MutableState<String>, listState: LazyListState = rememberLazyListState()){
+    fun placeSuggestionsAutocomplete(chosenPlaceAddress: MutableState<String>, listState: LazyListState = rememberLazyListState()){
         LazyColumn(state = listState) {
             items(AppController.placeViewModel.placeSuggestions) {
                 Box(
@@ -214,8 +203,7 @@ class SuggestPlace : ComponentActivity() {
         suggestPlace(LocalContext.current)
     }
 
-    fun chooseImage(callback: () -> Unit) {
+    fun chooseImage() {
         pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-        callback
     }
 }

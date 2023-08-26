@@ -1,3 +1,3 @@
 package com.tung.travelthere
 
-const val apikey="AIzaSyD5jFBmMOSm3-_Vgbkx2HsWFeIotYshOq0"
+const val apikey="AIzaSyC6qQqaqfHQMN2FXMX301c6LQ2rfjKPg2E"
