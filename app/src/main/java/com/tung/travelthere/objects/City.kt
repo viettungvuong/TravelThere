@@ -8,13 +8,9 @@ import android.os.Debug
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.google.firebase.ktx.Firebase
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
-import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 import java.net.HttpURLConnection
@@ -22,44 +18,45 @@ import java.net.URL
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.ktx.storage
 import com.tung.travelthere.controller.*
+import kotlinx.coroutines.*
 
 class City private constructor() {
-    private var name: String?=null
-    private var country: String?=null
-    private var imageUrl: String?=null
+    private var name: String? = null
+    private var country: String? = null
+    private var imageUrl: String? = null
 
-    companion object{
-        private var singleton: City?=null
+    companion object {
+        private var singleton: City? = null
 
         @JvmStatic
-        fun getSingleton(): City{
-            if (singleton==null){
-                singleton=City()
+        fun getSingleton(): City {
+            if (singleton == null) {
+                singleton = City()
             }
             return singleton!!
         }
     }
 
-    fun setName(name: String){
+    fun setName(name: String) {
         this.name = name
     }
 
-    fun setCountry(country: String){
+    fun setCountry(country: String) {
         this.country = country
     }
 
-    fun getName(): String?{
+    fun getName(): String? {
         return name
     }
 
-    fun getCountry(): String?{
+    fun getCountry(): String? {
         return country
     }
 
 
     //lấy từ trên firebase
     suspend fun fetchImageUrl(): String? {
-        if (imageUrl!=null){
+        if (imageUrl != null) {
             return imageUrl!!
         }
 
@@ -80,31 +77,63 @@ class City private constructor() {
 
     val recommendationsRepository = RecommendationsRepository()
 
-    inner class RecommendationsRepository: ViewModel() {
+    inner class RecommendationsRepository : ViewModel() {
 
         //những nơi nên đi tới
         var recommendations = ArrayList<Location>()
 
         suspend fun refreshRecommendations() {
-            withContext(Dispatchers.IO) {
-                val query =
-                    AppController.db.collection(collectionCities).whereEqualTo(cityNameField, name)
-                        .whereEqualTo("country", country)
-                        .limit(1).get().await()
+//            withContext(Dispatchers.IO) {
+//                val query =
+//                    AppController.db.collection(collectionCities).whereEqualTo(cityNameField, name)
+//                        .whereEqualTo("country", country)
+//                        .limit(1).get().await()
+//
+//                val documents = query.documents
+//
+//                for (document in documents) {
+//                    document.reference.collection(collectionLocations).get().addOnSuccessListener {
+//                        //lấy từng địa điểm của thành phố hiện tại
+//                            documents ->
+//                        for (document in documents) {
+//                            val name = document.getString("location-name")
+//                            //thêm toạ độ
+//                        }
+//                    }
+//                }
+//            }
+        }
 
-                val documents = query.documents
+        suspend fun suggestPlace(location: Location) {
+            val cityDocRef =
+                AppController.db.collection(collectionCities)
+                    .document(location.city.getName()!!)
 
-                for (document in documents) {
-                    document.reference.collection(collectionLocations).get().addOnSuccessListener {
-                        //lấy từng địa điểm của thành phố hiện tại
-                            documents ->
-                        for (document in documents) {
-                            val name = document.getString("location-name")
-                            //thêm toạ độ
-                        }
+            AppController.db.runTransaction { transaction ->
+                val cityDocument = transaction.get(cityDocRef)
+                val locationCollectionRef = cityDocRef.collection(collectionLocations)
+
+                val locationDocumentRef = locationCollectionRef.document(location.getPos().toString())
+
+                if (cityDocument.exists()) {
+
+                    val locationDocument = transaction.get(locationDocumentRef)
+
+                    if (locationDocument.exists()) {
+                        //có địa điểm này
+                        val recommendedNum = locationDocument.getLong("recommends")?:0
+                        transaction.update(locationDocumentRef, "recommends", recommendedNum+1)
+                    } else {
+                        //chưa có địa điểm này
+                        val locationData = hashMapOf(
+                            "name" to location.getName(),
+                            "pos" to location.getPos().toString(),
+                        )
+                        transaction.set(locationDocumentRef, locationData) //tạo document mới
                     }
                 }
             }
+
         }
     }
 }
