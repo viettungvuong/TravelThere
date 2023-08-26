@@ -27,13 +27,19 @@ import com.tung.travelthere.controller.AppController
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.SoftwareKeyboardController
+import androidx.compose.ui.text.input.ImeAction
 import com.tung.travelthere.controller.colorBlue
 import java.io.File
 
@@ -73,14 +79,16 @@ class SuggestPlace : ComponentActivity() {
 
 
 
+    @OptIn(ExperimentalComposeUiApi::class)
     @Composable
     fun suggestPlace() {
-        var searchPlace by remember { mutableStateOf("") }
-        var chosenPlaceAddress = remember { mutableStateOf("") }
+        var searchPlace = remember { mutableStateOf("") }
         var chosenPlaceName by remember { mutableStateOf("") }
 
         var listState = rememberLazyListState()
         var scaffoldState = rememberScaffoldState()
+
+        val keyboardController = LocalSoftwareKeyboardController.current
 
 
         LaunchedEffect(AppController.placeViewModel.currentName) {
@@ -129,18 +137,21 @@ class SuggestPlace : ComponentActivity() {
                         .padding(10.dp)
                 ) {
                     OutlinedTextField(
-                        value = searchPlace,
+                        value = searchPlace.value,
                         onValueChange = { newString ->
-                            searchPlace = newString
+                            searchPlace.value = newString
                             AppController.placeViewModel.fetchPlaceSuggestions(newString)
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(8.dp)
+                            .padding(8.dp),
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                        keyboardActions = KeyboardActions(
+                            onDone = {keyboardController?.hide()})
                     )
                 }
 
-                placeSuggestionsAutocomplete(chosenPlaceAddress = chosenPlaceAddress, listState)
+                placeSuggestionsAutocomplete(listState, searchPlace, keyboardController)
 
                 Box(
                     modifier = Modifier
@@ -197,8 +208,9 @@ class SuggestPlace : ComponentActivity() {
 
     }
 
+    @OptIn(ExperimentalComposeUiApi::class)
     @Composable
-    fun placeSuggestionsAutocomplete(chosenPlaceAddress: MutableState<String>, listState: LazyListState = rememberLazyListState()){
+    fun placeSuggestionsAutocomplete(listState: LazyListState = rememberLazyListState(), searchPlace: MutableState<String>, keyboardController: SoftwareKeyboardController?){
         LazyColumn(state = listState) {
             items(AppController.placeViewModel.placeSuggestions) {
                 Box(
@@ -210,9 +222,10 @@ class SuggestPlace : ComponentActivity() {
                             .fillMaxWidth()
                             .padding(16.dp)
                             .clickable(onClick = {
-                                chosenPlaceAddress.value = it.address
                                 AppController.placeViewModel.getName(it)
                                 AppController.placeViewModel.placeSuggestions.clear()
+                                searchPlace.value=""
+                                keyboardController?.hide()
                             }
 
                             )
