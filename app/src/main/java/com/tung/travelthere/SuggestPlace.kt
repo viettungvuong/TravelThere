@@ -1,6 +1,7 @@
 package com.tung.travelthere
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
@@ -15,7 +16,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Place
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,9 +26,15 @@ import androidx.compose.ui.unit.dp
 import com.tung.travelthere.controller.AppController
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.lazy.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.asImageBitmap
+import com.tung.travelthere.controller.colorBlue
 import java.io.File
 
 class SuggestPlace : ComponentActivity() {
@@ -61,26 +67,48 @@ class SuggestPlace : ComponentActivity() {
         imageViewModel = ImageViewModel()
 
         setContent {
-            suggestPlace(LocalContext.current)
+            suggestPlace()
         }
     }
 
 
 
     @Composable
-    fun suggestPlace(context: Context) {
+    fun suggestPlace() {
         var searchPlace by remember { mutableStateOf("") }
         var chosenPlaceAddress = remember { mutableStateOf("") }
         var chosenPlaceName by remember { mutableStateOf("") }
 
         var listState = rememberLazyListState()
+        var scaffoldState = rememberScaffoldState()
 
 
         LaunchedEffect(AppController.placeViewModel.currentName) {
             chosenPlaceName = AppController.placeViewModel.currentName
         }
 
-        MaterialTheme {
+        Scaffold(
+            bottomBar = {
+                BottomAppBar(cutoutShape = CircleShape, backgroundColor = colorBlue) {
+                }
+            },
+            floatingActionButton = {
+                FloatingActionButton(
+                    onClick = { /* Handle FAB click */ },
+                    backgroundColor = Color(android.graphics.Color.parseColor("#b3821b"))
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Search",
+                        tint = Color.White
+                    )
+                }
+            },
+            floatingActionButtonPosition = FabPosition.End,
+            isFloatingActionButtonDocked = true,
+            scaffoldState = scaffoldState
+        ){
+            padding ->
             Column(
                 modifier = Modifier
                     .padding(16.dp)
@@ -138,16 +166,24 @@ class SuggestPlace : ComponentActivity() {
                     }
                 }
 
-                LazyRow {
-                    items(imageViewModel.chosenImages) {
-                        Box(
-                            modifier = Modifier
-                                .padding(10.dp)
-                        ) {
-                            Image(
-                                bitmap = it.asImageBitmap(),
-                                contentDescription = null
-                            )
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp)
+
+                ) {
+                    LazyRow {
+                        items(imageViewModel.chosenImages) {
+                            Box(
+                                modifier = Modifier
+                                    .padding(10.dp)
+                            ) {
+                                Image(
+                                    bitmap = it.asImageBitmap(),
+                                    contentDescription = null,
+                                    alignment = Alignment.Center
+                                )
+                            }
                         }
                     }
                 }
@@ -155,6 +191,10 @@ class SuggestPlace : ComponentActivity() {
 
             }
         }
+
+
+
+
     }
 
     @Composable
@@ -200,7 +240,7 @@ class SuggestPlace : ComponentActivity() {
     @Preview(showBackground = true)
     @Composable
     fun DefaultPreview() {
-        suggestPlace(LocalContext.current)
+        suggestPlace()
     }
 
     fun chooseImage() {

@@ -51,6 +51,7 @@ import coil.request.ImageRequest
 import com.google.android.libraries.places.api.Places
 import com.tung.travelthere.controller.AppController
 import com.tung.travelthere.controller.ImageFromUrl
+import com.tung.travelthere.controller.colorBlue
 import com.tung.travelthere.controller.getDrawableNameFromName
 import com.tung.travelthere.objects.*
 import kotlinx.coroutines.*
@@ -88,7 +89,6 @@ fun Home(context: Context) {
     val tabTitles = listOf("Nearby", "Recommended", "Tourist attractions")
     val pagerState = rememberPagerState(initialPage = 0)
     val coroutineScope = rememberCoroutineScope()
-    val colorBlue = Color(android.graphics.Color.parseColor("#5980b3"))
     val scaffoldState = rememberScaffoldState()
 
     Scaffold(
