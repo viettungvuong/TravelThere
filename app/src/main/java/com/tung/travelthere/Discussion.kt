@@ -41,8 +41,21 @@ class Discussion(val name: String, private val location: Location) : ViewModel()
                                 val documentSnapshot2 = querySnapshot2.documents[0]
                                 documentSnapshot2.reference.collection(collectionDiscussions).document(id).get()
                                     .addOnSuccessListener {
+                                        document -> val number = document.getLong("number-of-replies")?:0 //số lượng phản hồi
 
+                                        for (i in 0..number){
+                                            val mapField = document.get(i.toString()) as? Map<String, String>
+                                            if (mapField!=null){
+                                                val sender = mapField["sender"]
+                                                val content = mapField["content"]
+
+                                                if (content!=null&&sender!=null){
+                                                    contents.add(DiscussionContent(sender,content)) //thêm vào contents
+                                                }
+                                            }
+                                        }
                                     }
+
                             }
                         }
                 }
