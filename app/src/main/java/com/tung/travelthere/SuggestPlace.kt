@@ -84,6 +84,7 @@ class SuggestPlace : ComponentActivity() {
     fun suggestPlace() {
         var searchPlace = remember { mutableStateOf("") }
         var chosenPlaceName by remember { mutableStateOf("") }
+        var chosenPlaceCity by remember { mutableStateOf("") }
 
         var listState = rememberLazyListState()
         var scaffoldState = rememberScaffoldState()
@@ -91,8 +92,9 @@ class SuggestPlace : ComponentActivity() {
         val keyboardController = LocalSoftwareKeyboardController.current
 
 
-        LaunchedEffect(AppController.placeViewModel.currentName) {
+        LaunchedEffect(AppController.placeViewModel.currentName,AppController.placeViewModel.currentCity) {
             chosenPlaceName = AppController.placeViewModel.currentName
+            chosenPlaceCity = AppController.placeViewModel.currentCity
         }
 
         Scaffold(
@@ -158,10 +160,17 @@ class SuggestPlace : ComponentActivity() {
                         .fillMaxWidth()
                         .padding(10.dp)
                 ) {
-                    Text(
-                        text = "Name: $chosenPlaceName",
-                        fontWeight = FontWeight.Bold
-                    )
+                    Column{
+                        Text(
+                            text = "Name: $chosenPlaceName",
+                            fontWeight = FontWeight.Bold
+                        )
+
+                        Text(
+                            text = "City: $chosenPlaceCity",
+                        )
+                    }
+
                 }
 
                 Box(
@@ -223,8 +232,9 @@ class SuggestPlace : ComponentActivity() {
                             .padding(16.dp)
                             .clickable(onClick = {
                                 AppController.placeViewModel.getName(it)
+                                AppController.placeViewModel.retrieveOtherInfo(it)
                                 AppController.placeViewModel.placeSuggestions.clear()
-                                searchPlace.value=""
+                                searchPlace.value = ""
                                 keyboardController?.hide()
                             }
 

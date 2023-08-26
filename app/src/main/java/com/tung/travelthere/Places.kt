@@ -1,13 +1,12 @@
 package com.tung.travelthere
 
 import android.content.Context
+import android.location.Geocoder
 import android.util.Log
 import androidx.compose.runtime.*
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.Places
-import com.google.android.libraries.places.api.model.AutocompletePrediction
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.model.PlaceTypes
@@ -16,17 +15,19 @@ import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRe
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse
 import java.util.*
 
+
 data class AutocompleteResult(
     val address: String,
-    val placeId: String
+    val placeId: String,
 )
 
 class PlaceAutocompleteViewModel(private val context: Context): ViewModel() {
     private val placesClient = Places.createClient(context)
 
-    var placeSuggestions= mutableStateListOf<AutocompleteResult>()
+    var placeSuggestions= mutableStateListOf<AutocompleteResult>() //chứa autocomplete
 
     var currentName by mutableStateOf("")
+    var currentCity by mutableStateOf("")
 
 
     fun fetchPlaceSuggestions(query: String) {
@@ -44,7 +45,7 @@ class PlaceAutocompleteViewModel(private val context: Context): ViewModel() {
                 placeSuggestions += response.autocompletePredictions.map {
                     AutocompleteResult(
                         it.getFullText(null).toString(),
-                        it.placeId
+                        it.placeId,
                     )
                 }
             }
@@ -61,11 +62,29 @@ class PlaceAutocompleteViewModel(private val context: Context): ViewModel() {
             .addOnSuccessListener {
                 if (it != null) {
                     currentName = it.place.name?:""
-                    Log.d("current name",it.place.name)
                 }
             }
             .addOnFailureListener {
                 exception -> Log.d("Lỗi",exception.message.toString())
+            }
+    }
+
+    fun retrieveOtherInfo(result: AutocompleteResult){
+        val placeFields = listOf(Place.Field.LAT_LNG)
+        val request = FetchPlaceRequest.newInstance(result.placeId, placeFields)
+        placesClient.fetchPlace(request)
+            .addOnSuccessListener {
+                if (it != null) {
+                    val geocoder = Geocoder(context, Locale.getDefault())
+                    val latLng = it.place.latLng
+                    val addresses = geocoder.getFromLocation(latLng.latitude,latLng.longitude,1)
+                    if (addresses != null) {
+                        currentCity = addresses[0].locality //lấy tên thành phố
+                    }
+                }
+            }
+            .addOnFailureListener {
+                    exception -> Log.d("Lỗi",exception.message.toString())
             }
     }
 
