@@ -28,7 +28,7 @@ enum class Category{
 open class Location protected constructor(private val name: String, private val pos: Position, val cityName: String): java.io.Serializable{
 
     private var drawableName: String?=null
-    var categories= LinkedList<Category>()
+    var categories: MutableSet<Category> = mutableSetOf() //các category của địa điểm này
 
     fun setDrawableName(name: String){
         drawableName=name
@@ -57,6 +57,10 @@ open class Location protected constructor(private val name: String, private val 
 }
 
 class Restaurant(name: String, pos: Position, cityName: String, private val specializeIn: Dish): Location(name,pos,cityName){
+    init {
+        this.categories.add(Category.RESTAURANT)
+    }
+
     private var ratings = ArrayList<Rating>()
     private var ratingScore = 0f
 
@@ -86,8 +90,16 @@ class Restaurant(name: String, pos: Position, cityName: String, private val spec
 
 }
 
-class PlaceOfInterest(name: String, pos: Position, cityName: String): Location(name,pos,cityName)
+class PlaceOfInterest(name: String, pos: Position, cityName: String): Location(name,pos,cityName){
+    init {
+        this.categories.add(Category.ATTRACTION)
+    }
+}
 
-class TouristPlace(name: String, pos: Position, cityName: String): Location(name,pos,cityName)
+class TouristPlace(name: String, pos: Position, cityName: String): Location(name,pos,cityName){
+    init {
+        this.categories.add(Category.ATTRACTION)
+    }
+}
 
 class RecommendedPlace(name: String, pos: Position, cityName: String): Location(name,pos,cityName)
