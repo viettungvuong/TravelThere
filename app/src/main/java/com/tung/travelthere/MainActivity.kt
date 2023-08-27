@@ -58,6 +58,8 @@ import com.tung.travelthere.objects.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import java.net.URL
+import java.util.*
+import kotlin.collections.ArrayList
 
 
 class MainActivity : ComponentActivity() {
@@ -75,6 +77,7 @@ class MainActivity : ComponentActivity() {
         t1.setDrawableName("benthanh")
         t1.categories.add(Category.ATTRACTION)
         t1.categories.add(Category.SHOPPING)
+        t1.reviews.add(Review("viettung","Good place", Date(), 10))
 
         val t2 = TouristPlace("The Cathedral", Position(1f, 1f),"Ho Chi Minh City")
         t2.setDrawableName("nhathoducba")

@@ -1,11 +1,13 @@
 package com.tung.travelthere
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -41,6 +43,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import coil.compose.AsyncImage
 import com.tung.travelthere.controller.colorBlue
+import com.tung.travelthere.controller.formatter
 import com.tung.travelthere.objects.Category
 import com.tung.travelthere.objects.City
 import com.tung.travelthere.objects.Location
@@ -138,6 +141,7 @@ class PlaceView : ComponentActivity() {
                             ) {
                                 when (page) {
                                     0 -> aboutPlace(location)
+                                    1 -> reviewsPlace(location)
                                 }
                             }
                         }
@@ -289,7 +293,57 @@ class PlaceView : ComponentActivity() {
 
     @Composable
     fun reviewsPlace(location: Location){
+        Box(modifier = Modifier.fillMaxSize()){
+            LazyColumn(){
+                itemsIndexed(location.reviews.toTypedArray()){
+                    index, review -> reviewLayout(review = review)
+                }
+            }
+        }
+    }
 
+    @Composable
+    fun reviewLayout(review: Review){
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    horizontal = 20.dp,
+                    vertical = 20.dp
+                ),
+            elevation = 10.dp
+        ){
+            Column() {
+                //sẽ có mục cho biết người dùng này là local hay foreigner
+                Row(modifier = Modifier.padding(10.dp)){
+
+                    Text(text = review.userId, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+
+                    Box(modifier = Modifier.padding(horizontal = 10.dp)){
+                        Text(text = formatter.format(review.time), fontWeight = FontWeight.Light)
+                    }
+                }
+
+                Box(modifier = Modifier.padding(10.dp)){
+                    Text(text = review.content, fontSize = 15.sp)
+                }
+
+                var color: Color?=null
+                if (review.score in 0..4){
+                    color=Color.Red
+                }
+                else if (review.score in 5..8){
+                    color=Color(0xffa88132)
+                }
+                else{
+                    color=Color(0xff326e14)
+                }
+                Box(modifier = Modifier.padding(10.dp)){
+                    Text(text = review.score.toString(), fontWeight = FontWeight.Bold, fontSize = 30.sp, color = color)
+                }
+
+            }
+        }
     }
 
     @Composable

@@ -1,5 +1,7 @@
 package com.tung.travelthere.controller
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -16,6 +18,8 @@ import com.google.firebase.ktx.Firebase
 import com.tung.travelthere.PlaceAutocompleteViewModel
 import com.tung.travelthere.objects.City
 import com.tung.travelthere.objects.User
+import java.text.SimpleDateFormat
+import java.time.format.DateTimeFormatter
 
 const val collectionCities = "cities"
 const val collectionLocations = "locations"
@@ -24,6 +28,7 @@ const val cityNameField = "city-name"
 const val locationNameField = "location-name"
 
 val colorBlue = Color(android.graphics.Color.parseColor("#5980b3"))
+val formatter = SimpleDateFormat("HH:mm:ss dd/MM/yyyy")
 
 class AppController {
     companion object{

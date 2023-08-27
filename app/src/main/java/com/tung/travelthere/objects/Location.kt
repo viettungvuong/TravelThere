@@ -1,6 +1,7 @@
 package com.tung.travelthere.objects
 
 import android.content.Context
+import com.tung.travelthere.Review
 import java.net.URL
 import java.util.*
 import kotlin.collections.ArrayList
@@ -29,6 +30,7 @@ open class Location protected constructor(private val name: String, private val 
 
     private var drawableName: String?=null
     var categories: MutableSet<Category> = mutableSetOf() //các category của địa điểm này
+    var reviews: MutableSet<Review> = mutableSetOf() //danh sách các review
 
     fun setDrawableName(name: String){
         drawableName=name
