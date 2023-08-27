@@ -216,7 +216,7 @@ class PlaceView : ComponentActivity() {
             )
 
             LazyRow {
-                itemsIndexed(location.categories) { index, category -> //tương tự xuất ra location adapter
+                itemsIndexed(location.categories.toTypedArray()) { index, category -> //tương tự xuất ra location adapter
                     categoryView(category = category)
                 }
             }
