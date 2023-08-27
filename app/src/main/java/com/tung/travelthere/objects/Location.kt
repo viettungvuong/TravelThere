@@ -2,6 +2,8 @@ package com.tung.travelthere.objects
 
 import android.content.Context
 import java.net.URL
+import java.util.*
+import kotlin.collections.ArrayList
 
 class Position(var lat: Float, var long: Float): java.io.Serializable{
     override fun toString(): String {
@@ -11,11 +13,23 @@ class Position(var lat: Float, var long: Float): java.io.Serializable{
 
 class Dish(var name: String, var type: String): java.io.Serializable
 
+enum class Category{
+    RESTAURANT,
+    BAR,
+    ATTRACTION,
+    NECESSITY,
+    NATURE,
+    SHOPPING,
+    OTHERS
+}
+
 
 //không cho phép tạo object từ class Location
 open class Location protected constructor(private val name: String, private val pos: Position, val cityName: String): java.io.Serializable{
 
     private var drawableName: String?=null
+    var categories= LinkedList<Category>()
+
     fun setDrawableName(name: String){
         drawableName=name
     }
@@ -35,7 +49,6 @@ open class Location protected constructor(private val name: String, private val 
     fun getPos(): Position{
         return pos
     }
-
 
 
     override fun toString(): String {

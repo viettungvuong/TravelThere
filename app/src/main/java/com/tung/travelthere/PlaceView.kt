@@ -6,12 +6,17 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Search
@@ -22,10 +27,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -34,6 +41,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import coil.compose.AsyncImage
 import com.tung.travelthere.controller.colorBlue
+import com.tung.travelthere.objects.Category
 import com.tung.travelthere.objects.City
 import com.tung.travelthere.objects.Location
 import kotlinx.coroutines.CoroutineScope
@@ -65,6 +73,23 @@ class PlaceView : ComponentActivity() {
             ConstraintLayout {
                 val (image, detail) = createRefs()
 
+//                Box(
+//                    modifier = Modifier
+//                        .constrainAs(image) {
+//                            top.linkTo(parent.top)
+//                            start.linkTo(parent.start)
+//                        }
+//                ){
+//                    FloatingActionButton(
+//                        onClick = { finish() },
+//                        backgroundColor = Color.White,
+//                        content = {
+//                            Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.Red)
+//                        }
+//                    )
+//                }
+
+
                 Box(
                     modifier = Modifier
                         .heightIn(max = 300.dp)
@@ -83,7 +108,6 @@ class PlaceView : ComponentActivity() {
                         modifier = Modifier.fillMaxSize()
                     )
                 }
-
 
                 Box(
                     modifier = Modifier
@@ -181,9 +205,27 @@ class PlaceView : ComponentActivity() {
             Text(text = "18 đường số 7")
         }
 
+
+
+        Column(
+            modifier = Modifier.padding(vertical = 20.dp)
+        ){
+            Text(
+                text="Categories",
+                fontWeight = FontWeight.Bold
+            )
+
+            LazyRow {
+                itemsIndexed(location.categories) { index, category -> //tương tự xuất ra location adapter
+                    categoryView(category = category)
+                }
+            }
+        }
+
         Button(
             onClick = { /*TODO*/ },
-            colors = ButtonDefaults.buttonColors(backgroundColor = Color.Red)
+            colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFF36D72)),
+            modifier = Modifier.fillMaxWidth()
         ) {
             Row(
             ) {
@@ -197,9 +239,61 @@ class PlaceView : ComponentActivity() {
 
                 Text(text = "Add to favorites", color = Color.White)
             }
-
         }
 
+    }
+
+    @Composable
+    fun categoryView(category: Category){
+        var painter: Painter?=null
+
+        painter = when (category){
+            Category.RESTAURANT -> painterResource(R.drawable.restaurant)
+            Category.BAR -> painterResource(R.drawable.bar)
+            Category.ATTRACTION -> painterResource(R.drawable.attraction)
+            Category.NATURE -> painterResource(R.drawable.nature)
+            Category.NECESSITY -> painterResource(R.drawable.hospital)
+            Category.OTHERS -> painterResource(R.drawable.other)
+            Category.SHOPPING -> painterResource(R.drawable.shopping)
+        }
+
+        var categoryName: String?=null
+        categoryName = when (category){
+            Category.RESTAURANT -> "Restaurant"
+            Category.BAR -> "Bar"
+            Category.ATTRACTION -> "Attraction"
+            Category.NATURE -> "Nature"
+            Category.NECESSITY -> "Necessity"
+            Category.OTHERS -> "Others"
+            Category.SHOPPING -> "Shopping"
+        }
+
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(vertical = 10.dp)
+        ) {
+            Image(
+                painter = painter!!,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.size(32.dp)
+            )
+
+            Box(
+                modifier = Modifier.padding(20.dp)
+            ){
+                Text(text = categoryName, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+            }
+        }
+    }
+
+    @Composable
+    fun reviewsPlace(location: Location){
+
+    }
+
+    @Composable
+    fun discussionsPlace(location: Location){
 
     }
 

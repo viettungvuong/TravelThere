@@ -68,15 +68,21 @@ class MainActivity : ComponentActivity() {
 
         AppController.placeViewModel = PlaceAutocompleteViewModel(applicationContext)
 
-        //phần initialize cho city
+        //phần initialize cho city (initialize location)
         City.getSingleton().setName("Ho Chi Minh City")
         City.getSingleton().setCountry("Vietnam")
         val t1 = TouristPlace("Ben Thanh Market", Position(1f, 1f),"Ho Chi Minh City")
         t1.setDrawableName("benthanh")
+        t1.categories.add(Category.ATTRACTION)
+        t1.categories.add(Category.SHOPPING)
+
         val t2 = TouristPlace("The Cathedral", Position(1f, 1f),"Ho Chi Minh City")
         t2.setDrawableName("nhathoducba")
+        t2.categories.add(Category.ATTRACTION)
+
         City.getSingleton().recommendationsRepository.recommendations.add(t1)
         City.getSingleton().recommendationsRepository.recommendations.add(t2)
+
 
         setContent {
             Home(this)
