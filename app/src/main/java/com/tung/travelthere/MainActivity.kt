@@ -146,7 +146,7 @@ fun Home(context: Context) {
             Box(
                 modifier = Modifier.weight(0.5f)
             ) {
-                CityIntroduction(context, City.getSingleton())
+                CityIntroduction(context, City.getSingleton()) //phần thông tin thành phố hiện tại
             }
 
             Box(
