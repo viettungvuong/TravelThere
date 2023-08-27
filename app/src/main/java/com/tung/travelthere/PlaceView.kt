@@ -99,11 +99,25 @@ class PlaceView : ComponentActivity() {
                             bottom.linkTo(parent.bottom)
                         }
                 ) {
-                    tabLayout(
-                        pagerState = pagerState,
-                        tabTitles = tabTitles,
-                        coroutineScope = coroutineScope
-                    )
+                    Column{
+                        tabLayout(
+                            pagerState = pagerState,
+                            tabTitles = tabTitles,
+                            coroutineScope = coroutineScope
+                        )
+
+                        HorizontalPager(state = pagerState, pageCount = tabTitles.size) { page ->
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(16.dp)
+                            ) {
+                                when (page) {
+                                    0 -> aboutPlace(location)
+                                }
+                            }
+                        }
+                    }
                 }
 
             }
@@ -115,8 +129,8 @@ class PlaceView : ComponentActivity() {
     fun tabLayout(pagerState: PagerState, tabTitles: List<String>, coroutineScope: CoroutineScope) {
         TabRow(
             selectedTabIndex = pagerState.currentPage,
-            backgroundColor = colorBlue,
-            contentColor = Color.White,
+            backgroundColor = Color.White,
+            contentColor = Color.Red,
             modifier = Modifier
                 .padding(vertical = 4.dp, horizontal = 8.dp)
                 .clip(RoundedCornerShape(50))
@@ -140,23 +154,11 @@ class PlaceView : ComponentActivity() {
             }
         }
 
-        HorizontalPager(state = pagerState, pageCount = tabTitles.size) { page ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
-            ) {
-                when (page) {
-                    0 -> aboutPlace(location)
-                }
-            }
 
-        }
     }
 
     @Composable
     fun aboutPlace(location: Location) {
-
         Text(
             text = location.getName(),
             fontWeight = FontWeight.Bold,

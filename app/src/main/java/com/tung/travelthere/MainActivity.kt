@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
@@ -153,33 +154,7 @@ fun Home(context: Context) {
                 modifier = Modifier.weight(1.5f)
             ) {
                 Column {
-                    TabRow(
-                        selectedTabIndex = pagerState.currentPage,
-                        backgroundColor = colorBlue,
-                        contentColor = Color.White,
-                        modifier = Modifier
-                            .padding(vertical = 4.dp, horizontal = 8.dp)
-                            .clip(RoundedCornerShape(50))
-                            .shadow(AppBarDefaults.TopAppBarElevation)
-                            .zIndex(10f),
-                    ) {
-                        tabTitles.forEachIndexed { index, title ->
-                            Tab(
-                                selected = (pagerState.currentPage == index), //current index có phải là index
-                                onClick = {
-                                    run {
-                                        coroutineScope.launch {
-                                            pagerState.animateScrollToPage(
-                                                index
-                                            )
-                                        }
-                                    }
-                                },
-                                text = { Text(text = title) }
-                            )
-                        }
-                    }
-
+                    tabLayout(pagerState = pagerState, tabTitles = tabTitles, coroutineScope = coroutineScope)
 
                     HorizontalPager(state = pagerState, pageCount = tabTitles.size) { page ->
 
@@ -192,6 +167,37 @@ fun Home(context: Context) {
             }
         }
 
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun tabLayout(pagerState: PagerState, tabTitles: List<String>, coroutineScope: CoroutineScope){
+    TabRow(
+        selectedTabIndex = pagerState.currentPage,
+        backgroundColor = colorBlue,
+        contentColor = Color.White,
+        modifier = Modifier
+            .padding(vertical = 4.dp, horizontal = 8.dp)
+            .clip(RoundedCornerShape(50))
+            .shadow(AppBarDefaults.TopAppBarElevation)
+            .zIndex(10f),
+    ) {
+        tabTitles.forEachIndexed { index, title ->
+            Tab(
+                selected = (pagerState.currentPage == index), //current index có phải là index
+                onClick = {
+                    run {
+                        coroutineScope.launch {
+                            pagerState.animateScrollToPage(
+                                index
+                            )
+                        }
+                    }
+                },
+                text = { Text(text = title) }
+            )
+        }
     }
 }
 
