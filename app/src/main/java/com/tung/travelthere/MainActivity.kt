@@ -72,18 +72,20 @@ class MainActivity : ComponentActivity() {
         //phần initialize cho city (initialize location)
         City.getSingleton().setName("Ho Chi Minh City")
         City.getSingleton().setCountry("Vietnam")
-        val t1 = TouristPlace("Ben Thanh Market", Position(1f, 1f),"Ho Chi Minh City")
+        val t1 = TouristPlace("Ben Thanh Market", Position(1f, 1f), "Ho Chi Minh City")
         t1.setDrawableName("benthanh")
         t1.categories.add(Category.ATTRACTION)
         t1.categories.add(Category.SHOPPING)
-        t1.reviews.add(Review("viettung","Good place", Date(), 10))
+        t1.reviews.add(Review("viettung", "Good place", Date(), 10))
 
-        val t2 = TouristPlace("The Cathedral", Position(1f, 1f),"Ho Chi Minh City")
+        val t2 = TouristPlace("The Cathedral", Position(1f, 1f), "Ho Chi Minh City")
         t2.setDrawableName("nhathoducba")
         t2.categories.add(Category.ATTRACTION)
 
         City.getSingleton().recommendationsRepository.recommendations.add(t1)
         City.getSingleton().recommendationsRepository.recommendations.add(t2)
+
+        AppController.favoriteList.add(t2)
 
 
         setContent {
@@ -111,7 +113,10 @@ fun Home(context: Context) {
                     )
                 }
                 Spacer(modifier = Modifier.width(10.dp))
-                IconButton(onClick = { /* Handle click action */ }) {
+                IconButton(onClick = {
+                    val intent = Intent(context, FavoritePage::class.java)
+                    context.startActivity(intent)
+                }) {
                     Icon(
                         imageVector = Icons.Default.Favorite,
                         tint = Color.White,
@@ -162,7 +167,11 @@ fun Home(context: Context) {
                 modifier = Modifier.weight(1.5f)
             ) {
                 Column {
-                    tabLayout(pagerState = pagerState, tabTitles = tabTitles, coroutineScope = coroutineScope)
+                    tabLayout(
+                        pagerState = pagerState,
+                        tabTitles = tabTitles,
+                        coroutineScope = coroutineScope
+                    )
 
                     HorizontalPager(state = pagerState, pageCount = tabTitles.size) { page ->
 
@@ -180,7 +189,7 @@ fun Home(context: Context) {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun tabLayout(pagerState: PagerState, tabTitles: List<String>, coroutineScope: CoroutineScope){
+fun tabLayout(pagerState: PagerState, tabTitles: List<String>, coroutineScope: CoroutineScope) {
     TabRow(
         selectedTabIndex = pagerState.currentPage,
         backgroundColor = colorBlue,
@@ -210,7 +219,6 @@ fun tabLayout(pagerState: PagerState, tabTitles: List<String>, coroutineScope: C
 }
 
 
-
 @Composable
 fun CityIntroduction(context: Context, city: City) {
     //phần cho city
@@ -232,7 +240,7 @@ fun CityIntroduction(context: Context, city: City) {
         bitmap = if (imageUrl == null) {
             null
         } else {
-            withContext(Dispatchers.IO){
+            withContext(Dispatchers.IO) {
                 BitmapFactory.decodeStream(URL(imageUrl).openConnection().getInputStream())
             }
         }
@@ -246,7 +254,7 @@ fun CityIntroduction(context: Context, city: City) {
         modifier = Modifier
             .fillMaxSize()
     ) {
-        ImageFromUrl(url = imageUrl?:"", contentDescription = null)
+        ImageFromUrl(url = imageUrl ?: "", contentDescription = null)
     }
     Column(
         modifier = Modifier
@@ -279,7 +287,6 @@ fun CityIntroduction(context: Context, city: City) {
 }
 
 
-
 //trang local recommended
 @Composable
 fun LocalRecommended(context: Context, city: City) {
@@ -305,45 +312,6 @@ fun LocalRecommended(context: Context, city: City) {
 
 }
 
-//xem trước địa điểm
-@Composable
-fun SneakViewPlace(context: Context, location: Location) {
-    Card(
-        modifier = Modifier
-            .padding(
-                horizontal = 20.dp,
-                vertical = 20.dp
-            )
-            .clickable(onClick =
-            {
-                val intent = Intent(context, PlaceView::class.java)
-                intent.putExtra("location", location)
-                context.startActivity(intent)
-            }),
-        elevation = 10.dp
-    ) {
-        Column {
-            val id = location.getDrawableName(context)
-
-            if (id != null) {
-                Image(
-                    painter = painterResource(id = id!!),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(150.dp)
-                        .border(BorderStroke(1.dp, Color.Black))
-                )
-            }
-
-
-            Text(
-                text = location.getName()
-            )
-
-        }
-    }
-}
 
 @Composable
 fun NearbyPlaces(userPos: Position, city: City) { //đề xuất địa điểm gần với nơi đang đứng

@@ -15,14 +15,16 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.tung.travelthere.controller.AppController
+import com.tung.travelthere.controller.SneakViewPlaceLong
 import com.tung.travelthere.controller.categoryView
 import com.tung.travelthere.controller.colorBlue
 import com.tung.travelthere.objects.Category
 import com.tung.travelthere.ui.theme.TravelThereTheme
-
+//sẽ có thêm filter theo tên thành phố, theo loại category
 class FavoritePage : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,7 +55,7 @@ fun FavoriteList(name: String) {
 
         LazyColumn(state = lazyListState, modifier = Modifier.padding(15.dp)){
             itemsIndexed(AppController.favoriteList) { index, location -> //tương tự xuất ra location adapter
-                //sneak view location
+                SneakViewPlaceLong(context = LocalContext.current, location = location)
             }
         }
     }
