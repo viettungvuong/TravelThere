@@ -1,9 +1,12 @@
 package com.tung.travelthere
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.location.Location
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -47,6 +50,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.palette.graphics.Palette
 import androidx.viewpager.widget.ViewPager
@@ -55,6 +60,8 @@ import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter.State.Empty.painter
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.google.android.libraries.places.api.Places
 import com.tung.travelthere.controller.*
 import com.tung.travelthere.objects.*
@@ -66,8 +73,26 @@ import kotlin.collections.ArrayList
 
 
 class MainActivity : ComponentActivity() {
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        //lấy địa điểm hiện tại
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            fusedLocationClient.lastLocation
+                .addOnSuccessListener { location : Location? ->
+                    AppController.currentPosition = getCurrentPosition(location)
+                }
+        }
+
 
         Places.initialize(applicationContext, "AIzaSyC6qQqaqfHQMN2FXMX301c6LQ2rfjKPg2E")
 
@@ -294,7 +319,7 @@ fun CityIntroduction(context: Context, city: City) {
 //trang local recommended
 @Composable
 fun LocalRecommended(context: Context, city: City) {
-    var listState by remember { mutableStateOf(ArrayList<Location>()) }
+    var listState by remember { mutableStateOf(ArrayList<Place>()) }
 
     listState.clear()
     listState.addAll(city.recommendationsRepository.recommendations)

@@ -17,7 +17,8 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.tung.travelthere.PlaceAutocompleteViewModel
 import com.tung.travelthere.objects.City
-import com.tung.travelthere.objects.Location
+import com.tung.travelthere.objects.Place
+import com.tung.travelthere.objects.Position
 import com.tung.travelthere.objects.User
 import java.text.SimpleDateFormat
 import java.time.format.DateTimeFormatter
@@ -37,9 +38,11 @@ class AppController {
 
         val currentUser = User() //user hiện tại
 
-        val favoriteList = ArrayList<Location>()
+        val favoriteList = ArrayList<Place>() //favorite
 
-        lateinit var placeViewModel: PlaceAutocompleteViewModel
+        lateinit var placeViewModel: PlaceAutocompleteViewModel //view model cho place
+
+        lateinit var currentPosition: Position
 
 
     }

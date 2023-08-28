@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.sp
 import com.tung.travelthere.PlaceView
 import com.tung.travelthere.R
 import com.tung.travelthere.objects.Category
-import com.tung.travelthere.objects.Location
+import com.tung.travelthere.objects.Place
 
 //phần hiện ra danh sách các categories
 @Composable
@@ -78,7 +78,7 @@ fun categoryView(category: Category, color: Color, clickable: Boolean) {
 
 //xem trước địa điểm
 @Composable
-fun SneakViewPlace(context: Context, location: Location) {
+fun SneakViewPlace(context: Context, location: Place) {
     Card(
         modifier = Modifier
             .padding(
@@ -119,7 +119,7 @@ fun SneakViewPlace(context: Context, location: Location) {
 }
 
 @Composable
-fun SneakViewPlaceLong(context: Context, location: Location) {
+fun SneakViewPlaceLong(context: Context, location: Place) {
     Card(
         modifier = Modifier
             .padding(

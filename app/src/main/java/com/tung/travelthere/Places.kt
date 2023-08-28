@@ -13,7 +13,7 @@ import com.google.android.libraries.places.api.model.PlaceTypes
 import com.google.android.libraries.places.api.net.FetchPlaceRequest
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse
-import com.tung.travelthere.objects.Location
+import com.tung.travelthere.objects.Place
 import com.tung.travelthere.objects.Position
 import java.util.*
 

@@ -1,6 +1,7 @@
 package com.tung.travelthere.controller
 
 import android.graphics.Bitmap
+import android.location.Location
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,6 +23,7 @@ import androidx.palette.graphics.Palette
 import com.tung.travelthere.R
 import com.tung.travelthere.objects.Category
 import com.tung.travelthere.objects.City
+import com.tung.travelthere.objects.Position
 
 fun getDrawableNameFromName(resourceName: String): Int {
     try {
@@ -38,4 +40,13 @@ fun colorFromImage(bitmap: Bitmap): Color {
         Color(it.rgb)
     } ?: Color.Transparent
     return colorExtracted
+}
+
+fun getCurrentPosition(location: Location?): Position {
+    return if (location==null){
+        Position(0f,0f)
+    }
+    else{
+        Position(location.latitude.toFloat(),location.longitude.toFloat())
+    }
 }
