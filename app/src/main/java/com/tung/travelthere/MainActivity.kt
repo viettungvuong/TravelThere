@@ -11,6 +11,10 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
@@ -303,11 +307,16 @@ fun LocalRecommended(context: Context, city: City) {
         }
 
 
-        LazyRow {
-            itemsIndexed(listState) { index, location -> //tương tự xuất ra location adapter
-                SneakViewPlace(context, location)
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            modifier = Modifier.fillMaxSize(),
+            content = {
+                items(listState) { location ->
+                    SneakViewPlace(context, location)
+                }
             }
-        }
+        )
+
     }
 
 }

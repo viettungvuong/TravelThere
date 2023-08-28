@@ -31,10 +31,10 @@ import com.tung.travelthere.objects.Location
 
 //phần hiện ra danh sách các categories
 @Composable
-fun categoryView(category: Category, color: Color, clickable: Boolean){
-    var painter: Painter?=null
+fun categoryView(category: Category, color: Color, clickable: Boolean) {
+    var painter: Painter? = null
 
-    painter = when (category){
+    painter = when (category) {
         Category.RESTAURANT -> painterResource(R.drawable.restaurant)
         Category.BAR -> painterResource(R.drawable.bar)
         Category.ATTRACTION -> painterResource(R.drawable.attraction)
@@ -45,8 +45,8 @@ fun categoryView(category: Category, color: Color, clickable: Boolean){
     }
 
 
-    var categoryName: String?=null
-    categoryName = when (category){
+    var categoryName: String? = null
+    categoryName = when (category) {
         Category.RESTAURANT -> "Restaurant"
         Category.BAR -> "Bar"
         Category.ATTRACTION -> "Attraction"
@@ -70,7 +70,7 @@ fun categoryView(category: Category, color: Color, clickable: Boolean){
 
         Box(
             modifier = Modifier.padding(20.dp)
-        ){
+        ) {
             Text(text = categoryName, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
         }
     }
@@ -82,7 +82,7 @@ fun SneakViewPlace(context: Context, location: Location) {
     Card(
         modifier = Modifier
             .padding(
-                horizontal = 20.dp,
+                horizontal = 40.dp,
                 vertical = 20.dp
             )
             .clickable(onClick =
@@ -93,7 +93,9 @@ fun SneakViewPlace(context: Context, location: Location) {
             }),
         elevation = 10.dp
     ) {
-        Column {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
             val id = location.getDrawableName(context)
 
             if (id != null) {
@@ -117,7 +119,7 @@ fun SneakViewPlace(context: Context, location: Location) {
 }
 
 @Composable
-fun SneakViewPlaceLong(context: Context, location: Location){
+fun SneakViewPlaceLong(context: Context, location: Location) {
     Card(
         modifier = Modifier
             .padding(
@@ -147,7 +149,9 @@ fun SneakViewPlaceLong(context: Context, location: Location){
             }
 
 
-            Column(modifier = Modifier.fillMaxWidth().padding(10.dp)){
+            Column(modifier = Modifier
+                .fillMaxWidth()
+                .padding(10.dp)) {
                 Text(
                     text = location.getName(),
                     fontSize = 20.sp,
