@@ -3,13 +3,24 @@ package com.tung.travelthere
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.tung.travelthere.controller.AppController
+import com.tung.travelthere.controller.categoryView
+import com.tung.travelthere.controller.colorBlue
+import com.tung.travelthere.objects.Category
 import com.tung.travelthere.ui.theme.TravelThereTheme
 
 class FavoritePage : ComponentActivity() {
@@ -31,7 +42,22 @@ class FavoritePage : ComponentActivity() {
 
 @Composable
 fun FavoriteList(name: String) {
-    Text(text = "Hello $name!")
+    val lazyListState = rememberLazyListState()
+
+    Column {
+        LazyRow(modifier = Modifier.padding(15.dp)) {
+            itemsIndexed(Category.values()) { index, category -> //tương tự xuất ra location adapter
+                categoryView(category, colorBlue, true)
+            }
+        }
+
+        LazyColumn(state = lazyListState, modifier = Modifier.padding(15.dp)){
+            itemsIndexed(AppController.favoriteList) { index, location -> //tương tự xuất ra location adapter
+                //sneak view location
+            }
+        }
+    }
+
 }
 
 @Preview(showBackground = true)

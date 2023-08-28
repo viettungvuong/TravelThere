@@ -62,7 +62,7 @@ class City private constructor() {
 
         var res: String? = null
 
-        val query = AppController.db.collection(collectionCities).whereEqualTo(cityNameField, name)
+        val query = Firebase.firestore.collection(collectionCities).whereEqualTo(cityNameField, name)
             .whereEqualTo("country", country).limit(1).get().await()
         val document = query.documents.firstOrNull()
         if (document != null) {
@@ -85,7 +85,7 @@ class City private constructor() {
         suspend fun refreshRecommendations() {
 //            withContext(Dispatchers.IO) {
 //                val query =
-//                    AppController.db.collection(collectionCities).whereEqualTo(cityNameField, name)
+//                    Firebase.firestore.collection(collectionCities).whereEqualTo(cityNameField, name)
 //                        .whereEqualTo("country", country)
 //                        .limit(1).get().await()
 //
@@ -106,10 +106,10 @@ class City private constructor() {
 
         suspend fun suggestPlace(location: Location) {
             val cityDocRef =
-                AppController.db.collection(collectionCities)
+                Firebase.firestore.collection(collectionCities)
                     .document(location.cityName)
 
-            AppController.db.runTransaction { transaction ->
+            Firebase.firestore.runTransaction { transaction ->
                 val cityDocument = transaction.get(cityDocRef)
                 val locationCollectionRef = cityDocRef.collection(collectionLocations)
 

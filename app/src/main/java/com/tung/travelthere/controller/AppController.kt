@@ -17,6 +17,7 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.tung.travelthere.PlaceAutocompleteViewModel
 import com.tung.travelthere.objects.City
+import com.tung.travelthere.objects.Location
 import com.tung.travelthere.objects.User
 import java.text.SimpleDateFormat
 import java.time.format.DateTimeFormatter
@@ -33,9 +34,10 @@ val formatter = SimpleDateFormat("HH:mm:ss dd/MM/yyyy")
 class AppController {
     companion object{
         @JvmStatic
-        val db = Firebase.firestore
 
-        val currentUser = User()
+        val currentUser = User() //user hiện tại
+
+        val favoriteList = ArrayList<Location>()
 
         lateinit var placeViewModel: PlaceAutocompleteViewModel
 
