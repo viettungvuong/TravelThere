@@ -4,6 +4,10 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <meta-data
+        android:name="com.google.android.geo.API_KEY"
+        android:value="AIzaSyD5jFBmMOSm3-_Vgbkx2HsWFeIotYshOq0" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -13,6 +17,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.TravelThere"
         tools:targetApi="31">
+        <activity
+            android:name=".FavoritePage"
+            android:exported="false"
+            android:label="@string/title_activity_favorite_page"
+            android:theme="@style/Theme.TravelThere" />
         <activity
             android:name=".SuggestPlace"
             android:exported="false" />
@@ -29,10 +38,5 @@
         </activity>
         <activity android:name=".PlaceView" />
     </application>
-
-    <meta-data
-        android:name="com.google.android.geo.API_KEY"
-        android:value="AIzaSyD5jFBmMOSm3-_Vgbkx2HsWFeIotYshOq0"/>
-
 
 </manifest>
