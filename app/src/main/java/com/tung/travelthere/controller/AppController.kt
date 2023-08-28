@@ -38,6 +38,8 @@ class AppController {
         val currentUser = User()
 
         lateinit var placeViewModel: PlaceAutocompleteViewModel
+
+
     }
 }
 

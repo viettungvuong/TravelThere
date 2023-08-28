@@ -291,6 +291,7 @@ class PlaceView : ComponentActivity() {
         }
     }
 
+    //phần xem những đánh giá về địa điểm
     @Composable
     fun reviewsPlace(location: Location){
         Box(modifier = Modifier.fillMaxSize()){

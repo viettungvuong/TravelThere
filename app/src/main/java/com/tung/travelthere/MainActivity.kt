@@ -30,6 +30,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -210,6 +212,53 @@ fun tabLayout(pagerState: PagerState, tabTitles: List<String>, coroutineScope: C
     }
 }
 
+//phần hiện ra danh sách các categories
+@Composable
+fun categoryView(category: Category){
+    var painter: Painter?=null
+
+    painter = when (category){
+        Category.RESTAURANT -> painterResource(R.drawable.restaurant)
+        Category.BAR -> painterResource(R.drawable.bar)
+        Category.ATTRACTION -> painterResource(R.drawable.attraction)
+        Category.NATURE -> painterResource(R.drawable.nature)
+        Category.NECESSITY -> painterResource(R.drawable.hospital)
+        Category.OTHERS -> painterResource(R.drawable.other)
+        Category.SHOPPING -> painterResource(R.drawable.shopping)
+    }
+
+
+    var categoryName: String?=null
+    categoryName = when (category){
+        Category.RESTAURANT -> "Restaurant"
+        Category.BAR -> "Bar"
+        Category.ATTRACTION -> "Attraction"
+        Category.NATURE -> "Nature"
+        Category.NECESSITY -> "Necessity"
+        Category.OTHERS -> "Others"
+        Category.SHOPPING -> "Shopping"
+    }
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.padding(vertical = 10.dp)
+    ) {
+        Image(
+            painter = painter!!,
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.size(32.dp),
+            colorFilter = ColorFilter.tint(color = colorBlue)
+        )
+
+        Box(
+            modifier = Modifier.padding(20.dp)
+        ){
+            Text(text = categoryName, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+        }
+    }
+}
+
 
 @Composable
 fun CityIntroduction(context: Context, city: City) {
@@ -284,37 +333,8 @@ fun CityIntroduction(context: Context, city: City) {
 }
 
 
-@Composable
-fun DetailCity(context: Context, city: City) {
-    Box(modifier = Modifier.fillMaxSize()) {
-        Column {
-            Box(
-                modifier = Modifier
-                    .padding(
-                        horizontal = 20.dp,
-                        vertical = 5.dp
-                    ),
-            ) {
-                Text("Locals recommended", fontWeight = FontWeight.Bold)
-            }
 
-            LocalRecommended(context, city = city)
-
-            Box(
-                modifier = Modifier
-                    .padding(
-                        horizontal = 20.dp,
-                        vertical = 5.dp
-                    ),
-            ) {
-                Text("Places near you", fontWeight = FontWeight.Bold)
-            }
-
-            //NearbyPlaces(userPos = , city = city) //cho phần đề xuất điểm đến gần đây
-        }
-    }
-}
-
+//trang local recommended
 @Composable
 fun LocalRecommended(context: Context, city: City) {
     var listState by remember { mutableStateOf(ArrayList<Location>()) }
@@ -322,15 +342,24 @@ fun LocalRecommended(context: Context, city: City) {
     listState.clear()
     listState.addAll(city.recommendationsRepository.recommendations)
 
+    Column() {
+        LazyRow(modifier = Modifier.padding(15.dp)) {
+            itemsIndexed(Category.values()) { index, category -> //tương tự xuất ra location adapter
+                categoryView(category = category)
+            }
+        }
 
-    LazyRow {
-        itemsIndexed(listState) { index, location -> //tương tự xuất ra location adapter
-            SneakViewPlace(context, location)
+
+        LazyRow {
+            itemsIndexed(listState) { index, location -> //tương tự xuất ra location adapter
+                SneakViewPlace(context, location)
+            }
         }
     }
+
 }
 
-
+//xem trước địa điểm
 @Composable
 fun SneakViewPlace(context: Context, location: Location) {
     Card(
