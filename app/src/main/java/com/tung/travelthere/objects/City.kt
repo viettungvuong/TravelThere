@@ -81,7 +81,7 @@ class City private constructor() {
     inner class RecommendationsRepository : ViewModel() {
 
         //những nơi nên đi tới
-        var recommendations = ArrayList<Place>()
+        var recommendations = ArrayList<PlaceLocation>()
 
         suspend fun refreshRecommendations() {
 //            withContext(Dispatchers.IO) {
@@ -105,7 +105,7 @@ class City private constructor() {
 //            }
         }
 
-        suspend fun suggestPlace(location: Place) {
+        suspend fun suggestPlace(location: PlaceLocation) {
             val cityDocRef =
                 Firebase.firestore.collection(collectionCities)
                     .document(location.cityName)

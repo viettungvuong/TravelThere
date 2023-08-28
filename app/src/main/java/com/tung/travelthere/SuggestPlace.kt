@@ -41,14 +41,14 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import com.tung.travelthere.controller.colorBlue
-import com.tung.travelthere.objects.Place
+import com.tung.travelthere.objects.PlaceLocation
 import com.tung.travelthere.objects.PlaceOfInterest
 import com.tung.travelthere.objects.RecommendedPlace
 import java.io.File
 
 class SuggestPlace : ComponentActivity() {
 
-    lateinit var currentLocation: Place //location hiện tại (location người dùng muốn suggest)
+    lateinit var currentLocation: PlaceLocation //location hiện tại (location người dùng muốn suggest)
 
     inner class ImageViewModel {
         var currentChosenImage by mutableStateOf<String>("")

@@ -319,7 +319,7 @@ fun CityIntroduction(context: Context, city: City) {
 //trang local recommended
 @Composable
 fun LocalRecommended(context: Context, city: City) {
-    var listState by remember { mutableStateOf(ArrayList<Place>()) }
+    var listState by remember { mutableStateOf(ArrayList<PlaceLocation>()) }
 
     listState.clear()
     listState.addAll(city.recommendationsRepository.recommendations)

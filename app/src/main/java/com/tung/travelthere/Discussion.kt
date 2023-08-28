@@ -8,9 +8,9 @@ import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.tung.travelthere.controller.*
-import com.tung.travelthere.objects.Place
+import com.tung.travelthere.objects.PlaceLocation
 
-class Discussion(val name: String, private val location: Place) : ViewModel() {
+class Discussion(val name: String, private val location: PlaceLocation) : ViewModel() {
     lateinit var id: String
 
     inner class DiscussionContent(private val sender: String, private val content: String) {

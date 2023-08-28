@@ -23,8 +23,8 @@ enum class Category{
 }
 
 
-//không cho phép tạo object từ class Place
-open class Place protected constructor(private val name: String, private val pos: Position, val cityName: String): java.io.Serializable{
+//không cho phép tạo object từ class PlaceLocation
+open class PlaceLocation protected constructor(private val name: String, private val pos: Position, val cityName: String): java.io.Serializable{
 
     private var drawableName: String?=null
     var categories: MutableSet<Category> = mutableSetOf() //các category của địa điểm này
@@ -56,7 +56,7 @@ open class Place protected constructor(private val name: String, private val pos
     }
 }
 
-class Restaurant(name: String, pos: Position, cityName: String, private val specializeIn: Dish): Place(name,pos,cityName){
+class Restaurant(name: String, pos: Position, cityName: String, private val specializeIn: Dish): PlaceLocation(name,pos,cityName){
     init {
         this.categories.add(Category.RESTAURANT)
     }
@@ -90,16 +90,16 @@ class Restaurant(name: String, pos: Position, cityName: String, private val spec
 
 }
 
-class PlaceOfInterest(name: String, pos: Position, cityName: String): Place(name,pos,cityName){
+class PlaceOfInterest(name: String, pos: Position, cityName: String): PlaceLocation(name,pos,cityName){
     init {
         this.categories.add(Category.ATTRACTION)
     }
 }
 
-class TouristPlace(name: String, pos: Position, cityName: String): Place(name,pos,cityName){
+class TouristPlace(name: String, pos: Position, cityName: String): PlaceLocation(name,pos,cityName){
     init {
         this.categories.add(Category.ATTRACTION)
     }
 }
 
-class RecommendedPlace(name: String, pos: Position, cityName: String): Place(name,pos,cityName)
+class RecommendedPlace(name: String, pos: Position, cityName: String): PlaceLocation(name,pos,cityName)

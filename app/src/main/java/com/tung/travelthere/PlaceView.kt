@@ -49,17 +49,17 @@ import com.tung.travelthere.controller.colorBlue
 import com.tung.travelthere.controller.formatter
 import com.tung.travelthere.objects.Category
 import com.tung.travelthere.objects.City
-import com.tung.travelthere.objects.Place
+import com.tung.travelthere.objects.PlaceLocation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 class PlaceView : ComponentActivity() {
-    lateinit var location: Place
+    lateinit var location: PlaceLocation
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        location = intent.getSerializableExtra("location") as Place
+        location = intent.getSerializableExtra("location") as PlaceLocation
 
         setContent {
             viewPlace(location = location)
@@ -68,7 +68,7 @@ class PlaceView : ComponentActivity() {
 
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
-    fun viewPlace(location: Place) {
+    fun viewPlace(location: PlaceLocation) {
         val id = location.getDrawableName(this)
 
         val tabTitles = listOf("About", "Reviews", "Discussions")
@@ -190,7 +190,7 @@ class PlaceView : ComponentActivity() {
     }
 
     @Composable
-    fun aboutPlace(location: Place) {
+    fun aboutPlace(location: PlaceLocation) {
         Text(
             text = location.getName(),
             fontWeight = FontWeight.Bold,
@@ -253,7 +253,7 @@ class PlaceView : ComponentActivity() {
 
     //phần xem những đánh giá về địa điểm
     @Composable
-    fun reviewsPlace(location: Place){
+    fun reviewsPlace(location: PlaceLocation){
         Box(modifier = Modifier.fillMaxSize()){
             LazyColumn(){
                 itemsIndexed(location.reviews.toTypedArray()){
@@ -308,7 +308,7 @@ class PlaceView : ComponentActivity() {
     }
 
     @Composable
-    fun discussionsPlace(location: Place){
+    fun discussionsPlace(location: PlaceLocation){
 
     }
 
