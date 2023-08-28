@@ -46,7 +46,6 @@ import androidx.constraintlayout.compose.Dimension
 import coil.compose.AsyncImage
 import com.tung.travelthere.controller.categoryView
 import com.tung.travelthere.controller.colorBlue
-import com.tung.travelthere.controller.colorFromImage
 import com.tung.travelthere.controller.formatter
 import com.tung.travelthere.objects.Category
 import com.tung.travelthere.objects.City
@@ -56,7 +55,6 @@ import kotlinx.coroutines.launch
 
 class PlaceView : ComponentActivity() {
     lateinit var location: Location
-    var mainColor=Color.Gray //màu chủ đạo (được lấy từ ảnh)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,9 +70,6 @@ class PlaceView : ComponentActivity() {
     @Composable
     fun viewPlace(location: Location) {
         val id = location.getDrawableName(this)
-        val bitmap = BitmapFactory.decodeResource(resources, id!!)
-
-        mainColor = colorFromImage(bitmap)
 
         val tabTitles = listOf("About", "Reviews", "Discussions")
         val pagerState = rememberPagerState(initialPage = 0)
@@ -167,7 +162,7 @@ class PlaceView : ComponentActivity() {
         TabRow(
             selectedTabIndex = pagerState.currentPage,
             backgroundColor = Color.White,
-            contentColor = mainColor!!,
+            contentColor = Color.Red,
             modifier = Modifier
                 .padding(vertical = 4.dp, horizontal = 8.dp)
                 .clip(RoundedCornerShape(50))
@@ -230,16 +225,14 @@ class PlaceView : ComponentActivity() {
 
             LazyRow {
                 itemsIndexed(location.categories.toTypedArray()) { index, category -> //tương tự xuất ra location adapter
-                    categoryView(category = category, mainColor)
+                    categoryView(category = category, Color.Red)
                 }
             }
         }
 
         Button(
             onClick = { /*TODO*/ },
-            colors = ButtonDefaults.buttonColors(
-                backgroundColor = mainColor,
-            ),
+            colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFF36D72)),
             modifier = Modifier.fillMaxWidth()
         ) {
             Row(
