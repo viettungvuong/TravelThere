@@ -225,13 +225,13 @@ class PlaceView : ComponentActivity() {
 
             LazyRow {
                 itemsIndexed(location.categories.toTypedArray()) { index, category -> //tương tự xuất ra location adapter
-                    categoryView(category = category, Color.Red)
+                    categoryView(category, Color.Red, false)
                 }
             }
         }
 
         Button(
-            onClick = { /*TODO*/ },
+            onClick = { /*TODO*/ }, //thêm địa điểm vào favorite
             colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFF36D72)),
             modifier = Modifier.fillMaxWidth()
         ) {

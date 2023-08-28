@@ -22,7 +22,7 @@ import com.tung.travelthere.objects.Category
 
 //phần hiện ra danh sách các categories
 @Composable
-fun categoryView(category: Category, color: Color){
+fun categoryView(category: Category, color: Color, clickable: Boolean){
     var painter: Painter?=null
 
     painter = when (category){

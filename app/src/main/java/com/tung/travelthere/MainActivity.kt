@@ -291,7 +291,7 @@ fun LocalRecommended(context: Context, city: City) {
     Column() {
         LazyRow(modifier = Modifier.padding(15.dp)) {
             itemsIndexed(Category.values()) { index, category -> //tương tự xuất ra location adapter
-                categoryView(category = category, colorBlue)
+                categoryView(category, colorBlue, true)
             }
         }
 
