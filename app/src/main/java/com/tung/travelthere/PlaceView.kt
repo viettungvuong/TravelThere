@@ -2,6 +2,7 @@ package com.tung.travelthere
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -23,6 +24,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,7 +44,9 @@ import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import coil.compose.AsyncImage
+import com.tung.travelthere.controller.categoryView
 import com.tung.travelthere.controller.colorBlue
+import com.tung.travelthere.controller.colorFromImage
 import com.tung.travelthere.controller.formatter
 import com.tung.travelthere.objects.Category
 import com.tung.travelthere.objects.City
@@ -52,6 +56,8 @@ import kotlinx.coroutines.launch
 
 class PlaceView : ComponentActivity() {
     lateinit var location: Location
+    var mainColor=Color.Gray //màu chủ đạo (được lấy từ ảnh)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -66,6 +72,9 @@ class PlaceView : ComponentActivity() {
     @Composable
     fun viewPlace(location: Location) {
         val id = location.getDrawableName(this)
+        val bitmap = BitmapFactory.decodeResource(resources, id!!)
+
+        mainColor = colorFromImage(bitmap)
 
         val tabTitles = listOf("About", "Reviews", "Discussions")
         val pagerState = rememberPagerState(initialPage = 0)
@@ -158,7 +167,7 @@ class PlaceView : ComponentActivity() {
         TabRow(
             selectedTabIndex = pagerState.currentPage,
             backgroundColor = Color.White,
-            contentColor = Color.Red,
+            contentColor = mainColor!!,
             modifier = Modifier
                 .padding(vertical = 4.dp, horizontal = 8.dp)
                 .clip(RoundedCornerShape(50))
@@ -221,14 +230,16 @@ class PlaceView : ComponentActivity() {
 
             LazyRow {
                 itemsIndexed(location.categories.toTypedArray()) { index, category -> //tương tự xuất ra location adapter
-                    categoryView(category = category)
+                    categoryView(category = category, mainColor)
                 }
             }
         }
 
         Button(
             onClick = { /*TODO*/ },
-            colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFF36D72)),
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = mainColor,
+            ),
             modifier = Modifier.fillMaxWidth()
         ) {
             Row(
@@ -245,50 +256,6 @@ class PlaceView : ComponentActivity() {
             }
         }
 
-    }
-
-    @Composable
-    fun categoryView(category: Category){
-        var painter: Painter?=null
-
-        painter = when (category){
-            Category.RESTAURANT -> painterResource(R.drawable.restaurant)
-            Category.BAR -> painterResource(R.drawable.bar)
-            Category.ATTRACTION -> painterResource(R.drawable.attraction)
-            Category.NATURE -> painterResource(R.drawable.nature)
-            Category.NECESSITY -> painterResource(R.drawable.hospital)
-            Category.OTHERS -> painterResource(R.drawable.other)
-            Category.SHOPPING -> painterResource(R.drawable.shopping)
-        }
-
-        var categoryName: String?=null
-        categoryName = when (category){
-            Category.RESTAURANT -> "Restaurant"
-            Category.BAR -> "Bar"
-            Category.ATTRACTION -> "Attraction"
-            Category.NATURE -> "Nature"
-            Category.NECESSITY -> "Necessity"
-            Category.OTHERS -> "Others"
-            Category.SHOPPING -> "Shopping"
-        }
-
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(vertical = 10.dp)
-        ) {
-            Image(
-                painter = painter!!,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.size(32.dp)
-            )
-
-            Box(
-                modifier = Modifier.padding(20.dp)
-            ){
-                Text(text = categoryName, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
-            }
-        }
     }
 
     //phần xem những đánh giá về địa điểm

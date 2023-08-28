@@ -52,10 +52,7 @@ import coil.compose.AsyncImagePainter.State.Empty.painter
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.google.android.libraries.places.api.Places
-import com.tung.travelthere.controller.AppController
-import com.tung.travelthere.controller.ImageFromUrl
-import com.tung.travelthere.controller.colorBlue
-import com.tung.travelthere.controller.getDrawableNameFromName
+import com.tung.travelthere.controller.*
 import com.tung.travelthere.objects.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
@@ -212,52 +209,6 @@ fun tabLayout(pagerState: PagerState, tabTitles: List<String>, coroutineScope: C
     }
 }
 
-//phần hiện ra danh sách các categories
-@Composable
-fun categoryView(category: Category){
-    var painter: Painter?=null
-
-    painter = when (category){
-        Category.RESTAURANT -> painterResource(R.drawable.restaurant)
-        Category.BAR -> painterResource(R.drawable.bar)
-        Category.ATTRACTION -> painterResource(R.drawable.attraction)
-        Category.NATURE -> painterResource(R.drawable.nature)
-        Category.NECESSITY -> painterResource(R.drawable.hospital)
-        Category.OTHERS -> painterResource(R.drawable.other)
-        Category.SHOPPING -> painterResource(R.drawable.shopping)
-    }
-
-
-    var categoryName: String?=null
-    categoryName = when (category){
-        Category.RESTAURANT -> "Restaurant"
-        Category.BAR -> "Bar"
-        Category.ATTRACTION -> "Attraction"
-        Category.NATURE -> "Nature"
-        Category.NECESSITY -> "Necessity"
-        Category.OTHERS -> "Others"
-        Category.SHOPPING -> "Shopping"
-    }
-
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(vertical = 10.dp)
-    ) {
-        Image(
-            painter = painter!!,
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.size(32.dp),
-            colorFilter = ColorFilter.tint(color = colorBlue)
-        )
-
-        Box(
-            modifier = Modifier.padding(20.dp)
-        ){
-            Text(text = categoryName, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
-        }
-    }
-}
 
 
 @Composable
@@ -286,13 +237,8 @@ fun CityIntroduction(context: Context, city: City) {
             }
         }
 
-
         if (bitmap != null) {
-            val palette = Palette.Builder(bitmap!!).generate()
-            val colorExtracted = palette.dominantSwatch?.let {
-                Color(it.rgb)
-            } ?: Color.Transparent
-            textBgColor = colorExtracted //đặt màu nền phần box gần với màu cái ảnh
+            textBgColor = colorFromImage(bitmap!!) //đặt màu nền phần box gần với màu cái ảnh
         }
     }
 
@@ -345,7 +291,7 @@ fun LocalRecommended(context: Context, city: City) {
     Column() {
         LazyRow(modifier = Modifier.padding(15.dp)) {
             itemsIndexed(Category.values()) { index, category -> //tương tự xuất ra location adapter
-                categoryView(category = category)
+                categoryView(category = category, colorBlue)
             }
         }
 
