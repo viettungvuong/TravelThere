@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.core.animateDpAsState
@@ -46,6 +47,7 @@ import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import coil.compose.AsyncImage
+import com.tung.travelthere.controller.AppController
 import com.tung.travelthere.controller.categoryView
 import com.tung.travelthere.controller.colorBlue
 import com.tung.travelthere.controller.formatter
@@ -103,7 +105,7 @@ class PlaceView : ComponentActivity() {
                 }
 
                 Box(
-                    modifier = Modifier.size(32.dp).padding(20.dp).constrainAs(button){
+                    modifier = Modifier.size(32.dp).constrainAs(button){
                         top.linkTo(parent.top)
                         start.linkTo(parent.start)
                     }
@@ -232,7 +234,8 @@ class PlaceView : ComponentActivity() {
         }
 
         Button(
-            onClick = { /*TODO*/ }, //thêm địa điểm vào favorite
+            onClick = { AppController.Favorites.getSingleton().addFavorite(location)
+                Toast.makeText(this, "Added to favorite", Toast.LENGTH_SHORT).show()}, //thêm địa điểm vào favorite
             colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFF36D72)),
             modifier = Modifier.fillMaxWidth()
         ) {

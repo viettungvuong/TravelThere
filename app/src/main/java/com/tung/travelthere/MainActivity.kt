@@ -70,9 +70,6 @@ class MainActivity : ComponentActivity() {
         City.getSingleton().recommendationsRepository.recommendations.add(t1)
         City.getSingleton().recommendationsRepository.recommendations.add(t2)
 
-        AppController.Favorites.getSingleton().addFavorite(t2)
-
-
         setContent {
             Home(this)
         }

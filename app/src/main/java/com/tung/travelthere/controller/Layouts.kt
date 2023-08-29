@@ -64,12 +64,12 @@ fun categoryView(category: Category, color: Color, clickable: Boolean) {
             painter = painter!!,
             contentDescription = null,
             contentScale = ContentScale.Crop,
-            modifier = Modifier.size(32.dp),
+            modifier = Modifier.size(24.dp),
             colorFilter = ColorFilter.tint(color = color)
         )
 
         Box(
-            modifier = Modifier.padding(20.dp)
+            modifier = Modifier.padding(10.dp)
         ) {
             Text(text = categoryName, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
         }
