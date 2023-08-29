@@ -1,7 +1,15 @@
 package com.tung.travelthere.objects
 
 import android.content.Context
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
 import com.tung.travelthere.Review
+import com.tung.travelthere.controller.cityNameField
+import com.tung.travelthere.controller.collectionCities
+import com.tung.travelthere.controller.collectionLocations
+import com.tung.travelthere.controller.locationNameField
+import kotlinx.coroutines.tasks.await
 import kotlin.collections.ArrayList
 
 class Position(var lat: Double, var long: Double): java.io.Serializable{
@@ -29,6 +37,7 @@ open class PlaceLocation protected constructor(private val name: String, private
     private var drawableName: String?=null
     var categories: MutableSet<Category> = mutableSetOf() //các category của địa điểm này
     var reviews: MutableSet<Review> = mutableSetOf() //danh sách các review
+    var imageUrl: String?=null
 
     fun setDrawableName(name: String){
         drawableName=name
@@ -64,6 +73,31 @@ open class PlaceLocation protected constructor(private val name: String, private
 
     override fun hashCode(): Int {
         return name.hashCode() * cityName.hashCode() * 30
+    }
+
+    suspend fun fetchImageUrl(): String? {
+        if (imageUrl != null) {
+            return imageUrl!!
+        }
+
+        var res: String? = null
+
+        val query = Firebase.firestore.collection(collectionCities).whereEqualTo(cityNameField, cityName)
+            .limit(1).get().await()
+        val document = query.documents.firstOrNull()
+        if (document != null) {
+            val locationCollection = document.reference.collection(collectionLocations).whereEqualTo(
+                locationNameField,name).limit(1).get().await()
+            val document2 = locationCollection.documents.firstOrNull()
+            if (document2!=null){
+                res = document2.getString("file-name")
+                val storageRef = Firebase.storage.reference
+                val imageRef = storageRef.child(res!!)
+                res = imageRef.downloadUrl.await().toString()
+            }
+        }
+        imageUrl = res
+        return res
     }
 
 }

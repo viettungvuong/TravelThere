@@ -64,7 +64,7 @@ class City private constructor() {
         var res: String? = null
 
         val query = Firebase.firestore.collection(collectionCities).whereEqualTo(cityNameField, name)
-            .whereEqualTo("country", country).limit(1).get().await()
+            .limit(1).get().await()
         val document = query.documents.firstOrNull()
         if (document != null) {
             res = document.getString("file-name")
@@ -84,27 +84,33 @@ class City private constructor() {
         var recommendations = ArrayList<PlaceLocation>()
 
         suspend fun refreshRecommendations() {
-//            withContext(Dispatchers.IO) {
-//                val query =
-//                    Firebase.firestore.collection(collectionCities).whereEqualTo(cityNameField, name)
-//                        .whereEqualTo("country", country)
-//                        .limit(1).get().await()
-//
-//                val documents = query.documents
-//
-//                for (document in documents) {
-//                    document.reference.collection(collectionLocations).get().addOnSuccessListener {
-//                        //lấy từng địa điểm của thành phố hiện tại
-//                            documents ->
-//                        for (document in documents) {
-//                            val name = document.getString("location-name")
-//                            //thêm toạ độ
-//                        }
-//                    }
-//                }
-//            }
+            withContext(Dispatchers.IO) {
+                val query =
+                    Firebase.firestore.collection(collectionCities).whereEqualTo(cityNameField, name)
+                        .limit(1).get().await()
+
+                val document = query.documents.firstOrNull()
+
+                if (document!=null){
+                    val locationCollection = document.reference.collection(collectionLocations).get().await()
+
+                    val locations = locationCollection.documents
+                    for (location in locations){
+
+                        val placeName = location.getString(locationNameField)?:""
+                        val cityName = this@City.name?:""
+                        val lat = location.getDouble("lat")?:0.0
+                        val long = location.getDouble("long")?:0.0
+
+                        val t = TouristPlace(placeName, Position(lat,long), cityName)
+
+                        recommendations.add(t)
+                    }
+                }
+            }
         }
 
+        //cho phép người dùng thêm địa điểm
         suspend fun suggestPlace(location: PlaceLocation) {
             val cityDocRef =
                 Firebase.firestore.collection(collectionCities)

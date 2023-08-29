@@ -57,19 +57,6 @@ class MainActivity : ComponentActivity() {
         Places.initialize(this, "AIzaSyCytvnlz93VlDAMs2RsndMo-HVgd0fl-lQ")
         AppController.placeViewModel = PlaceAutocompleteViewModel(this)
 
-        val t1 = TouristPlace("Ben Thanh Market", Position(1.0, 1.0), "Ho Chi Minh City")
-        t1.setDrawableName("benthanh")
-        t1.categories.add(Category.ATTRACTION)
-        t1.categories.add(Category.SHOPPING)
-        t1.reviews.add(Review("viettung", "Good place", Date(), 10))
-
-        val t2 = TouristPlace("The Cathedral", Position(0.0, 0.0), "Ho Chi Minh City")
-        t2.setDrawableName("nhathoducba")
-        t2.categories.add(Category.ATTRACTION)
-
-        City.getSingleton().recommendationsRepository.recommendations.add(t1)
-        City.getSingleton().recommendationsRepository.recommendations.add(t2)
-
         setContent {
             Home(this)
         }
@@ -142,7 +129,7 @@ fun Home(context: Context) {
             Box(
                 modifier = Modifier.weight(0.5f)
             ) {
-                CityIntroduction(context, City.getSingleton()) //phần thông tin thành phố hiện tại
+                CityIntroduction(City.getSingleton()) //phần thông tin thành phố hiện tại
             }
 
             Box(
@@ -202,7 +189,7 @@ fun tabLayout(pagerState: PagerState, tabTitles: List<String>, coroutineScope: C
 
 
 @Composable
-fun CityIntroduction(context: Context, city: City) {
+fun CityIntroduction(city: City) {
     //phần cho city
     var imageUrl by remember { mutableStateOf<String?>(null) }
 

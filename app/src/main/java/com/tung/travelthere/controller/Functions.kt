@@ -14,6 +14,7 @@ import com.tung.travelthere.R
 import com.tung.travelthere.objects.City
 import com.tung.travelthere.objects.PlaceLocation
 import com.tung.travelthere.objects.Position
+import kotlinx.coroutines.runBlocking
 import java.util.*
 
 fun getDrawableNameFromName(resourceName: String): Int {
@@ -57,6 +58,10 @@ fun getCurrentPosition(fusedLocationClient: FusedLocationProviderClient, context
 
                 City.getSingleton().setName(cityName) //đặt tên cho thành phố hiện tại
                 City.getSingleton().setCountry(countryName)
+
+                runBlocking {
+                    City.getSingleton().RecommendationsRepository().refreshRecommendations()
+                }
 
                 callback()
             }
