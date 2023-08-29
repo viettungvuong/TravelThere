@@ -39,12 +39,40 @@ class AppController {
         var currentLocation: Position?=null
     }
 
+    class Favorites{
+        private constructor()
+
+        private val favoriteList = ArrayList<PlaceLocation>()
+
+        companion object{
+            private var singleton: Favorites?=null
+
+            @JvmStatic
+            fun getSingleton(): Favorites{
+                if (singleton==null){
+                    singleton= Favorites()
+                }
+                return singleton!!
+            }
+        }
+
+        fun addFavorite(location: PlaceLocation){
+            favoriteList.add(location)
+        }
+
+        fun removeFavorite(index: Int){
+            favoriteList.removeAt(index)
+        }
+
+        fun getList(): ArrayList<PlaceLocation>{
+            return favoriteList
+        }
+    }
+
     companion object{
         @JvmStatic
 
         val currentUser = User() //user hiện tại
-
-        val favoriteList = ArrayList<PlaceLocation>() //favorite
 
         lateinit var placeViewModel: PlaceAutocompleteViewModel //view model cho place
 

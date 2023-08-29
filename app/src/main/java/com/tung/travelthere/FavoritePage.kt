@@ -54,7 +54,7 @@ fun FavoriteList(name: String) {
         }
 
         LazyColumn(state = lazyListState, modifier = Modifier.padding(15.dp)){
-            itemsIndexed(AppController.favoriteList) { index, location -> //tương tự xuất ra location adapter
+            itemsIndexed(AppController.Favorites.getSingleton().getList()) { index, location -> //tương tự xuất ra location adapter
                 SneakViewPlaceLong(context = LocalContext.current, location = location)
             }
         }
