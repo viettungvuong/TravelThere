@@ -5,7 +5,6 @@ import android.location.Geocoder
 import android.util.Log
 import androidx.compose.runtime.*
 import androidx.lifecycle.ViewModel
-import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken
 import com.google.android.libraries.places.api.model.Place
@@ -29,7 +28,7 @@ class PlaceAutocompleteViewModel(private val context: Context): ViewModel() {
 
     var currentName by mutableStateOf("")
     var currentCity by mutableStateOf("")
-    var currentPos by mutableStateOf(Position(0f,0f))
+    var currentPos by mutableStateOf(Position(0.0,0.0))
 
 
     fun fetchPlaceSuggestions(query: String) {
@@ -79,7 +78,7 @@ class PlaceAutocompleteViewModel(private val context: Context): ViewModel() {
                 if (it != null) {
                     val geocoder = Geocoder(context, Locale.getDefault())
                     val latLng = it.place.latLng
-                    currentPos = Position(latLng.latitude.toFloat(),latLng.longitude.toFloat())
+                    currentPos = Position(latLng.latitude,latLng.longitude)
                     val addresses = geocoder.getFromLocation(latLng.latitude,latLng.longitude,1)
                     if (addresses != null) {
                         currentCity = addresses[0].locality //lấy tên thành phố

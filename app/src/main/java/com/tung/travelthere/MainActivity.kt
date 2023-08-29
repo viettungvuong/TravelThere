@@ -1,14 +1,10 @@
 package com.tung.travelthere
 
-import android.Manifest
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.location.Location
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.*
@@ -17,13 +13,11 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -37,12 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -50,23 +39,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import androidx.core.net.toUri
-import androidx.palette.graphics.Palette
-import androidx.viewpager.widget.ViewPager
-import androidx.viewpager2.widget.ViewPager2
-import coil.compose.AsyncImage
-import coil.compose.AsyncImagePainter.State.Empty.painter
-import coil.compose.rememberAsyncImagePainter
-import coil.request.ImageRequest
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
 import com.google.android.libraries.places.api.Places
 import com.tung.travelthere.controller.*
 import com.tung.travelthere.objects.*
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.collect
 import java.net.URL
 import java.util.*
 import kotlin.collections.ArrayList
@@ -84,13 +60,13 @@ class MainActivity : ComponentActivity() {
         //phần initialize cho city (initialize location)
         City.getSingleton().setName("Ho Chi Minh City")
         City.getSingleton().setCountry("Vietnam")
-        val t1 = TouristPlace("Ben Thanh Market", Position(1f, 1f), "Ho Chi Minh City")
+        val t1 = TouristPlace("Ben Thanh Market", Position(1.0, 1.0), "Ho Chi Minh City")
         t1.setDrawableName("benthanh")
         t1.categories.add(Category.ATTRACTION)
         t1.categories.add(Category.SHOPPING)
         t1.reviews.add(Review("viettung", "Good place", Date(), 10))
 
-        val t2 = TouristPlace("The Cathedral", Position(1f, 1f), "Ho Chi Minh City")
+        val t2 = TouristPlace("The Cathedral", Position(0.0, 0.0), "Ho Chi Minh City")
         t2.setDrawableName("nhathoducba")
         t2.categories.add(Category.ATTRACTION)
 
