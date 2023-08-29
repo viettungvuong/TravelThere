@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
 import android.location.Geocoder
+import android.util.Log
 import androidx.compose.ui.graphics.Color
 import androidx.palette.graphics.Palette
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -43,7 +44,8 @@ fun getCurrentPosition(fusedLocationClient: FusedLocationProviderClient, context
             val geocoder = Geocoder(context, Locale.getDefault())
             val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
             if (addresses!=null&&addresses.isNotEmpty()) {
-                val cityName = addresses[0].locality
+                val cityName = addresses[0].adminArea
+                Log.d("addresses[0]",addresses[0].toString())
                 val countryName = addresses[0].countryName
 
                 AppController.currentPosition.cityName = cityName
