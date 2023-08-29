@@ -63,8 +63,9 @@ class City private constructor() {
 
         var res: String? = null
 
-        val query = Firebase.firestore.collection(collectionCities).whereEqualTo(cityNameField, name)
-            .limit(1).get().await()
+        val query =
+            Firebase.firestore.collection(collectionCities).whereEqualTo(cityNameField, name)
+                .limit(1).get().await()
         val document = query.documents.firstOrNull()
         if (document != null) {
             res = document.getString("file-name")
@@ -81,33 +82,35 @@ class City private constructor() {
     inner class RecommendationsRepository : ViewModel() {
 
         //những nơi nên đi tới
-        var recommendations = ArrayList<PlaceLocation>()
+        private var recommendations = ArrayList<PlaceLocation>()
 
-        suspend fun refreshRecommendations() {
-            withContext(Dispatchers.IO) {
-                val query =
-                    Firebase.firestore.collection(collectionCities).whereEqualTo(cityNameField, name)
-                        .limit(1).get().await()
+        suspend fun refreshRecommendations(): ArrayList<PlaceLocation> {
+            val query =
+                Firebase.firestore.collection(collectionCities).whereEqualTo(cityNameField, name)
+                    .limit(1).get().await()
 
-                val document = query.documents.firstOrNull()
+            val document = query.documents.firstOrNull()
 
-                if (document!=null){
-                    val locationCollection = document.reference.collection(collectionLocations).get().await()
+            if (document != null) {
+                val locationCollection =
+                    document.reference.collection(collectionLocations).get().await()
 
-                    val locations = locationCollection.documents
-                    for (location in locations){
+                val locations = locationCollection.documents
+                for (location in locations) {
 
-                        val placeName = location.getString(locationNameField)?:""
-                        val cityName = this@City.name?:""
-                        val lat = location.getDouble("lat")?:0.0
-                        val long = location.getDouble("long")?:0.0
+                    val placeName = location.getString(locationNameField) ?: ""
+                    val cityName = this@City.name ?: ""
+                    val lat = location.getDouble("lat") ?: 0.0
+                    val long = location.getDouble("long") ?: 0.0
 
-                        val t = TouristPlace(placeName, Position(lat,long), cityName)
+                    val t = TouristPlace(placeName, Position(lat, long), cityName)
 
-                        recommendations.add(t)
-                    }
+                    recommendations.add(t)
+                    Log.d("recommendations added",recommendations.size.toString())
                 }
             }
+
+            return recommendations
         }
 
         //cho phép người dùng thêm địa điểm
@@ -120,7 +123,8 @@ class City private constructor() {
                 val cityDocument = transaction.get(cityDocRef)
                 val locationCollectionRef = cityDocRef.collection(collectionLocations)
 
-                val locationDocumentRef = locationCollectionRef.document(location.getPos().toString())
+                val locationDocumentRef =
+                    locationCollectionRef.document(location.getPos().toString())
 
                 if (cityDocument.exists()) {
 
@@ -128,8 +132,8 @@ class City private constructor() {
 
                     if (locationDocument.exists()) {
                         //có địa điểm này
-                        val recommendedNum = locationDocument.getLong("recommends")?:0
-                        transaction.update(locationDocumentRef, "recommends", recommendedNum+1)
+                        val recommendedNum = locationDocument.getLong("recommends") ?: 0
+                        transaction.update(locationDocumentRef, "recommends", recommendedNum + 1)
                     } else {
                         //chưa có địa điểm này
                         val locationData = hashMapOf(

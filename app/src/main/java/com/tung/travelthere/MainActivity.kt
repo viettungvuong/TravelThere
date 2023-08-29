@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.*
@@ -260,9 +261,14 @@ fun CityIntroduction(city: City) {
 @Composable
 fun LocalRecommended(context: Context, city: City) {
     var listState by remember { mutableStateOf(ArrayList<PlaceLocation>()) }
+    val coroutineScope = rememberCoroutineScope()
 
-    listState.clear()
-    listState.addAll(city.recommendationsRepository.recommendations)
+    LaunchedEffect(listState) {
+        coroutineScope.launch {
+            listState = City.getSingleton().RecommendationsRepository().refreshRecommendations()
+            Log.d("list state add", listState.size.toString())
+        }
+    }
 
     Column() {
         LazyRow(modifier = Modifier.padding(15.dp)) {

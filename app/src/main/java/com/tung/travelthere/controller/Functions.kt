@@ -59,10 +59,6 @@ fun getCurrentPosition(fusedLocationClient: FusedLocationProviderClient, context
                 City.getSingleton().setName(cityName) //đặt tên cho thành phố hiện tại
                 City.getSingleton().setCountry(countryName)
 
-                runBlocking {
-                    City.getSingleton().RecommendationsRepository().refreshRecommendations()
-                }
-
                 callback()
             }
         }
