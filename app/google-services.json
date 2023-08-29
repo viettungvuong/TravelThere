@@ -1,33 +1,33 @@
 {
   "project_info": {
-    "project_number": "605084263680",
-    "project_id": "travelthere-9f19a",
-    "storage_bucket": "travelthere-9f19a.appspot.com"
+    "project_number": "610910372640",
+    "project_id": "travel-397404",
+    "storage_bucket": "travel-397404.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:605084263680:android:756dd747af1c5058c13fe5",
+        "mobilesdk_app_id": "1:610910372640:android:1ee63cd34cf2bc40430d45",
         "android_client_info": {
           "package_name": "com.tung.travelthere"
         }
       },
       "oauth_client": [
         {
-          "client_id": "605084263680-u0aea6nh6te37ah7ckrmpffrh2p08ftn.apps.googleusercontent.com",
+          "client_id": "610910372640-dvivvg4mek26jm7bbe992akckb2lpiet.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyD5jFBmMOSm3-_Vgbkx2HsWFeIotYshOq0"
+          "current_key": "AIzaSyDoohIDPbqWNOZ19zeh3KVaxFpYFHYCFWo"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "605084263680-u0aea6nh6te37ah7ckrmpffrh2p08ftn.apps.googleusercontent.com",
+              "client_id": "610910372640-dvivvg4mek26jm7bbe992akckb2lpiet.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
