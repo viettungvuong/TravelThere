@@ -52,8 +52,20 @@ open class PlaceLocation protected constructor(private val name: String, private
 
 
     override fun toString(): String {
-        return name + "," + pos.lat.toString() + "," + pos.long.toString()
+        return "$name,$cityName"
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is PlaceLocation) return false
+
+        return this.toString() == other.toString()
+    }
+
+    override fun hashCode(): Int {
+        return name.hashCode() * cityName.hashCode() * 30
+    }
+
 }
 
 class Restaurant(name: String, pos: Position, cityName: String, private val specializeIn: Dish): PlaceLocation(name,pos,cityName){

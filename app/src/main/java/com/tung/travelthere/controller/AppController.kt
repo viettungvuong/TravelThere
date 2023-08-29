@@ -1,6 +1,7 @@
 package com.tung.travelthere.controller
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.fillMaxSize
@@ -42,7 +43,8 @@ class AppController {
     class Favorites{
         private constructor()
 
-        private val favoriteList = ArrayList<PlaceLocation>()
+        private val favoriteList = mutableSetOf<PlaceLocation>()
+        //dùng set để tránh trùng lặp
 
         companion object{
             private var singleton: Favorites?=null
@@ -58,14 +60,19 @@ class AppController {
 
         fun addFavorite(location: PlaceLocation){
             favoriteList.add(location)
+            Log.d("favorite",favoriteList.toString())
         }
 
-        fun removeFavorite(index: Int){
-            favoriteList.removeAt(index)
+        fun removeFavorite(location: PlaceLocation){
+            favoriteList.remove(location)
         }
 
-        fun getList(): ArrayList<PlaceLocation>{
+        fun getList(): Set<PlaceLocation> {
             return favoriteList
+        }
+
+        fun isFavorite(location: PlaceLocation): Boolean{
+            return favoriteList.contains(location)
         }
     }
 

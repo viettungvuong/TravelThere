@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -22,10 +23,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Place
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,6 +31,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -105,16 +104,22 @@ class PlaceView : ComponentActivity() {
                 }
 
                 Box(
-                    modifier = Modifier.size(32.dp).constrainAs(button){
-                        top.linkTo(parent.top)
-                        start.linkTo(parent.start)
-                    }
+                    modifier = Modifier
+                        .size(32.dp)
+                        .constrainAs(button) {
+                            top.linkTo(parent.top)
+                            start.linkTo(parent.start)
+                        }
                 ) {
                     FloatingActionButton(
                         onClick = { finish() },
                         backgroundColor = Color.White,
                         content = {
-                            Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.Red)
+                            Icon(
+                                imageVector = Icons.Default.ArrowBack,
+                                contentDescription = "Back",
+                                tint = Color.Red
+                            )
                         }
                     )
                 }
@@ -133,7 +138,7 @@ class PlaceView : ComponentActivity() {
                             bottom.linkTo(parent.bottom)
                         }
                 ) {
-                    Column{
+                    Column {
                         tabLayout(
                             pagerState = pagerState,
                             tabTitles = tabTitles,
@@ -194,6 +199,17 @@ class PlaceView : ComponentActivity() {
 
     @Composable
     fun aboutPlace(location: PlaceLocation) {
+        var indexFav by remember { mutableStateOf(AppController.Favorites.getSingleton().isFavorite(location)) }
+        var iconVector by remember { mutableStateOf(Icons.Default.Favorite) }
+
+        LaunchedEffect(indexFav){
+            iconVector = if (!indexFav) {
+                Icons.Default.Favorite
+            } else {
+                Icons.Default.Delete
+            }
+        }
+
         Text(
             text = location.getName(),
             fontWeight = FontWeight.Bold,
@@ -220,9 +236,9 @@ class PlaceView : ComponentActivity() {
 
         Column(
             modifier = Modifier.padding(vertical = 20.dp)
-        ){
+        ) {
             Text(
-                text="Categories",
+                text = "Categories",
                 fontWeight = FontWeight.Bold
             )
 
@@ -234,22 +250,38 @@ class PlaceView : ComponentActivity() {
         }
 
         Button(
-            onClick = { AppController.Favorites.getSingleton().addFavorite(location)
-                Toast.makeText(this, "Added to favorite", Toast.LENGTH_SHORT).show()}, //thêm địa điểm vào favorite
+            onClick = {
+                AppController.Favorites.getSingleton().addFavorite(location)
+                indexFav = if (!indexFav) {
+                    Toast.makeText(this, "Added to favorites", Toast.LENGTH_SHORT).show()
+                    true
+                }//thêm địa điểm vào favorite
+                else{
+                    Toast.makeText(this, "Remove from favorites", Toast.LENGTH_SHORT).show()
+                    false
+                }
+            }
+            ,
             colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFF36D72)),
             modifier = Modifier.fillMaxWidth()
         ) {
+
+
             Row(
             ) {
                 Icon(
-                    imageVector = Icons.Default.Favorite,
+                    imageVector = iconVector!!,
                     contentDescription = "Favorite",
                     tint = Color.White
                 )
 
                 Spacer(modifier = Modifier.width(20.dp))
 
-                Text(text = "Add to favorites", color = Color.White)
+                if (!indexFav) {
+                    Text(text = "Add to favorites", color = Color.White)
+                } else {
+                    Text(text = "Remove from favorites", color = Color.White)
+                }
             }
         }
 
@@ -257,18 +289,18 @@ class PlaceView : ComponentActivity() {
 
     //phần xem những đánh giá về địa điểm
     @Composable
-    fun reviewsPlace(location: PlaceLocation){
-        Box(modifier = Modifier.fillMaxSize()){
-            LazyColumn(){
-                itemsIndexed(location.reviews.toTypedArray()){
-                    index, review -> reviewLayout(review = review)
+    fun reviewsPlace(location: PlaceLocation) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            LazyColumn() {
+                itemsIndexed(location.reviews.toTypedArray()) { index, review ->
+                    reviewLayout(review = review)
                 }
             }
         }
     }
 
     @Composable
-    fun reviewLayout(review: Review){
+    fun reviewLayout(review: Review) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -277,34 +309,37 @@ class PlaceView : ComponentActivity() {
                     vertical = 20.dp
                 ),
             elevation = 10.dp
-        ){
+        ) {
             Column() {
                 //sẽ có mục cho biết người dùng này là local hay foreigner
-                Row(modifier = Modifier.padding(10.dp)){
+                Row(modifier = Modifier.padding(10.dp)) {
 
                     Text(text = review.userId, fontWeight = FontWeight.Bold, fontSize = 15.sp)
 
-                    Box(modifier = Modifier.padding(horizontal = 10.dp)){
+                    Box(modifier = Modifier.padding(horizontal = 10.dp)) {
                         Text(text = formatter.format(review.time), fontWeight = FontWeight.Light)
                     }
                 }
 
-                Box(modifier = Modifier.padding(10.dp)){
+                Box(modifier = Modifier.padding(10.dp)) {
                     Text(text = review.content, fontSize = 15.sp)
                 }
 
-                var color: Color?=null
-                if (review.score in 0..4){
-                    color=Color.Red
+                var color: Color? = null
+                if (review.score in 0..4) {
+                    color = Color.Red
+                } else if (review.score in 5..8) {
+                    color = Color(0xffa88132)
+                } else {
+                    color = Color(0xff326e14)
                 }
-                else if (review.score in 5..8){
-                    color=Color(0xffa88132)
-                }
-                else{
-                    color=Color(0xff326e14)
-                }
-                Box(modifier = Modifier.padding(10.dp)){
-                    Text(text = review.score.toString(), fontWeight = FontWeight.Bold, fontSize = 30.sp, color = color)
+                Box(modifier = Modifier.padding(10.dp)) {
+                    Text(
+                        text = review.score.toString(),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 30.sp,
+                        color = color
+                    )
                 }
 
             }
@@ -312,7 +347,7 @@ class PlaceView : ComponentActivity() {
     }
 
     @Composable
-    fun discussionsPlace(location: PlaceLocation){
+    fun discussionsPlace(location: PlaceLocation) {
 
     }
 

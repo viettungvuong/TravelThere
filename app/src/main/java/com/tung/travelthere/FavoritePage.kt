@@ -1,6 +1,7 @@
 package com.tung.travelthere
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
@@ -26,8 +27,8 @@ import com.tung.travelthere.objects.Category
 import com.tung.travelthere.ui.theme.TravelThereTheme
 //sẽ có thêm filter theo tên thành phố, theo loại category
 class FavoritePage : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onCreate(savedInstanceState: Bundle?) { super.onCreate(savedInstanceState)
+
         setContent {
             TravelThereTheme {
                 // A surface container using the 'background' color from the theme
@@ -54,7 +55,7 @@ fun FavoriteList(name: String) {
         }
 
         LazyColumn(state = lazyListState, modifier = Modifier.padding(15.dp)){
-            itemsIndexed(AppController.Favorites.getSingleton().getList()) { index, location -> //tương tự xuất ra location adapter
+            itemsIndexed(AppController.Favorites.getSingleton().getList().toTypedArray()) { index, location -> //tương tự xuất ra location adapter
                 SneakViewPlaceLong(context = LocalContext.current, location = location)
             }
         }
