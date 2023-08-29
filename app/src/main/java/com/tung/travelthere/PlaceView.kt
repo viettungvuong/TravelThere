@@ -46,10 +46,7 @@ import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import coil.compose.AsyncImage
-import com.tung.travelthere.controller.AppController
-import com.tung.travelthere.controller.categoryView
-import com.tung.travelthere.controller.colorBlue
-import com.tung.travelthere.controller.formatter
+import com.tung.travelthere.controller.*
 import com.tung.travelthere.objects.Category
 import com.tung.travelthere.objects.City
 import com.tung.travelthere.objects.PlaceLocation
@@ -73,11 +70,16 @@ class PlaceView : ComponentActivity() {
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
     fun viewPlace(location: PlaceLocation) {
-        val id = location.getDrawableName(this)
-
+        var imageUrl by remember { mutableStateOf<String?>(null) }
         val tabTitles = listOf("About", "Reviews", "Discussions")
         val pagerState = rememberPagerState(initialPage = 0)
         val coroutineScope = rememberCoroutineScope()
+
+        LaunchedEffect(imageUrl){
+            coroutineScope.launch {
+                imageUrl = location.fetchImageUrl()
+            }
+        }
 
 
         MaterialTheme {
@@ -95,12 +97,7 @@ class PlaceView : ComponentActivity() {
                             width = Dimension.fillToConstraints
                         }
                 ) {
-                    Image( //hình ảnh
-                        painter = painterResource(id = id!!),
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
-                    )
+                    ImageFromUrl(url = imageUrl ?: "", contentDescription = null, 0.0)
                 }
 
                 Box(

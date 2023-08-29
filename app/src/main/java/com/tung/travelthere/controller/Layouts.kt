@@ -12,7 +12,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Place
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,10 +24,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.rememberImagePainter
 import com.tung.travelthere.PlaceView
 import com.tung.travelthere.R
 import com.tung.travelthere.objects.Category
 import com.tung.travelthere.objects.PlaceLocation
+import kotlinx.coroutines.launch
 
 //phần hiện ra danh sách các categories
 @Composable
@@ -79,6 +81,15 @@ fun categoryView(category: Category, color: Color, clickable: Boolean) {
 //xem trước địa điểm
 @Composable
 fun SneakViewPlace(context: Context, location: PlaceLocation) {
+    var imageUrl by remember { mutableStateOf<String?>(null) }
+    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(imageUrl){
+        coroutineScope.launch {
+            imageUrl = location.fetchImageUrl()
+        }
+    }
+
     Card(
         modifier = Modifier
             .padding(
@@ -96,19 +107,7 @@ fun SneakViewPlace(context: Context, location: PlaceLocation) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            val id = location.getDrawableName(context)
-
-            if (id != null) {
-                Image(
-                    painter = painterResource(id = id!!),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(150.dp)
-                        .border(BorderStroke(1.dp, Color.Black))
-                )
-            }
-
+            ImageFromUrl(url = imageUrl ?: "", contentDescription = null, 150.0)
 
             Text(
                 text = location.getName()
@@ -120,6 +119,15 @@ fun SneakViewPlace(context: Context, location: PlaceLocation) {
 
 @Composable
 fun SneakViewPlaceLong(context: Context, location: PlaceLocation) {
+    var imageUrl by remember { mutableStateOf<String?>(null) }
+    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(imageUrl){
+        coroutineScope.launch {
+            imageUrl = location.fetchImageUrl()
+        }
+    }
+
     Card(
         modifier = Modifier
             .padding(
@@ -135,18 +143,7 @@ fun SneakViewPlaceLong(context: Context, location: PlaceLocation) {
         elevation = 10.dp
     ) {
         Row {
-            val id = location.getDrawableName(context)
-
-            if (id != null) {
-                Image(
-                    painter = painterResource(id = id!!),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(150.dp)
-                        .border(BorderStroke(1.dp, Color.Black))
-                )
-            }
+            ImageFromUrl(url = imageUrl ?: "", contentDescription = null, 150.0)
 
 
             Column(modifier = Modifier
@@ -178,4 +175,22 @@ fun SneakViewPlaceLong(context: Context, location: PlaceLocation) {
 
         }
     }
+}
+
+@Composable
+fun ImageFromUrl(url: String, contentDescription: String?, size: Double) {
+    var modifier: Modifier?=null
+    if (size==0.0){
+        modifier = Modifier.fillMaxSize()
+    }
+    else{
+        modifier = Modifier.size(size.dp)
+    }
+
+    Image(
+        painter = rememberImagePainter(url),
+        contentDescription = contentDescription,
+        modifier = modifier,
+        contentScale = ContentScale.Crop,
+    )
 }

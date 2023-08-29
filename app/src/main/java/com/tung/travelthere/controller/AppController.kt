@@ -87,12 +87,3 @@ class AppController {
     }
 }
 
-@Composable
-fun ImageFromUrl(url: String, contentDescription: String?) {
-    Image(
-        painter = rememberImagePainter(url),
-        contentDescription = contentDescription,
-        modifier = Modifier.fillMaxSize(),
-        contentScale = ContentScale.Crop,
-    )
-}

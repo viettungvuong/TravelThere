@@ -224,7 +224,7 @@ fun CityIntroduction(city: City) {
         modifier = Modifier
             .fillMaxSize()
     ) {
-        ImageFromUrl(url = imageUrl ?: "", contentDescription = null)
+        ImageFromUrl(url = imageUrl ?: "", contentDescription = null, 0.0)
     }
     Column(
         modifier = Modifier
