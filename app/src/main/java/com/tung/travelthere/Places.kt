@@ -81,7 +81,12 @@ class PlaceAutocompleteViewModel(private val context: Context): ViewModel() {
                     currentPos = Position(latLng.latitude,latLng.longitude)
                     val addresses = geocoder.getFromLocation(latLng.latitude,latLng.longitude,1)
                     if (addresses != null) {
-                        addresses[0].adminArea //lấy tên thành phố theo tên tỉnh
+                        currentCity = if (addresses[0].locality==null){
+                            addresses[0].adminArea //lấy tên thành phố theo tên tỉnh
+                        } else{
+                            addresses[0].locality
+                        }
+
                     }
                 }
             }
