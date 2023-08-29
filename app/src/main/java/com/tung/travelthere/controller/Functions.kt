@@ -1,6 +1,11 @@
 package com.tung.travelthere.controller
 
+import android.Manifest
+import android.annotation.SuppressLint
+import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.location.Geocoder
 import android.location.Location
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
@@ -19,11 +24,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.palette.graphics.Palette
+import com.google.android.gms.location.FusedLocationProviderClient
 import com.tung.travelthere.R
 import com.tung.travelthere.objects.Category
 import com.tung.travelthere.objects.City
 import com.tung.travelthere.objects.Position
+import java.util.*
 
 fun getDrawableNameFromName(resourceName: String): Int {
     try {
@@ -42,11 +50,19 @@ fun colorFromImage(bitmap: Bitmap): Color {
     return colorExtracted
 }
 
-fun getCurrentPosition(location: Location?): Position {
-    return if (location==null){
-        Position(0f,0f)
+@SuppressLint("MissingPermission")
+fun getCurrentPosition(fusedLocationClient: FusedLocationProviderClient, context: Context): Position {
+    fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+        if (location != null) {
+            val geocoder = Geocoder(context, Locale.getDefault())
+            val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
+            if (addresses!=null&&addresses.isNotEmpty()) {
+                val city = addresses[0].locality
+            }
+        }
     }
-    else{
-        Position(location.latitude.toFloat(),location.longitude.toFloat())
-    }
+}
+
+fun initialize(callback: ()->Unit){
+
 }

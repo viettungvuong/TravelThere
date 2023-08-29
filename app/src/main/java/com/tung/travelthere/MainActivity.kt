@@ -73,26 +73,9 @@ import kotlin.collections.ArrayList
 
 
 class MainActivity : ComponentActivity() {
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        //lấy địa điểm hiện tại
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            fusedLocationClient.lastLocation
-                .addOnSuccessListener { location : Location? ->
-                    AppController.currentPosition = getCurrentPosition(location)
-                }
-        }
-
 
         Places.initialize(applicationContext, "AIzaSyC6qQqaqfHQMN2FXMX301c6LQ2rfjKPg2E")
 

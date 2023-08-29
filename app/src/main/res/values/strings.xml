@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Travel There</string>
     <string name="title_activity_favorite_page">FavoritePage</string>
+    <string name="title_activity_splash_screen">SplashScreen</string>
 </resources>
