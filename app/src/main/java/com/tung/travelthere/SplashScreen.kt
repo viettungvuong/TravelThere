@@ -1,5 +1,6 @@
 package com.tung.travelthere
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -28,6 +29,7 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.libraries.places.api.Places
 import com.tung.travelthere.controller.AppController
+import com.tung.travelthere.controller.getCurrentPosition
 import com.tung.travelthere.ui.theme.TravelThereTheme
 
 class SplashScreen : ComponentActivity() {
@@ -41,14 +43,12 @@ class SplashScreen : ComponentActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-            if (isGranted) {
-                AppController.currentPosition = getPo
-                AppController.placeViewModel = PlaceAutocompleteViewModel(applicationContext)
-            } else {
-                // Permission is denied
+            if (!isGranted) {
+                finish() //thoát khỏi app
             }
         }
 
+    @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -58,9 +58,8 @@ class SplashScreen : ComponentActivity() {
 
             fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
-            // Check location permission and request if needed
             if (hasLocationPermission()) {
-                getCurrentLocation()
+                getCurrentPosition(fusedLocationClient,this)
             } else {
                 requestPermissionLauncher.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
             }

@@ -4,7 +4,7 @@ import android.content.Context
 import com.tung.travelthere.Review
 import kotlin.collections.ArrayList
 
-class Position(var lat: Float, var long: Float): java.io.Serializable{
+class Position(var lat: Double, var long: Double): java.io.Serializable{
     override fun toString(): String {
         return "$lat,$long"
     }

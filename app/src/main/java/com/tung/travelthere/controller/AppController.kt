@@ -33,6 +33,11 @@ val colorBlue = Color(android.graphics.Color.parseColor("#5980b3"))
 val formatter = SimpleDateFormat("HH:mm:ss dd/MM/yyyy")
 
 class AppController {
+    class UserPlace{
+        var cityName = ""
+        var currentLocation: Position?=null
+    }
+
     companion object{
         @JvmStatic
 
@@ -42,9 +47,7 @@ class AppController {
 
         lateinit var placeViewModel: PlaceAutocompleteViewModel //view model cho place
 
-        lateinit var currentPosition: Position
-
-
+        lateinit var currentPosition: UserPlace
     }
 }
 

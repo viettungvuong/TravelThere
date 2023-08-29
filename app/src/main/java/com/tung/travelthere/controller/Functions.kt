@@ -30,6 +30,7 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.tung.travelthere.R
 import com.tung.travelthere.objects.Category
 import com.tung.travelthere.objects.City
+import com.tung.travelthere.objects.PlaceLocation
 import com.tung.travelthere.objects.Position
 import java.util.*
 
@@ -51,18 +52,19 @@ fun colorFromImage(bitmap: Bitmap): Color {
 }
 
 @SuppressLint("MissingPermission")
-fun getCurrentPosition(fusedLocationClient: FusedLocationProviderClient, context: Context): Position {
+fun getCurrentPosition(fusedLocationClient: FusedLocationProviderClient, context: Context) {
     fusedLocationClient.lastLocation.addOnSuccessListener { location ->
         if (location != null) {
+            AppController.currentPosition.currentLocation = Position(location.latitude,location.longitude)
+
             val geocoder = Geocoder(context, Locale.getDefault())
             val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
             if (addresses!=null&&addresses.isNotEmpty()) {
-                val city = addresses[0].locality
+                AppController.currentPosition.cityName = addresses[0].locality
             }
         }
     }
 }
 
 fun initialize(callback: ()->Unit){
-
 }
