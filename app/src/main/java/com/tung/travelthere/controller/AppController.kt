@@ -35,6 +35,7 @@ val formatter = SimpleDateFormat("HH:mm:ss dd/MM/yyyy")
 class AppController {
     class UserPlace{
         var cityName = ""
+        var countryName = ""
         var currentLocation: Position?=null
     }
 

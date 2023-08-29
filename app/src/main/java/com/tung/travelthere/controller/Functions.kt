@@ -7,7 +7,11 @@ import android.location.Geocoder
 import androidx.compose.ui.graphics.Color
 import androidx.palette.graphics.Palette
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.libraries.places.api.Places
+import com.tung.travelthere.PlaceAutocompleteViewModel
 import com.tung.travelthere.R
+import com.tung.travelthere.objects.City
+import com.tung.travelthere.objects.PlaceLocation
 import com.tung.travelthere.objects.Position
 import java.util.*
 
@@ -29,7 +33,9 @@ fun colorFromImage(bitmap: Bitmap): Color {
 }
 
 @SuppressLint("MissingPermission")
-fun getCurrentPosition(fusedLocationClient: FusedLocationProviderClient, context: Context) {
+fun getCurrentPosition(fusedLocationClient: FusedLocationProviderClient, context: Context, callback: () -> Unit) {
+    AppController.currentPosition= AppController.UserPlace()
+
     fusedLocationClient.lastLocation.addOnSuccessListener { location ->
         if (location != null) {
             AppController.currentPosition.currentLocation = Position(location.latitude,location.longitude)
@@ -37,11 +43,22 @@ fun getCurrentPosition(fusedLocationClient: FusedLocationProviderClient, context
             val geocoder = Geocoder(context, Locale.getDefault())
             val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
             if (addresses!=null&&addresses.isNotEmpty()) {
-                AppController.currentPosition.cityName = addresses[0].locality
+                val cityName = addresses[0].locality
+                val countryName = addresses[0].countryName
+
+                AppController.currentPosition.cityName = cityName
+                AppController.currentPosition.countryName = countryName
+
+                City.getSingleton().setName(cityName) //đặt tên cho thành phố hiện tại
+                City.getSingleton().setCountry(countryName)
+
+                callback()
             }
         }
     }
 }
 
-fun initialize(callback: ()->Unit){
+fun initialize(context: Context, callback: ()->Unit){
+
+
 }

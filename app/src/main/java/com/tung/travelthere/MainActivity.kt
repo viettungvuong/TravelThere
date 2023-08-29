@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.google.android.libraries.places.api.Places
+import com.google.maps.GeocodingApi
 import com.tung.travelthere.controller.*
 import com.tung.travelthere.objects.*
 import kotlinx.coroutines.*
@@ -53,13 +54,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        Places.initialize(applicationContext, "AIzaSyC6qQqaqfHQMN2FXMX301c6LQ2rfjKPg2E")
+        Places.initialize(this, "AIzaSyCytvnlz93VlDAMs2RsndMo-HVgd0fl-lQ")
+        AppController.placeViewModel = PlaceAutocompleteViewModel(this)
 
-        AppController.placeViewModel = PlaceAutocompleteViewModel(applicationContext)
-
-        //phần initialize cho city (initialize location)
-        City.getSingleton().setName("Ho Chi Minh City")
-        City.getSingleton().setCountry("Vietnam")
         val t1 = TouristPlace("Ben Thanh Market", Position(1.0, 1.0), "Ho Chi Minh City")
         t1.setDrawableName("benthanh")
         t1.categories.add(Category.ATTRACTION)

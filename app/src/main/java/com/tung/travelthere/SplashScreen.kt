@@ -2,6 +2,7 @@ package com.tung.travelthere
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -51,15 +52,21 @@ class SplashScreen : ComponentActivity() {
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        Places.initialize(applicationContext, "AIzaSyCytvnlz93VlDAMs2RsndMo-HVgd0fl-lQ")
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
         setContent {
             Greeting()
 
-            Places.initialize(applicationContext, "AIzaSyC6qQqaqfHQMN2FXMX301c6LQ2rfjKPg2E")
-
-            fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-
             if (hasLocationPermission()) {
-                getCurrentPosition(fusedLocationClient,this)
+                getCurrentPosition(fusedLocationClient,this){
+                    val intent= Intent(this,MainActivity::class.java)
+                    startActivity(intent)
+                    finish()
+                }
+
             } else {
                 requestPermissionLauncher.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
             }
