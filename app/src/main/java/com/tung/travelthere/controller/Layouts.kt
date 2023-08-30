@@ -9,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Place
@@ -193,4 +194,14 @@ fun ImageFromUrl(url: String, contentDescription: String?, size: Double) {
         modifier = modifier,
         contentScale = ContentScale.Crop,
     )
+}
+
+@Composable
+fun SearchBar(){
+    var searchQuery by remember { mutableStateOf("") }
+
+    OutlinedTextField(value = searchQuery, onValueChange = { newString ->
+        searchQuery = newString
+        //hiện suggestion
+    },)
 }

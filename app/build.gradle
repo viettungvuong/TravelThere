@@ -85,5 +85,6 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:1.x.x'
     implementation "com.google.android.gms:play-services-location:18.0.0"
     implementation 'com.google.maps:google-maps-services:0.15.0'
+    implementation 'com.firebaseui:firebase-ui-database:8.0.2'
 
 }

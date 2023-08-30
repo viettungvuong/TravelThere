@@ -2,6 +2,7 @@ package com.tung.travelthere.controller
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.SearchRecentSuggestionsProvider
 import android.graphics.Bitmap
 import android.location.Geocoder
 import android.util.Log
@@ -67,5 +68,11 @@ fun getCurrentPosition(fusedLocationClient: FusedLocationProviderClient, context
 
 fun initialize(context: Context, callback: ()->Unit){
 
+
+}
+
+
+//tìm kiếm và hiện đề xuất tìm kiếm
+fun search(searchQuery: String){
 
 }
