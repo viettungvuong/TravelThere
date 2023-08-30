@@ -48,19 +48,19 @@ import androidx.compose.runtime.Composable
 
 
 class MainActivity : ComponentActivity() {
-    lateinit var chosenViewModel: CategoryChosenViewModel
+
     //để biết chọn category nào
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        chosenViewModel = CategoryChosenViewModel()
+
 
         Places.initialize(this, "AIzaSyCytvnlz93VlDAMs2RsndMo-HVgd0fl-lQ")
         AppController.placeViewModel = PlaceAutocompleteViewModel(this)
 
         setContent {
-            Home(this, chosenViewModel)
+            Home(this)
         }
         //setContentView(R.layout.login_register_activity);
     }
@@ -68,7 +68,7 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun Home(context: Context, chosenViewModel: CategoryChosenViewModel) {
+fun Home(context: Context) {
     val tabTitles = listOf("Nearby", "Recommended", "Tourist attractions")
     val pagerState = rememberPagerState(initialPage = 0)
     val coroutineScope = rememberCoroutineScope()
@@ -154,12 +154,10 @@ fun Home(context: Context, chosenViewModel: CategoryChosenViewModel) {
                             0 -> LocalRecommended(
                                 context,
                                 city = City.getSingleton(),
-                                chosenViewModel
                             )
                             1 -> LocalRecommended(
                                 context,
                                 city = City.getSingleton(),
-                                chosenViewModel
                             )
                         }
                     }
@@ -272,22 +270,24 @@ fun CityIntroduction(city: City) {
 
 //trang local recommended
 @Composable
-fun LocalRecommended(context: Context, city: City, chosenViewModel: CategoryChosenViewModel) {
+fun LocalRecommended(context: Context, city: City) {
     var listState = remember { mutableStateOf(mutableSetOf<PlaceLocation>()) }
     var chosenState = remember { mutableStateOf(mutableSetOf<Category>()) }
+    var originalState = remember { mutableStateOf(mutableSetOf<PlaceLocation>()) }
     val coroutineScope = rememberCoroutineScope()
 
-    LaunchedEffect(listState) {
+    LaunchedEffect(originalState) {
         coroutineScope.launch {
-            listState.value =
+            originalState.value =
                 city.recommendationsRepository.refreshRecommendations() as MutableSet<PlaceLocation>
+            listState.value = originalState.value
         }
     }
 
     Column() {
         LazyRow(modifier = Modifier.padding(15.dp)) {
             itemsIndexed(Category.values()) { index, category -> //tương tự xuất ra location adapter
-                categoryView(category, colorBlue, true, listState, chosenState)
+                categoryView(category, colorBlue, true, listState, chosenState, originalState)
             }
         }
 

@@ -3,6 +3,7 @@ package com.tung.travelthere
 import android.app.Activity
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -21,7 +22,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
-import com.tung.travelthere.controller.CategoryChosenViewModel
+
 import com.tung.travelthere.controller.SneakViewPlaceLong
 import com.tung.travelthere.controller.categoryView
 import com.tung.travelthere.controller.colorBlue
@@ -32,13 +33,13 @@ import com.tung.travelthere.ui.theme.TravelThereTheme
 import kotlinx.coroutines.launch
 
 lateinit var searchViewModel: SearchViewModel
-lateinit var chosenViewModel2: CategoryChosenViewModel
+
 class SearchPlace : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         searchViewModel = SearchViewModel()
-        chosenViewModel2 = CategoryChosenViewModel()
+
 
         setContent {
             TravelThereTheme {
@@ -55,13 +56,13 @@ class SearchPlace : ComponentActivity() {
 }
 
 class SearchViewModel: ViewModel(){
-    var matchedQuery = mutableStateListOf<PlaceLocation>()
+
 }
 
 //thanh tìm kiếm
 @Composable
 fun SearchBar(
-    available: Set<PlaceLocation>, searchViewModel: SearchViewModel, context: Context
+    available: Set<PlaceLocation>, matchedQuery: MutableState<MutableSet<PlaceLocation>>
 ) {
     var searchQuery by remember { mutableStateOf(TextFieldValue()) }
 
@@ -70,10 +71,10 @@ fun SearchBar(
             onValueChange = { newString ->
                 searchQuery = newString
 
-                searchViewModel.matchedQuery.removeAll(searchViewModel.matchedQuery)
+                matchedQuery.value.clear()
 
                 if (newString.text.isNotBlank()) {
-                    searchViewModel.matchedQuery.addAll(available.filter {
+                    matchedQuery.value.addAll(available.filter {
                         it.getName().contains(newString.text, ignoreCase = true)
                     }.sortedBy {
                         val similarity = it.getName()
@@ -81,6 +82,7 @@ fun SearchBar(
                         //các từ nào tương đồng nhất sẽ được xếp trên đầu
                         similarity
                     })
+
                 }
 
             },
@@ -104,6 +106,10 @@ fun SearchBar(
 @Composable
 fun SearchPage(city: City, activity: Activity) {
     var listState by remember { mutableStateOf(setOf<PlaceLocation>()) }
+    var matchedQuery = remember {mutableStateOf(mutableSetOf<PlaceLocation>())}
+    var chosenState = remember { mutableStateOf(mutableSetOf<Category>()) }
+    var originalState = remember { mutableStateOf(mutableSetOf<PlaceLocation>()) }
+
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(listState) {
@@ -111,7 +117,6 @@ fun SearchPage(city: City, activity: Activity) {
             listState = city.recommendationsRepository.refreshRecommendations()
         }
     }
-
 
     MaterialTheme() {
         Column() {
@@ -132,16 +137,16 @@ fun SearchPage(city: City, activity: Activity) {
                 )
             }
 
-            SearchBar(available = listState, context = activity, searchViewModel = searchViewModel)
+            SearchBar(available = listState, matchedQuery)
 
             LazyRow(modifier = Modifier.padding(15.dp)) {
                 itemsIndexed(Category.values()) { index, category -> //tương tự xuất ra location adapter
-                    categoryView(category, colorBlue, true)
+                    categoryView(category, colorBlue, true, matchedQuery, chosenState, originalState)
                 }
             }
 
             LazyColumn(){
-                items(searchViewModel.matchedQuery){
+                items(matchedQuery.value.toTypedArray()){
                     location ->
                     SneakViewPlaceLong(context = activity, location = location, hasImage = false)
                 }
@@ -149,3 +154,4 @@ fun SearchPage(city: City, activity: Activity) {
         }
     }
 }
+
