@@ -55,36 +55,31 @@ class SearchPlace : ComponentActivity() {
     }
 }
 
-class SearchViewModel: ViewModel(){
-
+class SearchViewModel : ViewModel() {
+    var matchedQuery = mutableStateListOf<PlaceLocation>()
 }
 
 //thanh tìm kiếm
 @Composable
 fun SearchBar(
-    available: Set<PlaceLocation>, matchedQuery: MutableState<MutableSet<PlaceLocation>>
+    available: Set<PlaceLocation>, searchViewModel: SearchViewModel, context: Context
 ) {
     var searchQuery by remember { mutableStateOf(TextFieldValue()) }
 
     Column {
-        TextField(value = searchQuery,
+        TextField(
+            value = searchQuery,
             onValueChange = { newString ->
                 searchQuery = newString
 
-                matchedQuery.value.clear()
-
-                if (newString.text.isNotBlank()) {
-                    matchedQuery.value.addAll(available.filter {
-                        it.getName().contains(newString.text, ignoreCase = true)
-                    }.sortedBy {
-                        val similarity = it.getName()
-                            .commonPrefixWith(newString.text).length.toDouble() / newString.text.length
-                        //các từ nào tương đồng nhất sẽ được xếp trên đầu
-                        similarity
-                    })
-
+                searchViewModel.matchedQuery.clear()
+                searchViewModel.matchedQuery += available.filter {
+                    it.getName().contains(searchQuery.text, ignoreCase = true)
+                }.sortedBy {
+                    val similarity = it.getName()
+                        .commonPrefixWith(searchQuery.text).length.toDouble() / searchQuery.text.length
+                    similarity
                 }
-
             },
             textStyle = TextStyle(fontSize = 17.sp),
             leadingIcon = { Icon(Icons.Filled.Search, null, tint = Color.Gray) },
@@ -106,48 +101,28 @@ fun SearchBar(
 @Composable
 fun SearchPage(city: City, activity: Activity) {
     var listState by remember { mutableStateOf(setOf<PlaceLocation>()) }
-    var matchedQuery = remember {mutableStateOf(mutableSetOf<PlaceLocation>())}
-    var chosenState = remember { mutableStateOf(mutableSetOf<Category>()) }
-    var originalState = remember { mutableStateOf(mutableSetOf<PlaceLocation>()) }
-
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(listState) {
         coroutineScope.launch {
             listState = city.recommendationsRepository.refreshRecommendations()
+            Log.d("list state add", listState.size.toString())
         }
     }
 
+
     MaterialTheme() {
         Column() {
-            Box(
-                modifier = Modifier
-                    .size(32.dp)
-            ) {
-                FloatingActionButton(
-                    onClick = { activity.finish() },
-                    backgroundColor = Color.White,
-                    content = {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back",
-                            tint = colorBlue
-                        )
-                    }
-                )
-            }
-
-            SearchBar(available = listState, matchedQuery)
+            SearchBar(available = listState, context = activity, searchViewModel = searchViewModel)
 
             LazyRow(modifier = Modifier.padding(15.dp)) {
                 itemsIndexed(Category.values()) { index, category -> //tương tự xuất ra location adapter
-                    categoryView(category, colorBlue, true, matchedQuery, chosenState, originalState)
+                    categoryView(category, colorBlue, true)
                 }
             }
 
-            LazyColumn(){
-                items(matchedQuery.value.toTypedArray()){
-                    location ->
+            LazyColumn() {
+                items(searchViewModel.matchedQuery) { location ->
                     SneakViewPlaceLong(context = activity, location = location, hasImage = false)
                 }
             }
