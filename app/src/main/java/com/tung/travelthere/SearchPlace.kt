@@ -1,20 +1,20 @@
 package com.tung.travelthere
 
+import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.tung.travelthere.controller.SearchBar
@@ -44,7 +44,7 @@ class SearchPlace : ComponentActivity() {
 }
 
 @Composable
-fun SearchPage(city: City, context: Context) {
+fun SearchPage(city: City, activity: Activity) {
     var listState by remember { mutableStateOf(setOf<PlaceLocation>()) }
     val coroutineScope = rememberCoroutineScope()
 
@@ -55,12 +55,31 @@ fun SearchPage(city: City, context: Context) {
         }
     }
 
-    Column() {
-        SearchBar(available = listState, context = context)
+    MaterialTheme() {
+        Column() {
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+            ) {
+                FloatingActionButton(
+                    onClick = { activity.finish() },
+                    backgroundColor = Color.White,
+                    content = {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Back",
+                            tint = colorBlue
+                        )
+                    }
+                )
+            }
 
-        LazyRow(modifier = Modifier.padding(15.dp)) {
-            itemsIndexed(Category.values()) { index, category -> //tương tự xuất ra location adapter
-                categoryView(category, colorBlue, true)
+            SearchBar(available = listState, context = activity)
+
+            LazyRow(modifier = Modifier.padding(15.dp)) {
+                itemsIndexed(Category.values()) { index, category -> //tương tự xuất ra location adapter
+                    categoryView(category, colorBlue, true)
+                }
             }
         }
     }
