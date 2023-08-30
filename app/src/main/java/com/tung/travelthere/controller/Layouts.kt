@@ -244,7 +244,9 @@ private fun SuggestionList(
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
+            .padding(horizontal = 15.dp, vertical = 1.dp)
             .background(Color.White)
+
     ) {
         items(suggestions.toTypedArray()) { suggestion ->
             SuggestionItem(
@@ -259,14 +261,18 @@ private fun SuggestionItem(
     suggestion: PlaceLocation,
     context: Context
 ) {
-    Surface(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable {
                 val intent = Intent(context, PlaceView::class.java)
                 intent.putExtra("location", suggestion)
                 context.startActivity(intent)
-            }
+            }.border(
+                width = 2.dp,
+                color = Color(0xffcae8e5), // Border color
+                shape = RoundedCornerShape(4.dp) // Border shape
+            ),
     ) {
         Text(
             text = suggestion.getName(),
