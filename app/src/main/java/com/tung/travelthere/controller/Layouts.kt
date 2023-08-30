@@ -36,8 +36,7 @@ fun categoryView(
     color: Color,
     clickable: Boolean,
     locationState: MutableState<MutableSet<PlaceLocation>>? = null,
-    chosenState: MutableState<MutableSet<Category>>? = null,
-    originalState: MutableState<MutableSet<PlaceLocation>>? = null
+    chosenState: MutableState<MutableSet<Category>>? = null
 ) {
     var chosen by remember { mutableStateOf(false) }
 
@@ -82,15 +81,16 @@ fun categoryView(
                 } else {
                     chosenState!!.value.remove(category)
                 }
-                if (chosenState!!.value.isNotEmpty()){ //nếu có chọn category rồi
-                    locationState!!.value = originalState!!.value.filter {
+                if (chosenState!!.value.isNotEmpty()){
+                    locationState!!.value = locationState!!.value.filter {
                         chosenState!!.value.all{
                                 category -> it.categories.contains(category)
                         }
                     }.toMutableSet()
                 }
-                else{ //nếu không chọn category nào hết
-                    locationState!!.value = originalState!!.value
+                else{
+                    locationState!!.value =
+                        City.getSingleton().recommendationsRepository.recommendations
                 }
             } else Modifier)
     ) {
