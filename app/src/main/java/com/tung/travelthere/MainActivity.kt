@@ -224,7 +224,7 @@ fun CityIntroduction(city: City) {
         modifier = Modifier
             .fillMaxSize()
     ) {
-        ImageFromUrl(url = imageUrl ?: "", contentDescription = null, 0.0)
+        ImageFromUrl(url = imageUrl ?: "", contentDescription = null, 0.0) //hình ảnh
     }
     Column(
         modifier = Modifier
@@ -271,12 +271,13 @@ fun LocalRecommended(context: Context, city: City) {
     }
 
     Column() {
+        SearchBar(available = listState, context = context)
+
         LazyRow(modifier = Modifier.padding(15.dp)) {
             itemsIndexed(Category.values()) { index, category -> //tương tự xuất ra location adapter
                 categoryView(category, colorBlue, true)
             }
         }
-
 
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),

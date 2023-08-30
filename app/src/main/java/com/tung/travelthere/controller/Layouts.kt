@@ -6,10 +6,12 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -204,24 +206,35 @@ fun SearchBar(
     var searchQuery by remember { mutableStateOf(TextFieldValue()) }
 
     Column {
-        BasicTextField(
+        TextField(
             value = searchQuery,
-            onValueChange = {
-                searchQuery = it
+            onValueChange = {newString -> searchQuery = newString
             },
-            textStyle = TextStyle(color = Color.Black),
+            textStyle = TextStyle(fontSize = 17.sp),
+            leadingIcon = { Icon(Icons.Filled.Search, null, tint = Color.Gray) },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(horizontal = 20.dp, vertical = 5.dp)
+                .background(Color(0xFFE7F1F1), RoundedCornerShape(16.dp)),
+            placeholder = { Text(text = "Search") },
+            colors = TextFieldDefaults.textFieldColors(
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                backgroundColor = Color.Transparent,
+                cursorColor = Color.DarkGray
+            )
         )
 
         if (searchQuery.text.isNotEmpty()) {
             SuggestionList(
-                suggestions = available.filter { it.getName().contains(searchQuery.text, ignoreCase = true) }, context
+                suggestions = available.filter { it.getName().contains(searchQuery.text, ignoreCase = true) }
+                    .sortedBy { val similarity = it.getName().commonPrefixWith(searchQuery.text).length.toDouble() / searchQuery.text.length
+                        similarity }, context
             )
         }
     }
 }
+
 
 @Composable
 private fun SuggestionList(
