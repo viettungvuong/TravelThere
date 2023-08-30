@@ -47,6 +47,9 @@ import com.tung.travelthere.objects.*
 import kotlinx.coroutines.*
 import java.net.URL
 import java.util.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.viewinterop.AndroidView
 import kotlin.collections.ArrayList
 
 
@@ -61,6 +64,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             Home(this)
         }
+        //setContentView(R.layout.login_register_activity);
     }
 }
 
