@@ -108,7 +108,10 @@ fun Home(context: Context) {
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { /* Handle FAB click */ },
+                onClick = {
+                    val intent = Intent(context, SearchPlace::class.java)
+                    context.startActivity(intent)
+                },
                 backgroundColor = Color(android.graphics.Color.parseColor("#b3821b"))
             ) {
                 Icon(
@@ -271,8 +274,6 @@ fun LocalRecommended(context: Context, city: City) {
     }
 
     Column() {
-        SearchBar(available = listState, context = context)
-
         LazyRow(modifier = Modifier.padding(15.dp)) {
             itemsIndexed(Category.values()) { index, category -> //tương tự xuất ra location adapter
                 categoryView(category, colorBlue, true)
