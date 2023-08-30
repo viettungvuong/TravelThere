@@ -2,15 +2,12 @@ package com.tung.travelthere.controller
 
 import android.content.Context
 import android.content.Intent
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Card
-import androidx.compose.material.Icon
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.runtime.*
@@ -21,7 +18,9 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -181,11 +180,11 @@ fun SneakViewPlaceLong(context: Context, location: PlaceLocation) {
 @Composable
 fun ImageFromUrl(url: String, contentDescription: String?, size: Double) {
     var modifier: Modifier?=null
-    if (size==0.0){
-        modifier = Modifier.fillMaxSize()
+    modifier = if (size==0.0){
+        Modifier.fillMaxSize()
     }
     else{
-        modifier = Modifier.size(size.dp)
+        Modifier.size(size.dp)
     }
 
     Image(
@@ -196,12 +195,70 @@ fun ImageFromUrl(url: String, contentDescription: String?, size: Double) {
     )
 }
 
+//thanh tìm kiếm
 @Composable
-fun SearchBar(){
-    var searchQuery by remember { mutableStateOf("") }
+fun SearchBar(
+    available: Set<PlaceLocation>,
+    context: Context
+) {
+    var searchQuery by remember { mutableStateOf(TextFieldValue()) }
 
-    OutlinedTextField(value = searchQuery, onValueChange = { newString ->
-        searchQuery = newString
-        //hiện suggestion
-    },)
+    Column {
+        BasicTextField(
+            value = searchQuery,
+            onValueChange = {
+                searchQuery = it
+            },
+            textStyle = TextStyle(color = Color.Black),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        )
+
+        if (searchQuery.text.isNotEmpty()) {
+            SuggestionList(
+                suggestions = available.filter { it.getName().contains(searchQuery.text, ignoreCase = true) }, context
+            )
+        }
+    }
+}
+
+@Composable
+private fun SuggestionList(
+    suggestions: List<PlaceLocation>,
+    context: Context
+) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.White)
+    ) {
+        items(suggestions.toTypedArray()) { suggestion ->
+            SuggestionItem(
+                suggestion = suggestion, context
+            )
+        }
+    }
+}
+
+@Composable
+private fun SuggestionItem(
+    suggestion: PlaceLocation,
+    context: Context
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                val intent = Intent(context, PlaceView::class.java)
+                intent.putExtra("location", suggestion)
+                context.startActivity(intent)
+            }
+    ) {
+        Text(
+            text = suggestion.getName(),
+            modifier = Modifier
+                .padding(16.dp)
+        )
+    }
 }

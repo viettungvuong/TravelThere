@@ -82,9 +82,9 @@ class City private constructor() {
     inner class RecommendationsRepository : ViewModel() {
 
         //những nơi nên đi tới
-        private var recommendations = ArrayList<PlaceLocation>()
+        private var recommendations = mutableSetOf<PlaceLocation>()
 
-        suspend fun refreshRecommendations(): ArrayList<PlaceLocation> {
+        suspend fun refreshRecommendations(): Set<PlaceLocation> {
             val query =
                 Firebase.firestore.collection(collectionCities).whereEqualTo(cityNameField, name)
                     .limit(1).get().await()

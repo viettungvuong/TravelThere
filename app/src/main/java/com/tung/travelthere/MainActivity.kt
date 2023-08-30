@@ -260,12 +260,12 @@ fun CityIntroduction(city: City) {
 //trang local recommended
 @Composable
 fun LocalRecommended(context: Context, city: City) {
-    var listState by remember { mutableStateOf(ArrayList<PlaceLocation>()) }
+    var listState by remember { mutableStateOf(setOf<PlaceLocation>()) }
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(listState) {
         coroutineScope.launch {
-            listState = City.getSingleton().RecommendationsRepository().refreshRecommendations()
+            listState = city.recommendationsRepository.refreshRecommendations()
             Log.d("list state add", listState.size.toString())
         }
     }
@@ -282,7 +282,7 @@ fun LocalRecommended(context: Context, city: City) {
             columns = GridCells.Fixed(2),
             modifier = Modifier.fillMaxSize(),
             content = {
-                items(listState) { location ->
+                items(listState.toTypedArray()) { location ->
                     SneakViewPlace(context, location)
                 }
             }
