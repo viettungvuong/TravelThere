@@ -32,25 +32,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.google.android.libraries.places.api.Places
-import com.google.maps.GeocodingApi
 import com.tung.travelthere.controller.*
 import com.tung.travelthere.objects.*
 import kotlinx.coroutines.*
 import java.net.URL
 import java.util.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.viewinterop.AndroidView
-import kotlin.collections.ArrayList
 
 
 class MainActivity : ComponentActivity() {
@@ -279,19 +273,21 @@ fun CityIntroduction(city: City) {
 //trang local recommended
 @Composable
 fun LocalRecommended(context: Context, city: City, chosenViewModel: CategoryChosenViewModel) {
-    var listState by remember { mutableStateOf(mutableSetOf<PlaceLocation>()) }
+    var listState = remember { mutableStateOf(mutableSetOf<PlaceLocation>()) }
+    var chosenState = remember { mutableStateOf(mutableSetOf<Category>()) }
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(listState) {
         coroutineScope.launch {
-            listState = city.recommendationsRepository.refreshRecommendations() as MutableSet<PlaceLocation>
+            listState.value =
+                city.recommendationsRepository.refreshRecommendations() as MutableSet<PlaceLocation>
         }
     }
 
     Column() {
         LazyRow(modifier = Modifier.padding(15.dp)) {
             itemsIndexed(Category.values()) { index, category -> //tương tự xuất ra location adapter
-                categoryView(category, colorBlue, true, chosenViewModel)
+                categoryView(category, colorBlue, true, listState, chosenState)
             }
         }
 
@@ -299,7 +295,7 @@ fun LocalRecommended(context: Context, city: City, chosenViewModel: CategoryChos
             columns = GridCells.Fixed(2),
             modifier = Modifier.fillMaxSize(),
             content = {
-                items(listState.toTypedArray()) { location ->
+                items(listState.value.toTypedArray()) { location ->
                     SneakViewPlace(context, location)
                 }
             }

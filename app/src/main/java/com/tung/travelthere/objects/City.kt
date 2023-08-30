@@ -82,9 +82,13 @@ class City private constructor() {
     inner class RecommendationsRepository : ViewModel() {
 
         //những nơi nên đi tới
-        private var recommendations = mutableSetOf<PlaceLocation>()
+        var recommendations = mutableSetOf<PlaceLocation>()
 
         suspend fun refreshRecommendations(): Set<PlaceLocation> {
+            if (recommendations.isNotEmpty()){
+                return recommendations
+            }
+
             val query =
                 Firebase.firestore.collection(collectionCities).whereEqualTo(cityNameField, name)
                     .limit(1).get().await()
@@ -106,7 +110,6 @@ class City private constructor() {
                     val t = TouristPlace(placeName, Position(lat, long), cityName)
 
                     recommendations.add(t)
-                    Log.d("recommendations added",recommendations.size.toString())
                 }
             }
 

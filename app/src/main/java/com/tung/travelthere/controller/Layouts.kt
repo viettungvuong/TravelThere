@@ -5,14 +5,10 @@ import android.content.Intent
 import android.util.Log
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Place
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,17 +17,15 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberImagePainter
 import com.tung.travelthere.PlaceView
 import com.tung.travelthere.R
-import com.tung.travelthere.SearchViewModel
 import com.tung.travelthere.objects.Category
+import com.tung.travelthere.objects.City
 import com.tung.travelthere.objects.PlaceLocation
 import kotlinx.coroutines.launch
 
@@ -41,8 +35,8 @@ fun categoryView(
     category: Category,
     color: Color,
     clickable: Boolean,
-    chosenViewModel: CategoryChosenViewModel? = null,
-    listState: Set<PlaceLocation>? = null
+    locationState: MutableState<MutableSet<PlaceLocation>>? = null,
+    chosenState: MutableState<MutableSet<Category>>? = null
 ) {
     var chosen by remember { mutableStateOf(false) }
 
@@ -83,11 +77,21 @@ fun categoryView(
             .then(if (clickable) Modifier.clickable {
                 chosen = !chosen //chọn hay chưa
                 if (chosen) {
-                    chosenViewModel!!.chosenCategories.add(category)
+                    chosenState!!.value.add(category)
                 } else {
-                    chosenViewModel!!.chosenCategories.remove(category)
+                    chosenState!!.value.remove(category)
                 }
-
+                if (chosenState!!.value.isNotEmpty()){
+                    locationState!!.value = locationState!!.value.filter {
+                        chosenState!!.value.all{
+                                category -> it.categories.contains(category)
+                        }
+                    }.toMutableSet()
+                }
+                else{
+                    locationState!!.value =
+                        City.getSingleton().recommendationsRepository.recommendations
+                }
             } else Modifier)
     ) {
         Image(
