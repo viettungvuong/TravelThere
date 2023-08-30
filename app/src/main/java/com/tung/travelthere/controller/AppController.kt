@@ -85,6 +85,3 @@ class AppController {
     }
 }
 
-class CategoryChosenViewModel(): ViewModel(){
-    val chosenCategories = mutableStateOf(mutableSetOf<Category>())
-}

@@ -3,6 +3,7 @@ package com.tung.travelthere
 import android.app.Activity
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -21,7 +22,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
-import com.tung.travelthere.controller.CategoryChosenViewModel
+
 import com.tung.travelthere.controller.SneakViewPlaceLong
 import com.tung.travelthere.controller.categoryView
 import com.tung.travelthere.controller.colorBlue
@@ -32,13 +33,13 @@ import com.tung.travelthere.ui.theme.TravelThereTheme
 import kotlinx.coroutines.launch
 
 lateinit var searchViewModel: SearchViewModel
-lateinit var chosenViewModel2: CategoryChosenViewModel
+
 class SearchPlace : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         searchViewModel = SearchViewModel()
-        chosenViewModel2 = CategoryChosenViewModel()
+
 
         setContent {
             TravelThereTheme {
@@ -54,7 +55,7 @@ class SearchPlace : ComponentActivity() {
     }
 }
 
-class SearchViewModel: ViewModel(){
+class SearchViewModel : ViewModel() {
     var matchedQuery = mutableStateListOf<PlaceLocation>()
 }
 
@@ -66,23 +67,19 @@ fun SearchBar(
     var searchQuery by remember { mutableStateOf(TextFieldValue()) }
 
     Column {
-        TextField(value = searchQuery,
+        TextField(
+            value = searchQuery,
             onValueChange = { newString ->
                 searchQuery = newString
 
-                searchViewModel.matchedQuery.removeAll(searchViewModel.matchedQuery)
-
-                if (newString.text.isNotBlank()) {
-                    searchViewModel.matchedQuery.addAll(available.filter {
-                        it.getName().contains(newString.text, ignoreCase = true)
-                    }.sortedBy {
-                        val similarity = it.getName()
-                            .commonPrefixWith(newString.text).length.toDouble() / newString.text.length
-                        //các từ nào tương đồng nhất sẽ được xếp trên đầu
-                        similarity
-                    })
+                searchViewModel.matchedQuery.clear()
+                searchViewModel.matchedQuery += available.filter {
+                    it.getName().contains(searchQuery.text, ignoreCase = true)
+                }.sortedBy {
+                    val similarity = it.getName()
+                        .commonPrefixWith(searchQuery.text).length.toDouble() / searchQuery.text.length
+                    similarity
                 }
-
             },
             textStyle = TextStyle(fontSize = 17.sp),
             leadingIcon = { Icon(Icons.Filled.Search, null, tint = Color.Gray) },
@@ -109,29 +106,13 @@ fun SearchPage(city: City, activity: Activity) {
     LaunchedEffect(listState) {
         coroutineScope.launch {
             listState = city.recommendationsRepository.refreshRecommendations()
+            Log.d("list state add", listState.size.toString())
         }
     }
 
 
     MaterialTheme() {
         Column() {
-            Box(
-                modifier = Modifier
-                    .size(32.dp)
-            ) {
-                FloatingActionButton(
-                    onClick = { activity.finish() },
-                    backgroundColor = Color.White,
-                    content = {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back",
-                            tint = colorBlue
-                        )
-                    }
-                )
-            }
-
             SearchBar(available = listState, context = activity, searchViewModel = searchViewModel)
 
             LazyRow(modifier = Modifier.padding(15.dp)) {
@@ -140,12 +121,12 @@ fun SearchPage(city: City, activity: Activity) {
                 }
             }
 
-            LazyColumn(){
-                items(searchViewModel.matchedQuery){
-                    location ->
+            LazyColumn() {
+                items(searchViewModel.matchedQuery) { location ->
                     SneakViewPlaceLong(context = activity, location = location, hasImage = false)
                 }
             }
         }
     }
 }
+
