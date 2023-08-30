@@ -6,18 +6,24 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.tung.travelthere.controller.SearchBar
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
+import com.tung.travelthere.controller.SneakViewPlaceLong
 import com.tung.travelthere.controller.categoryView
 import com.tung.travelthere.controller.colorBlue
 import com.tung.travelthere.objects.Category
@@ -26,9 +32,11 @@ import com.tung.travelthere.objects.PlaceLocation
 import com.tung.travelthere.ui.theme.TravelThereTheme
 import kotlinx.coroutines.launch
 
+lateinit var searchViewModel: SearchViewModel
 class SearchPlace : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        searchViewModel = SearchViewModel()
         setContent {
             TravelThereTheme {
                 // A surface container using the 'background' color from the theme
@@ -43,6 +51,48 @@ class SearchPlace : ComponentActivity() {
     }
 }
 
+class SearchViewModel: ViewModel(){
+    var matchedQuery = mutableStateListOf<PlaceLocation>()
+}
+
+//thanh tìm kiếm
+@Composable
+fun SearchBar(
+    available: Set<PlaceLocation>, searchViewModel: SearchViewModel, context: Context
+) {
+    var searchQuery by remember { mutableStateOf(TextFieldValue()) }
+
+    Column {
+        TextField(value = searchQuery,
+            onValueChange = { newString ->
+                searchQuery = newString
+
+                searchViewModel.matchedQuery.clear()
+                searchViewModel.matchedQuery += available.filter {
+                    it.getName().contains(searchQuery.text, ignoreCase = true)
+                }.sortedBy {
+                    val similarity = it.getName()
+                        .commonPrefixWith(searchQuery.text).length.toDouble() / searchQuery.text.length
+                    similarity
+                }
+            },
+            textStyle = TextStyle(fontSize = 17.sp),
+            leadingIcon = { Icon(Icons.Filled.Search, null, tint = Color.Gray) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 5.dp)
+                .background(Color(0xFFE7F1F1), RoundedCornerShape(16.dp)),
+            placeholder = { Text(text = "Search") },
+            colors = TextFieldDefaults.textFieldColors(
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                backgroundColor = Color.Transparent,
+                cursorColor = Color.DarkGray
+            )
+        )
+    }
+}
+
 @Composable
 fun SearchPage(city: City, activity: Activity) {
     var listState by remember { mutableStateOf(setOf<PlaceLocation>()) }
@@ -51,9 +101,9 @@ fun SearchPage(city: City, activity: Activity) {
     LaunchedEffect(listState) {
         coroutineScope.launch {
             listState = city.recommendationsRepository.refreshRecommendations()
-            Log.d("list state add", listState.size.toString())
         }
     }
+
 
     MaterialTheme() {
         Column() {
@@ -74,11 +124,18 @@ fun SearchPage(city: City, activity: Activity) {
                 )
             }
 
-            SearchBar(available = listState, context = activity)
+            SearchBar(available = listState, context = activity, searchViewModel = searchViewModel)
 
             LazyRow(modifier = Modifier.padding(15.dp)) {
                 itemsIndexed(Category.values()) { index, category -> //tương tự xuất ra location adapter
                     categoryView(category, colorBlue, true)
+                }
+            }
+
+            LazyColumn(){
+                items(searchViewModel.matchedQuery){
+                    location ->
+                    SneakViewPlaceLong(context = activity, location = location)
                 }
             }
         }
