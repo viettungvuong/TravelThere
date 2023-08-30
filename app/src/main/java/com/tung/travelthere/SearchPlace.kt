@@ -23,6 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
+import com.tung.travelthere.controller.CategoryChosenViewModel
 import com.tung.travelthere.controller.SneakViewPlaceLong
 import com.tung.travelthere.controller.categoryView
 import com.tung.travelthere.controller.colorBlue
@@ -35,10 +36,14 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 lateinit var searchViewModel: SearchViewModel
+lateinit var chosenViewModel2: CategoryChosenViewModel
 class SearchPlace : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         searchViewModel = SearchViewModel()
+        chosenViewModel2 = CategoryChosenViewModel()
+
         setContent {
             TravelThereTheme {
                 // A surface container using the 'background' color from the theme
@@ -135,7 +140,7 @@ fun SearchPage(city: City, activity: Activity) {
 
             LazyRow(modifier = Modifier.padding(15.dp)) {
                 itemsIndexed(Category.values()) { index, category -> //tương tự xuất ra location adapter
-                    categoryView(category, colorBlue, true)
+                    categoryView(category, colorBlue, true, chosenViewModel2)
                 }
             }
 

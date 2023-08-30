@@ -7,20 +7,18 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
 import coil.compose.rememberImagePainter
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.tung.travelthere.PlaceAutocompleteViewModel
-import com.tung.travelthere.objects.City
-import com.tung.travelthere.objects.PlaceLocation
-import com.tung.travelthere.objects.Position
-import com.tung.travelthere.objects.User
+import com.tung.travelthere.objects.*
 import java.text.SimpleDateFormat
 import java.time.format.DateTimeFormatter
 
@@ -87,3 +85,6 @@ class AppController {
     }
 }
 
+class CategoryChosenViewModel(): ViewModel(){
+    val chosenCategories = mutableSetOf<Category>()
+}

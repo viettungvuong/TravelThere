@@ -54,15 +54,19 @@ import kotlin.collections.ArrayList
 
 
 class MainActivity : ComponentActivity() {
+    lateinit var chosenViewModel: CategoryChosenViewModel
+    //để biết chọn category nào
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        chosenViewModel = CategoryChosenViewModel()
 
         Places.initialize(this, "AIzaSyCytvnlz93VlDAMs2RsndMo-HVgd0fl-lQ")
         AppController.placeViewModel = PlaceAutocompleteViewModel(this)
 
         setContent {
-            Home(this)
+            Home(this, chosenViewModel)
         }
         //setContentView(R.layout.login_register_activity);
     }
@@ -70,7 +74,7 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun Home(context: Context) {
+fun Home(context: Context, chosenViewModel: CategoryChosenViewModel) {
     val tabTitles = listOf("Nearby", "Recommended", "Tourist attractions")
     val pagerState = rememberPagerState(initialPage = 0)
     val coroutineScope = rememberCoroutineScope()
@@ -153,8 +157,16 @@ fun Home(context: Context) {
                     HorizontalPager(state = pagerState, pageCount = tabTitles.size) { page ->
 
                         when (page) {
-                            0 -> LocalRecommended(context, city = City.getSingleton())
-                            1 -> LocalRecommended(context, city = City.getSingleton())
+                            0 -> LocalRecommended(
+                                context,
+                                city = City.getSingleton(),
+                                chosenViewModel
+                            )
+                            1 -> LocalRecommended(
+                                context,
+                                city = City.getSingleton(),
+                                chosenViewModel
+                            )
                         }
                     }
                 }
@@ -266,21 +278,20 @@ fun CityIntroduction(city: City) {
 
 //trang local recommended
 @Composable
-fun LocalRecommended(context: Context, city: City) {
-    var listState by remember { mutableStateOf(setOf<PlaceLocation>()) }
+fun LocalRecommended(context: Context, city: City, chosenViewModel: CategoryChosenViewModel) {
+    var listState by remember { mutableStateOf(mutableSetOf<PlaceLocation>()) }
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(listState) {
         coroutineScope.launch {
-            listState = city.recommendationsRepository.refreshRecommendations()
-            Log.d("list state add", listState.size.toString())
+            listState = city.recommendationsRepository.refreshRecommendations() as MutableSet<PlaceLocation>
         }
     }
 
     Column() {
         LazyRow(modifier = Modifier.padding(15.dp)) {
             itemsIndexed(Category.values()) { index, category -> //tương tự xuất ra location adapter
-                categoryView(category, colorBlue, true)
+                categoryView(category, colorBlue, true, chosenViewModel)
             }
         }
 
@@ -320,8 +331,3 @@ fun InteractLocal(city: City) {
 
 }
 
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    Home(LocalContext.current)
-}

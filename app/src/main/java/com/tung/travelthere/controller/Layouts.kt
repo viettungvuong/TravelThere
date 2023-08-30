@@ -37,7 +37,13 @@ import kotlinx.coroutines.launch
 
 //phần hiện ra danh sách các categories
 @Composable
-fun categoryView(category: Category, color: Color, clickable: Boolean) {
+fun categoryView(
+    category: Category,
+    color: Color,
+    clickable: Boolean,
+    chosenViewModel: CategoryChosenViewModel? = null,
+    listState: Set<PlaceLocation>? = null
+) {
     var chosen by remember { mutableStateOf(false) }
 
     var painter: Painter? = null
@@ -74,7 +80,15 @@ fun categoryView(category: Category, color: Color, clickable: Boolean) {
                 color = if (chosen) Color(0xff365875) else Color.Transparent,
                 shape = RoundedCornerShape(4.dp),
             )
-            .then(if (clickable) Modifier.clickable { chosen = !chosen } else Modifier)
+            .then(if (clickable) Modifier.clickable {
+                chosen = !chosen //chọn hay chưa
+                if (chosen) {
+                    chosenViewModel!!.chosenCategories.add(category)
+                } else {
+                    chosenViewModel!!.chosenCategories.remove(category)
+                }
+
+            } else Modifier)
     ) {
         Image(
             painter = painter!!,
@@ -151,7 +165,7 @@ fun SneakViewPlaceLong(context: Context, location: PlaceLocation, hasImage: Bool
             }), elevation = 10.dp
     ) {
         Row {
-            if (hasImage){
+            if (hasImage) {
                 ImageFromUrl(url = imageUrl ?: "", contentDescription = null, 150.0)
             }
 
