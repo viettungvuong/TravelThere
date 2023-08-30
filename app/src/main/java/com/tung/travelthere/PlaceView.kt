@@ -248,12 +248,13 @@ class PlaceView : ComponentActivity() {
 
         Button(
             onClick = {
-                AppController.Favorites.getSingleton().addFavorite(location)
                 indexFav = if (!indexFav) {
+                    AppController.Favorites.getSingleton().addFavorite(location)
                     Toast.makeText(this, "Added to favorites", Toast.LENGTH_SHORT).show()
                     true
                 }//thêm địa điểm vào favorite
                 else{
+                    AppController.Favorites.getSingleton().removeFavorite(location)
                     Toast.makeText(this, "Remove from favorites", Toast.LENGTH_SHORT).show()
                     false
                 }
@@ -262,8 +263,6 @@ class PlaceView : ComponentActivity() {
             colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFF36D72)),
             modifier = Modifier.fillMaxWidth()
         ) {
-
-
             Row(
             ) {
                 Icon(
@@ -279,6 +278,28 @@ class PlaceView : ComponentActivity() {
                 } else {
                     Text(text = "Remove from favorites", color = Color.White)
                 }
+            }
+        }
+
+        Button(
+            onClick = {
+                      //mở google maps chỉ đường
+            }
+            ,
+            colors = ButtonDefaults.buttonColors(backgroundColor = Color.Green),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+            ) {
+                Icon(
+                    imageVector = Icons.Default.LocationOn,
+                    contentDescription = "Favorite",
+                    tint = Color.White
+                )
+
+                Spacer(modifier = Modifier.width(20.dp))
+
+                Text(text = "Navigate", color = Color.White)
             }
         }
 
