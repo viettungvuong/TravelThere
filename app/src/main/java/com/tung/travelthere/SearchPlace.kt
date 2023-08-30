@@ -30,7 +30,9 @@ import com.tung.travelthere.objects.Category
 import com.tung.travelthere.objects.City
 import com.tung.travelthere.objects.PlaceLocation
 import com.tung.travelthere.ui.theme.TravelThereTheme
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 lateinit var searchViewModel: SearchViewModel
 class SearchPlace : ComponentActivity() {
@@ -67,14 +69,19 @@ fun SearchBar(
             onValueChange = { newString ->
                 searchQuery = newString
 
-                searchViewModel.matchedQuery.clear()
-                searchViewModel.matchedQuery += available.filter {
-                    it.getName().contains(searchQuery.text, ignoreCase = true)
-                }.sortedBy {
-                    val similarity = it.getName()
-                        .commonPrefixWith(searchQuery.text).length.toDouble() / searchQuery.text.length
-                    similarity
+                searchViewModel.matchedQuery.removeAll(searchViewModel.matchedQuery)
+
+                if (newString.text.isNotBlank()) {
+                    searchViewModel.matchedQuery.addAll(available.filter {
+                        it.getName().contains(newString.text, ignoreCase = true)
+                    }.sortedBy {
+                        val similarity = it.getName()
+                            .commonPrefixWith(newString.text).length.toDouble() / newString.text.length
+                        //các từ nào tương đồng nhất sẽ được xếp trên đầu
+                        similarity
+                    })
                 }
+
             },
             textStyle = TextStyle(fontSize = 17.sp),
             leadingIcon = { Icon(Icons.Filled.Search, null, tint = Color.Gray) },
@@ -135,7 +142,7 @@ fun SearchPage(city: City, activity: Activity) {
             LazyColumn(){
                 items(searchViewModel.matchedQuery){
                     location ->
-                    SneakViewPlaceLong(context = activity, location = location)
+                    SneakViewPlaceLong(context = activity, location = location, hasImage = false)
                 }
             }
         }

@@ -119,7 +119,7 @@ fun SneakViewPlace(context: Context, location: PlaceLocation) {
 }
 
 @Composable
-fun SneakViewPlaceLong(context: Context, location: PlaceLocation) {
+fun SneakViewPlaceLong(context: Context, location: PlaceLocation, hasImage: Boolean = true) {
     var imageUrl by remember { mutableStateOf<String?>(null) }
     val coroutineScope = rememberCoroutineScope()
 
@@ -141,7 +141,9 @@ fun SneakViewPlaceLong(context: Context, location: PlaceLocation) {
             }), elevation = 10.dp
     ) {
         Row {
-            ImageFromUrl(url = imageUrl ?: "", contentDescription = null, 150.0)
+            if (hasImage){
+                ImageFromUrl(url = imageUrl ?: "", contentDescription = null, 150.0)
+            }
 
             Column(
                 modifier = Modifier
