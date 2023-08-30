@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -62,7 +63,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             Home(this, chosenViewModel)
         }
-        //setContentView(R.layout.login_register_activity);
+//        val intent = Intent(this@MainActivity, RegisterLoginActivity::class.java)
+//        startActivity(intent)
     }
 }
 
