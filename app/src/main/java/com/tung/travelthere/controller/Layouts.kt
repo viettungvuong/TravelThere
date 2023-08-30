@@ -38,6 +38,8 @@ import kotlinx.coroutines.launch
 //phần hiện ra danh sách các categories
 @Composable
 fun categoryView(category: Category, color: Color, clickable: Boolean) {
+    var chosen by remember { mutableStateOf(false) }
+
     var painter: Painter? = null
 
     painter = when (category) {
@@ -62,9 +64,19 @@ fun categoryView(category: Category, color: Color, clickable: Boolean) {
         Category.SHOPPING -> "Shopping"
     }
 
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(vertical = 10.dp)
+        modifier = Modifier
+            .padding(vertical = 10.dp)
+            .clickable {
+                chosen = !chosen
+            }
+            .border(
+                width = if (chosen) 1.dp else 0.dp,
+                color = if (chosen) Color(0xff365875) else Color.Transparent,
+                shape = RoundedCornerShape(4.dp),
+            )
     ) {
         Image(
             painter = painter!!,
