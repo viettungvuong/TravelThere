@@ -26,9 +26,9 @@ class PlaceAutocompleteViewModel(private val context: Context): ViewModel() {
 
     var placeSuggestions= mutableStateListOf<AutocompleteResult>() //chứa autocomplete
 
-    var currentName= mutableStateOf("")
-    var currentCity= mutableStateOf("")
-    var currentPos= mutableStateOf(Position(0.0,0.0))
+    var currentName by mutableStateOf("")
+    var currentCity by mutableStateOf("")
+    var currentPos by mutableStateOf(Position(0.0,0.0))
 
 
     fun fetchPlaceSuggestions(query: String) {
@@ -62,7 +62,7 @@ class PlaceAutocompleteViewModel(private val context: Context): ViewModel() {
         placesClient.fetchPlace(request)
             .addOnSuccessListener {
                 if (it != null) {
-                    currentName.value = it.place.name?:""
+                    currentName = it.place.name?:""
                 }
             }
             .addOnFailureListener {
@@ -78,15 +78,14 @@ class PlaceAutocompleteViewModel(private val context: Context): ViewModel() {
                 if (it != null) {
                     val geocoder = Geocoder(context, Locale.getDefault())
                     val latLng = it.place.latLng
-                    currentPos.value = Position(latLng.latitude,latLng.longitude)
+                    currentPos = Position(latLng.latitude,latLng.longitude)
                     val addresses = geocoder.getFromLocation(latLng.latitude,latLng.longitude,1)
                     if (addresses != null) {
-                        currentCity.value = if (addresses[0].locality==null){
+                        currentCity = if (addresses[0].locality==null){
                             addresses[0].adminArea //lấy tên thành phố theo tên tỉnh
                         } else{
                             addresses[0].locality
                         }
-
                     }
                 }
             }
@@ -96,9 +95,9 @@ class PlaceAutocompleteViewModel(private val context: Context): ViewModel() {
     }
 
     override fun onCleared() {
-        currentName.value = ""
-        currentCity.value = ""
-        currentPos.value = Position(0.0,0.0)
+        currentName = ""
+        currentCity = ""
+        currentPos = Position(0.0,0.0)
 
         super.onCleared()
     }

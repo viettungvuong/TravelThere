@@ -57,7 +57,6 @@ class MainActivity : ComponentActivity() {
 
 
         Places.initialize(this, "AIzaSyCytvnlz93VlDAMs2RsndMo-HVgd0fl-lQ")
-        AppController.placeViewModel = PlaceAutocompleteViewModel(this)
 
         setContent {
             Home(this)

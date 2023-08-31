@@ -79,9 +79,9 @@ class AppController {
 
         val currentUser = User() //user hiện tại
 
-        lateinit var placeViewModel: PlaceAutocompleteViewModel //view model cho place
+        lateinit var currentPosition: UserPlace //địa điểm hiện tại
 
-        lateinit var currentPosition: UserPlace
+        val db = Firebase.firestore
     }
 }
 

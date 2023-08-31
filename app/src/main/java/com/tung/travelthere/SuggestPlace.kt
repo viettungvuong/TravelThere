@@ -50,7 +50,7 @@ import java.io.File
 
 class SuggestPlace : ComponentActivity() {
 
-    private var currentLocation: PlaceLocation?=null //location hiện tại (location người dùng muốn suggest)
+
 
     inner class ImageViewModel {
         var currentChosenImage by mutableStateOf<String>("")
@@ -74,13 +74,16 @@ class SuggestPlace : ComponentActivity() {
         }
     }
 
+    lateinit var placeViewModel: PlaceAutocompleteViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         imageViewModel = ImageViewModel()
+        placeViewModel = PlaceAutocompleteViewModel(this)
 
         setContent {
-            suggestPlace()
+            suggestPlace(placeViewModel)
         }
     }
 
@@ -88,11 +91,13 @@ class SuggestPlace : ComponentActivity() {
 
     @OptIn(ExperimentalComposeUiApi::class)
     @Composable
-    private fun suggestPlace() {
+    private fun suggestPlace(placeViewModel: PlaceAutocompleteViewModel) {
         var searchPlace = remember { mutableStateOf("") }
-        var chosenPlaceName by remember { AppController.placeViewModel.currentName }
-        var chosenPlaceCity by remember { AppController.placeViewModel.currentCity }
-        var chosenPlacePos by remember { AppController.placeViewModel.currentPos }
+        var chosenPlaceName by remember { mutableStateOf("") }
+        var chosenPlaceCity by remember {mutableStateOf("") }
+        var chosenPlacePos by remember { mutableStateOf(Position(0.0,0.0)) }
+
+        var currentLocation: PlaceLocation?=null //location hiện tại (location người dùng muốn suggest)
 
         var listState = rememberLazyListState()
         var scaffoldState = rememberScaffoldState()
@@ -101,10 +106,13 @@ class SuggestPlace : ComponentActivity() {
 
 
 
-        LaunchedEffect(AppController.placeViewModel.currentName,AppController.placeViewModel.currentCity) {
-            chosenPlaceName = AppController.placeViewModel.currentName.value
-            chosenPlaceCity = AppController.placeViewModel.currentCity.value
-            chosenPlacePos = AppController.placeViewModel.currentPos.value
+        LaunchedEffect(placeViewModel.currentName,placeViewModel.currentCity) {
+            chosenPlaceName = placeViewModel.currentName
+            chosenPlaceCity = placeViewModel.currentCity
+            chosenPlacePos = placeViewModel.currentPos
+
+            currentLocation = RecommendedPlace(chosenPlaceName,chosenPlacePos,chosenPlaceCity) //đặt location đang được suggest
+            Log.d("current location",currentLocation.toString())
         }
 
 
@@ -166,7 +174,7 @@ class SuggestPlace : ComponentActivity() {
                         value = searchPlace.value,
                         onValueChange = { newString ->
                             searchPlace.value = newString
-                            AppController.placeViewModel.fetchPlaceSuggestions(newString)
+                            placeViewModel.fetchPlaceSuggestions(newString)
                         },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -177,7 +185,7 @@ class SuggestPlace : ComponentActivity() {
                     )
                 }
 
-                placeSuggestionsAutocomplete(listState, searchPlace, keyboardController)
+                placeSuggestionsAutocomplete(listState, searchPlace, keyboardController, placeViewModel)
 
                 Box(
                     modifier = Modifier
@@ -239,9 +247,9 @@ class SuggestPlace : ComponentActivity() {
 
     @OptIn(ExperimentalComposeUiApi::class)
     @Composable
-    private fun placeSuggestionsAutocomplete(listState: LazyListState = rememberLazyListState(), searchPlace: MutableState<String>, keyboardController: SoftwareKeyboardController?){
+    private fun placeSuggestionsAutocomplete(listState: LazyListState = rememberLazyListState(), searchPlace: MutableState<String>, keyboardController: SoftwareKeyboardController?, placeViewModel: PlaceAutocompleteViewModel){
         LazyColumn(state = listState) {
-            items(AppController.placeViewModel.placeSuggestions) {
+            items(placeViewModel.placeSuggestions) {
                 Box(
                     modifier = Modifier
                         .padding(10.dp)
@@ -251,9 +259,9 @@ class SuggestPlace : ComponentActivity() {
                             .fillMaxWidth()
                             .padding(16.dp)
                             .clickable(onClick = {
-                                chooseLocation(it)
+                                chooseLocation(placeViewModel,it)
 
-                                AppController.placeViewModel.placeSuggestions.clear()
+                                placeViewModel.placeSuggestions.clear()
                                 searchPlace.value = ""
                                 keyboardController?.hide()
                             }
@@ -280,26 +288,17 @@ class SuggestPlace : ComponentActivity() {
     }
 
 
-    @Preview(showBackground = true)
-    @Composable
-    private fun DefaultPreview() {
-        suggestPlace()
-    }
 
     //chọn hình ảnh
     private fun chooseImage() {
         pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
     }
 
-    private fun chooseLocation(autocompleteResult: AutocompleteResult){
+    private fun chooseLocation(placeViewModel: PlaceAutocompleteViewModel, autocompleteResult: AutocompleteResult){
         //lấy các thông tin của địa điểm chọn
-        AppController.placeViewModel.getName(autocompleteResult)
-        AppController.placeViewModel.retrieveOtherInfo(autocompleteResult)
+        placeViewModel.getName(autocompleteResult)
+        placeViewModel.retrieveOtherInfo(autocompleteResult)
 
-        val currentName = AppController.placeViewModel.currentName.value
-        val currentCity = AppController.placeViewModel.currentCity.value
-        val currentPosition = AppController.placeViewModel.currentPos.value
 
-        currentLocation = RecommendedPlace(currentName,currentPosition,currentCity) //đặt location đang được suggest
     }
 }

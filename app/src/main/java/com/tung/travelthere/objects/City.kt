@@ -64,7 +64,7 @@ class City private constructor() {
         var res: String? = null
 
         val query =
-            Firebase.firestore.collection(collectionCities).whereEqualTo(cityNameField, name)
+            AppController.db.collection(collectionCities).whereEqualTo(cityNameField, name)
                 .limit(1).get().await()
         val document = query.documents.firstOrNull()
         if (document != null) {
@@ -90,7 +90,7 @@ class City private constructor() {
             }
 
             val query =
-                Firebase.firestore.collection(collectionCities).whereEqualTo(cityNameField, name)
+                AppController.db.collection(collectionCities).whereEqualTo(cityNameField, name)
                     .limit(1).get().await()
 
             val document = query.documents.firstOrNull()

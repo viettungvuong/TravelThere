@@ -5,10 +5,7 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 import com.tung.travelthere.Review
-import com.tung.travelthere.controller.cityNameField
-import com.tung.travelthere.controller.collectionCities
-import com.tung.travelthere.controller.collectionLocations
-import com.tung.travelthere.controller.locationNameField
+import com.tung.travelthere.controller.*
 import kotlinx.coroutines.tasks.await
 import kotlin.collections.ArrayList
 
@@ -82,7 +79,7 @@ open class PlaceLocation protected constructor(private val name: String, private
 
         var res: String? = null
 
-        val query = Firebase.firestore.collection(collectionCities).whereEqualTo(cityNameField, cityName)
+        val query = AppController.db.collection(collectionCities).whereEqualTo(cityNameField, cityName)
             .limit(1).get().await()
         val document = query.documents.firstOrNull()
         if (document != null) {
