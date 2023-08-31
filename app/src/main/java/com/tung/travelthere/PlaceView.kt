@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.lifecycle.ViewModel
 import com.tung.travelthere.controller.*
 import com.tung.travelthere.objects.Category
 import com.tung.travelthere.objects.PlaceLocation
@@ -36,6 +37,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+
+val reviewFilters = listOf("0 - 4", "5 - 8", "9 - 10")
+val colorFirst = Color.Red
+val colorSecond = Color(0xffa88132)
+val colorThird = Color(0xff326e14)
 
 class PlaceView : ComponentActivity() {
     lateinit var location: PlaceLocation
@@ -53,7 +59,7 @@ class PlaceView : ComponentActivity() {
     override fun onResume() {
         super.onResume()
 
-        runBlocking{
+        runBlocking {
             location.reviewRepository.refreshReviews() //lấy các review đánh giá
         }
     }
@@ -66,7 +72,7 @@ class PlaceView : ComponentActivity() {
         val pagerState = rememberPagerState(initialPage = 0)
         val coroutineScope = rememberCoroutineScope()
 
-        LaunchedEffect(imageUrl){
+        LaunchedEffect(imageUrl) {
             coroutineScope.launch {
                 imageUrl = location.fetchImageUrl()
             }
@@ -187,10 +193,14 @@ class PlaceView : ComponentActivity() {
 
     @Composable
     fun aboutPlace(location: PlaceLocation) {
-        var indexFav by remember { mutableStateOf(AppController.Favorites.getSingleton().isFavorite(location)) }
+        var indexFav by remember {
+            mutableStateOf(
+                AppController.Favorites.getSingleton().isFavorite(location)
+            )
+        }
         var iconVector by remember { mutableStateOf(Icons.Default.Favorite) }
 
-        LaunchedEffect(indexFav){
+        LaunchedEffect(indexFav) {
             iconVector = if (!indexFav) {
                 Icons.Default.Favorite
             } else {
@@ -244,13 +254,12 @@ class PlaceView : ComponentActivity() {
                     Toast.makeText(this, "Added to favorites", Toast.LENGTH_SHORT).show()
                     true
                 }//thêm địa điểm vào favorite
-                else{
+                else {
                     AppController.Favorites.getSingleton().removeFavorite(location)
                     Toast.makeText(this, "Remove from favorites", Toast.LENGTH_SHORT).show()
                     false
                 }
-            }
-            ,
+            },
             colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFF36D72)),
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -274,10 +283,9 @@ class PlaceView : ComponentActivity() {
 
         Button(
             onClick = {
-                      //mở google maps chỉ đường
-            }
-            ,
-            colors = ButtonDefaults.buttonColors(backgroundColor = Color.Green),
+                //mở google maps chỉ đường
+            },
+            colors = ButtonDefaults.buttonColors(backgroundColor = colorThird),
             modifier = Modifier.fillMaxWidth()
         ) {
             Row(
@@ -296,21 +304,40 @@ class PlaceView : ComponentActivity() {
 
     }
 
+    var chosenState by mutableStateOf(-1)
+
     //phần xem những đánh giá về địa điểm
     @Composable
     fun reviewsPlace(location: PlaceLocation) {
-        var listState = remember { mutableStateOf(listOf<Review>()) }
+        var listState = remember { mutableStateOf(mutableListOf<Review>()) }
+        var originalState = remember { mutableStateOf(mutableListOf<Review>()) }
+
         val coroutineScope = rememberCoroutineScope()
 
-        LaunchedEffect(listState) {
+        LaunchedEffect(originalState) {
             coroutineScope.launch {
-                listState.value =
-                    location.reviewRepository.refreshReviews()
-                Log.d("list state value",listState.value.toString())
+                originalState.value =
+                    location.reviewRepository.refreshReviews() as MutableList<Review>
+                listState.value = originalState.value
             }
         }
 
-        Box(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            Box(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    for (i in reviewFilters.indices) {
+                        filterReviewEach(i, listState, originalState)
+                    }
+                }
+            }
+
             LazyColumn() {
                 itemsIndexed(listState.value.toTypedArray()) { index, review ->
                     reviewLayout(review = review)
@@ -347,11 +374,11 @@ class PlaceView : ComponentActivity() {
 
                 var color: Color? = null
                 if (review.score in 0..4) {
-                    color = Color.Red
+                    color = colorFirst
                 } else if (review.score in 5..8) {
-                    color = Color(0xffa88132)
+                    color = colorSecond
                 } else {
-                    color = Color(0xff326e14)
+                    color = colorThird
                 }
                 Box(modifier = Modifier.padding(10.dp)) {
                     Text(
@@ -366,8 +393,76 @@ class PlaceView : ComponentActivity() {
         }
     }
 
+
     @Composable
-    fun discussionsPlace(location: PlaceLocation) {
+    private fun filterReviewEach(
+        index: Int, reviewState: MutableState<MutableList<Review>>,
+        originalState: MutableState<MutableList<Review>>
+    ) {
+        var chosenIndex by remember { mutableStateOf(-1) }
+
+        LaunchedEffect(chosenState){
+            chosenIndex = chosenState
+        }
+
+        Box(modifier = Modifier
+            .padding(5.dp)
+            .border(
+                width = if (chosenIndex==index) 1.dp else 0.dp,
+                color = if (chosenIndex==index) Color(0xff365875) else Color.Transparent,
+                shape = RoundedCornerShape(4.dp),
+            )
+            .padding(10.dp)
+            .clickable {
+                for (i in reviewFilters.indices) {
+                    if (i == index)
+                        continue
+                }
+                if (chosenState==index){
+                    chosenState = -1 //bỏ chọn
+                    reviewState!!.value = originalState!!.value
+                } else{
+                    chosenState = index //chọn
+                    reviewState!!.value = originalState!!.value.filter {
+                        val filterBool = (
+                                when (index) {
+                                    0 -> it.score in 0..4
+                                    1 -> it.score in 5..8
+                                    else -> it.score in 9..10
+                                })
+
+                        filterBool
+                    } as MutableList<Review>
+
+                }
+
+
+            }) {
+            Row() {
+                Text(
+                    text = reviewFilters[index],
+                    color = if (index==0) {
+                        colorFirst
+                    } else if (index==1) {
+                        colorSecond
+                    } else {
+                        colorThird
+                    }
+                )
+            }
+        }
+    }
+
+    //nếu đã up review rồi thì hiện review của người dùng và cho chỉnh sửa
+    //nếu chưa thì cho phép tạo review
+    @Composable
+    private fun yourReview() {
+
+    }
+
+
+    @Composable
+    private fun discussionsPlace(location: PlaceLocation) {
 
     }
 

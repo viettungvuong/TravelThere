@@ -63,266 +63,268 @@ class MainActivity : ComponentActivity() {
         }
         //setContentView(R.layout.login_register_activity);
     }
-}
 
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun Home(context: Context) {
-    val tabTitles = listOf("Nearby", "Recommended", "Tourist attractions")
-    val pagerState = rememberPagerState(initialPage = 0)
-    val coroutineScope = rememberCoroutineScope()
-    val scaffoldState = rememberScaffoldState()
+    @OptIn(ExperimentalFoundationApi::class)
+    @Composable
+    fun Home(context: Context) {
+        val tabTitles = listOf("Nearby", "Recommended", "Tourist attractions")
+        val pagerState = rememberPagerState(initialPage = 0)
+        val coroutineScope = rememberCoroutineScope()
+        val scaffoldState = rememberScaffoldState()
 
-    Scaffold(
-        bottomBar = {
-            BottomAppBar(cutoutShape = CircleShape, backgroundColor = colorBlue) {
-                IconButton(onClick = { /* Handle click action */ }) {
+        Scaffold(
+            bottomBar = {
+                BottomAppBar(cutoutShape = CircleShape, backgroundColor = colorBlue) {
+                    IconButton(onClick = { /* Handle click action */ }) {
+                        Icon(
+                            imageVector = Icons.Default.Home,
+                            tint = Color.White,
+                            contentDescription = "Home"
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(10.dp))
+                    IconButton(onClick = {
+                        val intent = Intent(context, FavoritePage::class.java)
+                        context.startActivity(intent)
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Favorite,
+                            tint = Color.White,
+                            contentDescription = "Favorite"
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(10.dp))
+                    IconButton(onClick = {
+                        val intent = Intent(context, SuggestPlace::class.java)
+                        context.startActivity(intent)
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            tint = Color.White,
+                            contentDescription = "Add"
+                        )
+                    }
+                }
+            },
+            floatingActionButton = {
+                FloatingActionButton(
+                    onClick = {
+                        val intent = Intent(context, SearchPlace::class.java)
+                        context.startActivity(intent)
+                    },
+                    backgroundColor = Color(android.graphics.Color.parseColor("#b3821b"))
+                ) {
                     Icon(
-                        imageVector = Icons.Default.Home,
-                        tint = Color.White,
-                        contentDescription = "Home"
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "Search",
+                        tint = Color.White
                     )
                 }
-                Spacer(modifier = Modifier.width(10.dp))
-                IconButton(onClick = {
-                    val intent = Intent(context, FavoritePage::class.java)
-                    context.startActivity(intent)
-                }) {
-                    Icon(
-                        imageVector = Icons.Default.Favorite,
-                        tint = Color.White,
-                        contentDescription = "Favorite"
-                    )
+            },
+            floatingActionButtonPosition = FabPosition.End,
+            isFloatingActionButtonDocked = true,
+            scaffoldState = scaffoldState
+        ) { padding ->
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Box(
+                    modifier = Modifier.weight(0.5f)
+                ) {
+                    CityIntroduction(City.getSingleton()) //phần thông tin thành phố hiện tại
                 }
-                Spacer(modifier = Modifier.width(10.dp))
-                IconButton(onClick = {
-                    val intent = Intent(context, SuggestPlace::class.java)
-                    context.startActivity(intent)
-                }) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        tint = Color.White,
-                        contentDescription = "Add"
-                    )
+
+                Box(
+                    modifier = Modifier.weight(1.5f)
+                ) {
+                    Column {
+                        tabLayout(
+                            pagerState = pagerState,
+                            tabTitles = tabTitles,
+                            coroutineScope = coroutineScope
+                        )
+
+                        HorizontalPager(state = pagerState, pageCount = tabTitles.size) { page ->
+
+                            when (page) {
+                                0 -> LocalRecommended(
+                                    context,
+                                    city = City.getSingleton(),
+                                )
+                                1 -> LocalRecommended(
+                                    context,
+                                    city = City.getSingleton(),
+                                )
+                            }
+                        }
+                    }
                 }
             }
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-                    val intent = Intent(context, SearchPlace::class.java)
-                    context.startActivity(intent)
-                },
-                backgroundColor = Color(android.graphics.Color.parseColor("#b3821b"))
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = "Search",
-                    tint = Color.White
+
+        }
+    }
+
+    @OptIn(ExperimentalFoundationApi::class)
+    @Composable
+    fun tabLayout(pagerState: PagerState, tabTitles: List<String>, coroutineScope: CoroutineScope) {
+        TabRow(
+            selectedTabIndex = pagerState.currentPage,
+            backgroundColor = colorBlue,
+            contentColor = Color.White,
+            modifier = Modifier
+                .padding(vertical = 4.dp, horizontal = 8.dp)
+                .clip(RoundedCornerShape(50))
+                .shadow(AppBarDefaults.TopAppBarElevation)
+                .zIndex(10f),
+        ) {
+            tabTitles.forEachIndexed { index, title ->
+                Tab(
+                    selected = (pagerState.currentPage == index), //current index có phải là index
+                    onClick = {
+                        run {
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(
+                                    index
+                                )
+                            }
+                        }
+                    },
+                    text = { Text(text = title) }
                 )
             }
-        },
-        floatingActionButtonPosition = FabPosition.End,
-        isFloatingActionButtonDocked = true,
-        scaffoldState = scaffoldState
-    ) { padding ->
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Box(
-                modifier = Modifier.weight(0.5f)
-            ) {
-                CityIntroduction(City.getSingleton()) //phần thông tin thành phố hiện tại
+        }
+    }
+
+
+    @Composable
+    fun CityIntroduction(city: City) {
+        //phần cho city
+        var imageUrl by remember { mutableStateOf<String?>(null) }
+
+        //background color của text
+        var textBgColor by remember { mutableStateOf(Color.Gray) }
+
+        //bitmap hình nền
+        var bitmap: Bitmap? = null
+
+        val coroutineScope = rememberCoroutineScope()
+
+        LaunchedEffect(imageUrl) {
+            coroutineScope.launch {
+                imageUrl = city.fetchImageUrl()
             }
 
-            Box(
-                modifier = Modifier.weight(1.5f)
-            ) {
-                Column {
-                    tabLayout(
-                        pagerState = pagerState,
-                        tabTitles = tabTitles,
-                        coroutineScope = coroutineScope
-                    )
-
-                    HorizontalPager(state = pagerState, pageCount = tabTitles.size) { page ->
-
-                        when (page) {
-                            0 -> LocalRecommended(
-                                context,
-                                city = City.getSingleton(),
-                            )
-                            1 -> LocalRecommended(
-                                context,
-                                city = City.getSingleton(),
-                            )
-                        }
-                    }
+            bitmap = if (imageUrl == null) {
+                null
+            } else {
+                withContext(Dispatchers.IO) {
+                    BitmapFactory.decodeStream(URL(imageUrl).openConnection().getInputStream())
                 }
             }
-        }
 
-    }
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun tabLayout(pagerState: PagerState, tabTitles: List<String>, coroutineScope: CoroutineScope) {
-    TabRow(
-        selectedTabIndex = pagerState.currentPage,
-        backgroundColor = colorBlue,
-        contentColor = Color.White,
-        modifier = Modifier
-            .padding(vertical = 4.dp, horizontal = 8.dp)
-            .clip(RoundedCornerShape(50))
-            .shadow(AppBarDefaults.TopAppBarElevation)
-            .zIndex(10f),
-    ) {
-        tabTitles.forEachIndexed { index, title ->
-            Tab(
-                selected = (pagerState.currentPage == index), //current index có phải là index
-                onClick = {
-                    run {
-                        coroutineScope.launch {
-                            pagerState.animateScrollToPage(
-                                index
-                            )
-                        }
-                    }
-                },
-                text = { Text(text = title) }
-            )
-        }
-    }
-}
-
-
-@Composable
-fun CityIntroduction(city: City) {
-    //phần cho city
-    var imageUrl by remember { mutableStateOf<String?>(null) }
-
-    //background color của text
-    var textBgColor by remember { mutableStateOf(Color.Gray) }
-
-    //bitmap hình nền
-    var bitmap: Bitmap? = null
-
-    val coroutineScope = rememberCoroutineScope()
-
-    LaunchedEffect(imageUrl) {
-        coroutineScope.launch {
-            imageUrl = city.fetchImageUrl()
-        }
-
-        bitmap = if (imageUrl == null) {
-            null
-        } else {
-            withContext(Dispatchers.IO) {
-                BitmapFactory.decodeStream(URL(imageUrl).openConnection().getInputStream())
+            if (bitmap != null) {
+                textBgColor = colorFromImage(bitmap!!) //đặt màu nền phần box gần với màu cái ảnh
             }
         }
 
-        if (bitmap != null) {
-            textBgColor = colorFromImage(bitmap!!) //đặt màu nền phần box gần với màu cái ảnh
-        }
-    }
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
-        ImageFromUrl(url = imageUrl ?: "", contentDescription = null, 0.0) //hình ảnh
-    }
-    Column(
-        modifier = Modifier
-            .fillMaxSize(),
-        verticalArrangement = Arrangement.Bottom,
-
-        ) {
         Box(
             modifier = Modifier
-                .padding(
-                    start = 16.dp,
-                    top = 8.dp,
-                    end = 16.dp,
-                    bottom = 8.dp,
-                )
-                .background(textBgColor)
+                .fillMaxSize()
         ) {
-            Text(
-                text = "${city.getName()}",
-                color = Color.White,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Start,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
+            ImageFromUrl(url = imageUrl ?: "", contentDescription = null, 0.0) //hình ảnh
         }
+        Column(
+            modifier = Modifier
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.Bottom,
 
-    }
-}
+            ) {
+            Box(
+                modifier = Modifier
+                    .padding(
+                        start = 16.dp,
+                        top = 8.dp,
+                        end = 16.dp,
+                        bottom = 8.dp,
+                    )
+                    .background(textBgColor)
+            ) {
+                Text(
+                    text = "${city.getName()}",
+                    color = Color.White,
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Start,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
 
-
-//trang local recommended
-@Composable
-fun LocalRecommended(context: Context, city: City) {
-    var listState = remember { mutableStateOf(mutableSetOf<PlaceLocation>()) }
-    var chosenState = remember { mutableStateOf(mutableSetOf<Category>()) }
-    var originalState = remember { mutableStateOf(mutableSetOf<PlaceLocation>()) }
-    val coroutineScope = rememberCoroutineScope()
-
-    LaunchedEffect(originalState) {
-        coroutineScope.launch {
-            originalState.value =
-                city.recommendationsRepository.refreshRecommendations() as MutableSet<PlaceLocation>
-            listState.value=originalState.value
         }
     }
 
-    Column() {
-        LazyRow(modifier = Modifier.padding(15.dp)) {
-            itemsIndexed(Category.values()) { index, category -> //tương tự xuất ra location adapter
-                categoryView(category, colorBlue, true, listState, chosenState, originalState)
+
+    //trang local recommended
+    @Composable
+    fun LocalRecommended(context: Context, city: City) {
+        var listState = remember { mutableStateOf(mutableSetOf<PlaceLocation>()) }
+        var chosenState = remember { mutableStateOf(mutableSetOf<Category>()) }
+        var originalState = remember { mutableStateOf(mutableSetOf<PlaceLocation>()) }
+        val coroutineScope = rememberCoroutineScope()
+
+        LaunchedEffect(originalState) {
+            coroutineScope.launch {
+                originalState.value =
+                    city.recommendationsRepository.refreshRecommendations() as MutableSet<PlaceLocation>
+                listState.value=originalState.value
             }
         }
 
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            modifier = Modifier.fillMaxSize(),
-            content = {
-                items(listState.value.toTypedArray()) { location ->
-                    SneakViewPlace(context, location)
+        Column() {
+            LazyRow(modifier = Modifier.padding(15.dp)) {
+                itemsIndexed(Category.values()) { index, category -> //tương tự xuất ra location adapter
+                    categoryView(category, colorBlue, true, listState, chosenState, originalState)
                 }
             }
-        )
+
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                modifier = Modifier.fillMaxSize(),
+                content = {
+                    items(listState.value.toTypedArray()) { location ->
+                        SneakViewPlace(context, location)
+                    }
+                }
+            )
+
+        }
+
+    }
+
+
+    @Composable
+    fun NearbyPlaces(userPos: Position, city: City) { //đề xuất địa điểm gần với nơi đang đứng
+
+    }
+
+    @Composable
+    fun Weather(city: City) {
+
+    }
+
+
+    @Composable
+    fun Transportation(city: City) {
+
+    }
+
+    @Composable
+    fun InteractLocal(city: City) {
 
     }
 
 }
 
-
-@Composable
-fun NearbyPlaces(userPos: Position, city: City) { //đề xuất địa điểm gần với nơi đang đứng
-
-}
-
-@Composable
-fun Weather(city: City) {
-
-}
-
-
-@Composable
-fun Transportation(city: City) {
-
-}
-
-@Composable
-fun InteractLocal(city: City) {
-
-}
 

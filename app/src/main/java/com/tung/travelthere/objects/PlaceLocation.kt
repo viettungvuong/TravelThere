@@ -113,7 +113,7 @@ open class PlaceLocation protected constructor(private val name: String, private
 
             val query =
                 AppController.db.collection(collectionCities).document(cityName)
-                    .collection(collectionLocations).document(pos.toString())
+                    .collection(collectionLocations).document("0,0")
                     .get().await()
 
             val document = query.reference
