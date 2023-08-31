@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#8EFFF3">
+    android:background="@color/white">
 
     <EditText
         android:id="@+id/passwordEditText"
@@ -13,6 +13,10 @@
         android:ems="10"
         android:inputType="text"
         android:text="Password"
+        android:drawableStart="@drawable/password"
+        android:drawablePadding="10dp"
+        android:textColor="@color/blue"
+        android:backgroundTint="@color/blue"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
@@ -27,6 +31,10 @@
         android:ems="10"
         android:inputType="text"
         android:text="Email"
+        android:drawableStart="@drawable/email"
+        android:drawablePadding="10dp"
+        android:textColor="@color/blue"
+        android:backgroundTint="@color/blue"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
@@ -34,7 +42,8 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.4" />
 
-    <ImageButton
+
+    <Button
         android:id="@+id/registerImageButton"
         android:layout_width="93dp"
         android:layout_height="42dp"
@@ -44,9 +53,12 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.6"
         android:scaleType="fitCenter"
-        app:srcCompat="@drawable/hospital" />
+        android:text="Sign in"
+        android:textColor="@color/white"
+        android:backgroundTint="#477bb3"
+         />
 
-    <ImageButton
+    <Button
         android:id="@+id/loginImageButton"
         android:layout_width="93dp"
         android:layout_height="42dp"
@@ -56,6 +68,8 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.7"
         android:scaleType="fitCenter"
-        app:srcCompat="@drawable/hospital" />
+        android:text="Sign out"
+        android:textColor="@color/white"
+        android:backgroundTint="#477bb3"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
