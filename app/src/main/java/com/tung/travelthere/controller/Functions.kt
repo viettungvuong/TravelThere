@@ -6,6 +6,7 @@ import android.content.SearchRecentSuggestionsProvider
 import android.graphics.Bitmap
 import android.location.Geocoder
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.ui.graphics.Color
 import androidx.palette.graphics.Palette
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -80,34 +81,48 @@ fun search(searchQuery: String){
 }
 
 //cho phép người dùng thêm địa điểm
-fun suggestPlace(location: PlaceLocation) {
-    val cityDocRef =
-        Firebase.firestore.collection(collectionCities)
-            .document(location.cityName)
+fun suggestPlace(context: Context, location: PlaceLocation) {
 
-    Firebase.firestore.runTransaction { transaction ->
-        val cityDocument = transaction.get(cityDocRef)
-        val locationCollectionRef = cityDocRef.collection(collectionLocations)
 
-        val locationDocumentRef =
-            locationCollectionRef.document(location.getPos().toString())
+    val docRef = Firebase.firestore.collection(collectionCities).document(location.cityName).collection(
+        collectionCities).document(location.getPos().toString())
 
-        if (cityDocument.exists()) {
+    docRef.get()
+        .addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val documentSnapshot = task.result
+                val documentExists = documentSnapshot?.exists() ?: false
 
-            val locationDocument = transaction.get(locationDocumentRef)
+                if (documentExists) {
+                    //có tồn tại
+                    val recommendedNum = documentSnapshot.getLong("recommends") ?: 0 //số lượng được recommends
+                    val updatedField = mapOf("recommends" to recommendedNum+1)
 
-            if (locationDocument.exists()) {
-                //có địa điểm này
-                val recommendedNum = locationDocument.getLong("recommends") ?: 0 //số lượng được recommends
-                transaction.update(locationDocumentRef, "recommends", recommendedNum + 1)
+                    docRef.update(updatedField)
+                        .addOnSuccessListener {
+                            Toast.makeText(context,"Thank you for your suggestion!", Toast.LENGTH_LONG)
+                        }
+                        .addOnFailureListener { e ->
+                            // Handle the update failure
+                            Toast.makeText(context,"There is an error when adding your suggestion, please try again", Toast.LENGTH_LONG)
+                        }
+                } else {
+                    //không tồn tại
+                    val locationData = hashMapOf(
+                        "name" to location.getName(),
+                        "pos" to location.getPos().toString(),
+                    )
+                    docRef.set(locationData) // Create a new document with locationData
+                        .addOnSuccessListener {
+                            Toast.makeText(context,"Thank you for your suggestion!", Toast.LENGTH_LONG)
+                        }
+                        .addOnFailureListener { e ->
+                            Toast.makeText(context,"There is an error when adding your suggestion, please try again", Toast.LENGTH_LONG)
+                        }
+                }
             } else {
-                //chưa có địa điểm này
-                val locationData = hashMapOf(
-                    "name" to location.getName(),
-                    "pos" to location.getPos().toString(),
-                )
-                transaction.set(locationDocumentRef, locationData) //tạo document mới
+                Log.d("error","fetching unsuccessful")
             }
         }
-    }
+
 }

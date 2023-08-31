@@ -8,6 +8,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
@@ -41,6 +42,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
+import androidx.lifecycle.ViewModel
 import com.tung.travelthere.controller.colorBlue
 import com.tung.travelthere.objects.*
 import kotlinx.coroutines.runBlocking
@@ -82,11 +84,14 @@ class SuggestPlace : ComponentActivity() {
         }
     }
 
+    class SuggestPlaceViewModel: ViewModel(){
+
+    }
 
 
     @OptIn(ExperimentalComposeUiApi::class)
     @Composable
-    fun suggestPlace() {
+    private fun suggestPlace() {
         var searchPlace = remember { mutableStateOf("") }
         var chosenPlaceName by remember { mutableStateOf("") }
         var chosenPlaceCity by remember { mutableStateOf("") }
@@ -109,6 +114,7 @@ class SuggestPlace : ComponentActivity() {
             //địa điểm đang suggest
         }
 
+
         Scaffold(
             bottomBar = {
                 BottomAppBar(cutoutShape = CircleShape, backgroundColor = colorBlue) {
@@ -118,12 +124,17 @@ class SuggestPlace : ComponentActivity() {
                 FloatingActionButton(
                     onClick = {
                         if (currentPlaceLocation!=null){
-                            suggestPlace(currentPlaceLocation!!)
+                            suggestPlace(this, currentPlaceLocation!!)
                             //đề xuất địa điểm
-                        }
 
+                            this.finish()
+                        }
                     }, //thêm vào đề xuất
-                    backgroundColor = Color(android.graphics.Color.parseColor("#b3821b"))
+                    backgroundColor = if (currentPlaceLocation != null) {
+                        Color(android.graphics.Color.parseColor("#b3821b"))
+                    } else {
+                        Color.Gray // Change to the appropriate color for a disabled button
+                    },
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
@@ -233,7 +244,7 @@ class SuggestPlace : ComponentActivity() {
 
     @OptIn(ExperimentalComposeUiApi::class)
     @Composable
-    fun placeSuggestionsAutocomplete(listState: LazyListState = rememberLazyListState(), searchPlace: MutableState<String>, keyboardController: SoftwareKeyboardController?){
+    private fun placeSuggestionsAutocomplete(listState: LazyListState = rememberLazyListState(), searchPlace: MutableState<String>, keyboardController: SoftwareKeyboardController?){
         LazyColumn(state = listState) {
             items(AppController.placeViewModel.placeSuggestions) {
                 Box(
@@ -276,16 +287,16 @@ class SuggestPlace : ComponentActivity() {
 
     @Preview(showBackground = true)
     @Composable
-    fun DefaultPreview() {
+    private fun DefaultPreview() {
         suggestPlace()
     }
 
     //chọn hình ảnh
-    fun chooseImage() {
+    private fun chooseImage() {
         pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
     }
 
-    fun chooseLocation(autocompleteResult: AutocompleteResult){
+    private fun chooseLocation(autocompleteResult: AutocompleteResult){
         //lấy các thông tin của địa điểm chọn
         AppController.placeViewModel.getName(autocompleteResult)
         AppController.placeViewModel.retrieveOtherInfo(autocompleteResult)
