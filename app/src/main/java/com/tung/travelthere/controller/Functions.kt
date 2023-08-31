@@ -85,7 +85,7 @@ fun suggestPlace(context: Context, location: PlaceLocation) {
 
 
     val docRef = Firebase.firestore.collection(collectionCities).document(location.cityName).collection(
-        collectionCities).document(location.getPos().toString())
+        collectionLocations).document(location.getPos().toString())
 
     docRef.get()
         .addOnCompleteListener { task ->
@@ -100,11 +100,11 @@ fun suggestPlace(context: Context, location: PlaceLocation) {
 
                     docRef.update(updatedField)
                         .addOnSuccessListener {
-                            Toast.makeText(context,"Thank you for your suggestion!", Toast.LENGTH_LONG)
+                            Toast.makeText(context,"Thank you for your suggestion!", Toast.LENGTH_LONG).show()
                         }
                         .addOnFailureListener { e ->
                             // Handle the update failure
-                            Toast.makeText(context,"There is an error when adding your suggestion, please try again", Toast.LENGTH_LONG)
+                            Toast.makeText(context,"There is an error when adding your suggestion, please try again", Toast.LENGTH_LONG).show()
                         }
                 } else {
                     //không tồn tại
@@ -114,10 +114,10 @@ fun suggestPlace(context: Context, location: PlaceLocation) {
                     )
                     docRef.set(locationData) // Create a new document with locationData
                         .addOnSuccessListener {
-                            Toast.makeText(context,"Thank you for your suggestion!", Toast.LENGTH_LONG)
+                            Toast.makeText(context,"Thank you for your suggestion!", Toast.LENGTH_LONG).show()
                         }
                         .addOnFailureListener { e ->
-                            Toast.makeText(context,"There is an error when adding your suggestion, please try again", Toast.LENGTH_LONG)
+                            Toast.makeText(context,"There is an error when adding your suggestion, please try again", Toast.LENGTH_LONG).show()
                         }
                 }
             } else {

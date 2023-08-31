@@ -50,7 +50,7 @@ import java.io.File
 
 class SuggestPlace : ComponentActivity() {
 
-    lateinit var currentLocation: PlaceLocation //location hiện tại (location người dùng muốn suggest)
+    private var currentLocation: PlaceLocation?=null //location hiện tại (location người dùng muốn suggest)
 
     inner class ImageViewModel {
         var currentChosenImage by mutableStateOf<String>("")
@@ -84,35 +84,29 @@ class SuggestPlace : ComponentActivity() {
         }
     }
 
-    class SuggestPlaceViewModel: ViewModel(){
-
-    }
 
 
     @OptIn(ExperimentalComposeUiApi::class)
     @Composable
     private fun suggestPlace() {
         var searchPlace = remember { mutableStateOf("") }
-        var chosenPlaceName by remember { mutableStateOf("") }
-        var chosenPlaceCity by remember { mutableStateOf("") }
-        var chosenPlacePos by remember { mutableStateOf(Position(0.0,0.0)) }
+        var chosenPlaceName by remember { AppController.placeViewModel.currentName }
+        var chosenPlaceCity by remember { AppController.placeViewModel.currentCity }
+        var chosenPlacePos by remember { AppController.placeViewModel.currentPos }
 
         var listState = rememberLazyListState()
         var scaffoldState = rememberScaffoldState()
 
         val keyboardController = LocalSoftwareKeyboardController.current
 
-        var currentPlaceLocation: PlaceLocation?=null
 
 
         LaunchedEffect(AppController.placeViewModel.currentName,AppController.placeViewModel.currentCity) {
-            chosenPlaceName = AppController.placeViewModel.currentName
-            chosenPlaceCity = AppController.placeViewModel.currentCity
-            chosenPlacePos = AppController.placeViewModel.currentPos
-
-            currentPlaceLocation = RecommendedPlace(chosenPlaceName,chosenPlacePos,chosenPlaceCity)
-            //địa điểm đang suggest
+            chosenPlaceName = AppController.placeViewModel.currentName.value
+            chosenPlaceCity = AppController.placeViewModel.currentCity.value
+            chosenPlacePos = AppController.placeViewModel.currentPos.value
         }
+
 
 
         Scaffold(
@@ -123,18 +117,19 @@ class SuggestPlace : ComponentActivity() {
             floatingActionButton = {
                 FloatingActionButton(
                     onClick = {
-                        if (currentPlaceLocation!=null){
-                            suggestPlace(this, currentPlaceLocation!!)
+                        if (currentLocation!=null){
+                            suggestPlace(this, currentLocation!!)
                             //đề xuất địa điểm
 
                             this.finish()
                         }
+                        else{
+                            Toast.makeText(this,"No location has been chosen",Toast.LENGTH_LONG).show()
+
+                        }
                     }, //thêm vào đề xuất
-                    backgroundColor = if (currentPlaceLocation != null) {
+                    backgroundColor =
                         Color(android.graphics.Color.parseColor("#b3821b"))
-                    } else {
-                        Color.Gray // Change to the appropriate color for a disabled button
-                    },
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
@@ -301,9 +296,9 @@ class SuggestPlace : ComponentActivity() {
         AppController.placeViewModel.getName(autocompleteResult)
         AppController.placeViewModel.retrieveOtherInfo(autocompleteResult)
 
-        val currentName = AppController.placeViewModel.currentName
-        val currentCity = AppController.placeViewModel.currentCity
-        val currentPosition = AppController.placeViewModel.currentPos
+        val currentName = AppController.placeViewModel.currentName.value
+        val currentCity = AppController.placeViewModel.currentCity.value
+        val currentPosition = AppController.placeViewModel.currentPos.value
 
         currentLocation = RecommendedPlace(currentName,currentPosition,currentCity) //đặt location đang được suggest
     }
