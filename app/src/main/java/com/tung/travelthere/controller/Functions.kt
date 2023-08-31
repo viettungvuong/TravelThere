@@ -123,7 +123,8 @@ fun suggestPlace(context: Context, location: PlaceLocation) {
                             //không tồn tại
                             val locationData = hashMapOf(
                                 "name" to location.getName(),
-                                "pos" to location.getPos().toString(),
+                                "lat" to location.getPos().lat,
+                                "long" to location.getPos().long
                             )
                             locationRef.set(locationData) // Create a new document with locationData
                                 .addOnSuccessListener {

@@ -1,6 +1,7 @@
 package com.tung.travelthere
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -29,9 +30,12 @@ import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.tung.travelthere.controller.*
+import com.tung.travelthere.objects.Category
 import com.tung.travelthere.objects.PlaceLocation
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 class PlaceView : ComponentActivity() {
     lateinit var location: PlaceLocation
@@ -43,6 +47,14 @@ class PlaceView : ComponentActivity() {
 
         setContent {
             viewPlace(location = location)
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        runBlocking{
+            location.reviewRepository.refreshReviews() //lấy các review đánh giá
         }
     }
 
@@ -287,9 +299,20 @@ class PlaceView : ComponentActivity() {
     //phần xem những đánh giá về địa điểm
     @Composable
     fun reviewsPlace(location: PlaceLocation) {
+        var listState = remember { mutableStateOf(listOf<Review>()) }
+        val coroutineScope = rememberCoroutineScope()
+
+        LaunchedEffect(listState) {
+            coroutineScope.launch {
+                listState.value =
+                    location.reviewRepository.refreshReviews()
+                Log.d("list state value",listState.value.toString())
+            }
+        }
+
         Box(modifier = Modifier.fillMaxSize()) {
             LazyColumn() {
-                itemsIndexed(location.reviews.toTypedArray()) { index, review ->
+                itemsIndexed(listState.value.toTypedArray()) { index, review ->
                     reviewLayout(review = review)
                 }
             }

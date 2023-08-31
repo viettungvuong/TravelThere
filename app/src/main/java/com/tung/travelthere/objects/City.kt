@@ -90,14 +90,15 @@ class City private constructor() {
             }
 
             val query =
-                AppController.db.collection(collectionCities).whereEqualTo(cityNameField, name)
-                    .limit(1).get().await()
+                AppController.db.collection(collectionCities).document(name!!)
+                    .get().await()
 
-            val document = query.documents.firstOrNull()
+            val document = query.reference
 
             if (document != null) {
+
                 val locationCollection =
-                    document.reference.collection(collectionLocations).get().await()
+                    document.collection(collectionLocations).get().await()
 
                 val locations = locationCollection.documents
                 for (location in locations) {
@@ -108,7 +109,6 @@ class City private constructor() {
                     val long = location.getDouble("long") ?: 0.0
 
                     val t = TouristPlace(placeName, Position(lat, long), cityName)
-
                     recommendations.add(t)
                 }
             }

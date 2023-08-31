@@ -279,7 +279,7 @@ fun LocalRecommended(context: Context, city: City) {
         coroutineScope.launch {
             originalState.value =
                 city.recommendationsRepository.refreshRecommendations() as MutableSet<PlaceLocation>
-            listState.value = originalState.value
+            listState.value=originalState.value
         }
     }
 

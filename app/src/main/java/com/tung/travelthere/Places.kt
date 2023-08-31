@@ -86,6 +86,9 @@ class PlaceAutocompleteViewModel(private val context: Context): ViewModel() {
                         } else{
                             addresses[0].locality
                         }
+                        if (currentCity=="Thành phố Hồ Chí Minh"){
+                            currentCity="Ho Chi Minh City"
+                        }
                     }
                 }
             }

@@ -1,12 +1,16 @@
 package com.tung.travelthere.objects
 
 import android.content.Context
+import android.util.Log
+import androidx.compose.runtime.mutableStateListOf
+import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 import com.tung.travelthere.Review
 import com.tung.travelthere.controller.*
 import kotlinx.coroutines.tasks.await
+import java.util.*
 import kotlin.collections.ArrayList
 
 class Position(var lat: Double, var long: Double): java.io.Serializable{
@@ -33,7 +37,6 @@ open class PlaceLocation protected constructor(private val name: String, private
 
     private var drawableName: String?=null
     var categories: MutableSet<Category> = mutableSetOf() //các category của địa điểm này
-    var reviews: MutableSet<Review> = mutableSetOf() //danh sách các review
     var imageUrl: String?=null
 
     fun setDrawableName(name: String){
@@ -97,6 +100,46 @@ open class PlaceLocation protected constructor(private val name: String, private
         return res
     }
 
+    val reviewRepository = ReviewRepository()
+
+    inner class ReviewRepository : ViewModel(), java.io.Serializable {
+        var reviews=mutableListOf<Review>()
+
+        //lấy review về địa điểm
+        suspend fun refreshReviews(): List<Review> {
+            if (reviews.isNotEmpty()){
+                return reviews
+            }
+
+            val query =
+                AppController.db.collection(collectionCities).document(cityName)
+                    .collection(collectionLocations).document(pos.toString())
+                    .get().await()
+
+            val document = query.reference
+
+            if (document != null) {
+                Log.d("document not null","not null")
+                val reviewCollection =
+                    document.collection("reviews").get().await()
+
+                val fetchedReviews = reviewCollection.documents
+                for (document in fetchedReviews) {
+
+                    val userId = document.getString("sender")?:""
+                    val content = document.getString("content")?:""
+                    val time = formatter.parse(document.getString("time"))
+                    val score = (document.getLong("score")?:0L).toInt()
+
+                    val review = Review(userId,content,time,score)
+                    Log.d("review",review.toString())
+                    reviews.add(review)
+                }
+            }
+
+            return reviews as List<Review>
+        }
+    }
 }
 
 class Restaurant(name: String, pos: Position, cityName: String, private val specializeIn: Dish): PlaceLocation(name,pos,cityName){
