@@ -2,6 +2,7 @@ package com.tung.travelthere
 
 import android.os.Bundle
 import android.util.Log
+import android.widget.ImageButton
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -15,6 +16,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -24,12 +26,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.ViewModel
+import com.google.android.material.textfield.TextInputEditText
 import com.tung.travelthere.controller.*
 import com.tung.travelthere.objects.Category
 import com.tung.travelthere.objects.PlaceLocation
@@ -308,7 +313,7 @@ class PlaceView : ComponentActivity() {
 
     //phần xem những đánh giá về địa điểm
     @Composable
-    fun reviewsPlace(location: PlaceLocation) {
+    private fun reviewsPlace(location: PlaceLocation) {
         var listState = remember { mutableStateOf(mutableListOf<Review>()) }
         var originalState = remember { mutableStateOf(mutableListOf<Review>()) }
 
@@ -343,6 +348,8 @@ class PlaceView : ComponentActivity() {
                     reviewLayout(review = review)
                 }
             }
+
+            yourReview()
         }
     }
 
@@ -408,8 +415,8 @@ class PlaceView : ComponentActivity() {
         Box(modifier = Modifier
             .padding(5.dp)
             .border(
-                width = if (chosenIndex==index) 1.dp else 0.dp,
-                color = if (chosenIndex==index) Color(0xff365875) else Color.Transparent,
+                width = if (chosenIndex == index) 1.dp else 0.dp,
+                color = if (chosenIndex == index) Color(0xff365875) else Color.Transparent,
                 shape = RoundedCornerShape(4.dp),
             )
             .padding(10.dp)
@@ -418,10 +425,10 @@ class PlaceView : ComponentActivity() {
                     if (i == index)
                         continue
                 }
-                if (chosenState==index){
+                if (chosenState == index) {
                     chosenState = -1 //bỏ chọn
                     reviewState!!.value = originalState!!.value
-                } else{
+                } else {
                     chosenState = index //chọn
                     reviewState!!.value = originalState!!.value.filter {
                         val filterBool = (
@@ -457,7 +464,46 @@ class PlaceView : ComponentActivity() {
     //nếu chưa thì cho phép tạo review
     @Composable
     private fun yourReview() {
+        val textState = remember { mutableStateOf("") }
+        val integerState = remember { mutableStateOf(0) }
 
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Column(modifier = Modifier.weight(0.7f).padding(5.dp)){
+                TextField(
+                    value = textState.value,
+                    onValueChange = { textState.value = it },
+                    placeholder = { Text("Enter text") },
+                    modifier = Modifier.padding(vertical = 5.dp),
+                )
+
+                TextField(
+                    value = integerState.value.toString(),
+                    onValueChange = {
+                        val input = it.toIntOrNull()
+                        if (input != null) {
+                            integerState.value = input
+                        }
+                    },
+                    placeholder = { Text("Enter integer from 0 to 10") },
+                    modifier = Modifier.padding(vertical = 5.dp),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Done
+                    )
+                )
+            }
+
+
+            Button(
+                onClick = {
+                    // Do something with the text and integer values
+                },
+                modifier = Modifier.weight(0.3f).padding(10.dp)
+            ) {
+
+                Text("Submit")
+            }
+        }
     }
 
 
