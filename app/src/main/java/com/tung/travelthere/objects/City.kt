@@ -135,7 +135,7 @@ class City private constructor() {
 
                     if (locationDocument.exists()) {
                         //có địa điểm này
-                        val recommendedNum = locationDocument.getLong("recommends") ?: 0
+                        val recommendedNum = locationDocument.getLong("recommends") ?: 0 //số lượng được recommends
                         transaction.update(locationDocumentRef, "recommends", recommendedNum + 1)
                     } else {
                         //chưa có địa điểm này

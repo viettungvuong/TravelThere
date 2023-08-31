@@ -41,9 +41,8 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import com.tung.travelthere.controller.colorBlue
-import com.tung.travelthere.objects.PlaceLocation
-import com.tung.travelthere.objects.PlaceOfInterest
-import com.tung.travelthere.objects.RecommendedPlace
+import com.tung.travelthere.objects.*
+import kotlinx.coroutines.runBlocking
 import java.io.File
 
 class SuggestPlace : ComponentActivity() {
@@ -90,16 +89,23 @@ class SuggestPlace : ComponentActivity() {
         var searchPlace = remember { mutableStateOf("") }
         var chosenPlaceName by remember { mutableStateOf("") }
         var chosenPlaceCity by remember { mutableStateOf("") }
+        var chosenPlacePos by remember { mutableStateOf(Position(0.0,0.0)) }
 
         var listState = rememberLazyListState()
         var scaffoldState = rememberScaffoldState()
 
         val keyboardController = LocalSoftwareKeyboardController.current
 
+        var currentPlaceLocation: PlaceLocation?=null
+
 
         LaunchedEffect(AppController.placeViewModel.currentName,AppController.placeViewModel.currentCity) {
             chosenPlaceName = AppController.placeViewModel.currentName
             chosenPlaceCity = AppController.placeViewModel.currentCity
+            chosenPlacePos = AppController.placeViewModel.currentPos
+
+            currentPlaceLocation = RecommendedPlace(chosenPlaceName,chosenPlacePos,chosenPlaceCity)
+            //địa điểm đang suggest
         }
 
         Scaffold(
@@ -109,12 +115,20 @@ class SuggestPlace : ComponentActivity() {
             },
             floatingActionButton = {
                 FloatingActionButton(
-                    onClick = { /* Handle FAB click */ },
+                    onClick = {
+                        if (currentPlaceLocation!=null){
+                            runBlocking {
+                                City.getSingleton().recommendationsRepository.suggestPlace(currentPlaceLocation!!)
+                                //đề xuất địa điểm
+                            }
+                        }
+
+                    }, //thêm vào đề xuất
                     backgroundColor = Color(android.graphics.Color.parseColor("#b3821b"))
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
-                        contentDescription = "Search",
+                        contentDescription = "Add",
                         tint = Color.White
                     )
                 }
@@ -267,6 +281,7 @@ class SuggestPlace : ComponentActivity() {
         suggestPlace()
     }
 
+    //chọn hình ảnh
     fun chooseImage() {
         pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
     }
