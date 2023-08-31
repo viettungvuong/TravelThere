@@ -65,7 +65,7 @@ class PlaceView : ComponentActivity() {
         super.onResume()
 
         runBlocking {
-            location.reviewRepository.refreshReviews() //lấy các review đánh giá
+            location.reviewRepository.refreshReviews(refreshNow = true) //lấy các review đánh giá
         }
     }
 

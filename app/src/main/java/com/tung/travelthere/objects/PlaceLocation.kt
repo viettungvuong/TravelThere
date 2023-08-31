@@ -106,8 +106,8 @@ open class PlaceLocation protected constructor(private val name: String, private
         var reviews=mutableListOf<Review>()
 
         //lấy review về địa điểm
-        suspend fun refreshReviews(): List<Review> {
-            if (reviews.isNotEmpty()){
+        suspend fun refreshReviews(refreshNow: Boolean=false): List<Review> {
+            if (reviews.isNotEmpty()&&refreshNow){
                 return reviews
             }
 
