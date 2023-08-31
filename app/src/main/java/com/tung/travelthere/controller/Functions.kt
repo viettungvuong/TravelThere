@@ -10,6 +10,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.palette.graphics.Palette
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.libraries.places.api.Places
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import com.tung.travelthere.PlaceAutocompleteViewModel
 import com.tung.travelthere.R
 import com.tung.travelthere.objects.City
@@ -75,4 +77,37 @@ fun initialize(context: Context, callback: ()->Unit){
 //tìm kiếm và hiện đề xuất tìm kiếm
 fun search(searchQuery: String){
 
+}
+
+//cho phép người dùng thêm địa điểm
+fun suggestPlace(location: PlaceLocation) {
+    val cityDocRef =
+        Firebase.firestore.collection(collectionCities)
+            .document(location.cityName)
+
+    Firebase.firestore.runTransaction { transaction ->
+        val cityDocument = transaction.get(cityDocRef)
+        val locationCollectionRef = cityDocRef.collection(collectionLocations)
+
+        val locationDocumentRef =
+            locationCollectionRef.document(location.getPos().toString())
+
+        if (cityDocument.exists()) {
+
+            val locationDocument = transaction.get(locationDocumentRef)
+
+            if (locationDocument.exists()) {
+                //có địa điểm này
+                val recommendedNum = locationDocument.getLong("recommends") ?: 0 //số lượng được recommends
+                transaction.update(locationDocumentRef, "recommends", recommendedNum + 1)
+            } else {
+                //chưa có địa điểm này
+                val locationData = hashMapOf(
+                    "name" to location.getName(),
+                    "pos" to location.getPos().toString(),
+                )
+                transaction.set(locationDocumentRef, locationData) //tạo document mới
+            }
+        }
+    }
 }

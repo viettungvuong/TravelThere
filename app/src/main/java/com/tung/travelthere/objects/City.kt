@@ -85,7 +85,7 @@ class City private constructor() {
         var recommendations = mutableSetOf<PlaceLocation>()
 
         suspend fun refreshRecommendations(): Set<PlaceLocation> {
-            if (recommendations.isNotEmpty()){
+            if (recommendations.isNotEmpty()) {
                 return recommendations
             }
 
@@ -116,39 +116,8 @@ class City private constructor() {
             return recommendations
         }
 
-        //cho phép người dùng thêm địa điểm
-        suspend fun suggestPlace(location: PlaceLocation) {
-            val cityDocRef =
-                Firebase.firestore.collection(collectionCities)
-                    .document(location.cityName)
 
-            Firebase.firestore.runTransaction { transaction ->
-                val cityDocument = transaction.get(cityDocRef)
-                val locationCollectionRef = cityDocRef.collection(collectionLocations)
-
-                val locationDocumentRef =
-                    locationCollectionRef.document(location.getPos().toString())
-
-                if (cityDocument.exists()) {
-
-                    val locationDocument = transaction.get(locationDocumentRef)
-
-                    if (locationDocument.exists()) {
-                        //có địa điểm này
-                        val recommendedNum = locationDocument.getLong("recommends") ?: 0 //số lượng được recommends
-                        transaction.update(locationDocumentRef, "recommends", recommendedNum + 1)
-                    } else {
-                        //chưa có địa điểm này
-                        val locationData = hashMapOf(
-                            "name" to location.getName(),
-                            "pos" to location.getPos().toString(),
-                        )
-                        transaction.set(locationDocumentRef, locationData) //tạo document mới
-                    }
-                }
-            }
-
-        }
     }
+
 }
 

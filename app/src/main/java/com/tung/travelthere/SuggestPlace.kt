@@ -2,6 +2,7 @@ package com.tung.travelthere
 
 import android.content.Context
 import android.content.Intent
+import com.tung.travelthere.controller.*
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
@@ -117,10 +118,8 @@ class SuggestPlace : ComponentActivity() {
                 FloatingActionButton(
                     onClick = {
                         if (currentPlaceLocation!=null){
-                            runBlocking {
-                                City.getSingleton().recommendationsRepository.suggestPlace(currentPlaceLocation!!)
-                                //đề xuất địa điểm
-                            }
+                            suggestPlace(currentPlaceLocation!!)
+                            //đề xuất địa điểm
                         }
 
                     }, //thêm vào đề xuất
