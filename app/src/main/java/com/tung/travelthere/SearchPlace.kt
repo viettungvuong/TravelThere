@@ -66,8 +66,20 @@ fun searchRestaurantByDish(searchViewModel: SearchViewModel,newString: String,av
     searchViewModel.matchedQuery.clear()
     if (newString.isNotBlank()){
         searchViewModel.matchedQuery += available.filter {
+            val hasDish = (
+                    if (it is Restaurant){
+                        //tìm trong các dish của nhà hàng có món nào có chứa cụm từ hiện tại hay kh
+                        val dishes = it.getSpecializedDish().sortedBy {
+                            dish -> dish.name //sắp xếp các dish theo tên
+                        }.filter { dish -> dish.name.contains(newString) }
+
+                        dishes.isNotEmpty()
+                    }
+                    else
+                        false
+                    )
             it.categories.contains(Category.RESTAURANT)&&
-                    (it as Restaurant).getSpecializedDish().name.contains(newString, ignoreCase = true)
+                   hasDish
         }
     }
     searchViewModel.originalMatchedQuery.clear()

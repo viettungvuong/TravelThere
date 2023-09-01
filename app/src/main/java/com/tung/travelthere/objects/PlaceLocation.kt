@@ -122,6 +122,15 @@ open class PlaceLocation protected constructor(private val name: String, private
     inner class ReviewRepository : ViewModel(), java.io.Serializable {
         var reviews=mutableListOf<Review>()
 
+        //lấy tổng điểm
+        fun calculateReviewScore(): Double{
+            var res = 0.0
+            for (review in reviews){
+                res+=review.score
+            }
+            return res
+        }
+
         //đăng review lên firebase
         fun submitReview(review: Review, context: Context){
             val reviewData= hashMapOf(
@@ -176,35 +185,14 @@ open class PlaceLocation protected constructor(private val name: String, private
     }
 }
 
-class Restaurant(name: String, pos: Position, cityName: String, private val specializeIn: Dish): PlaceLocation(name,pos,cityName){
+class Restaurant(name: String, pos: Position, cityName: String, private val specializeIn: MutableList<Dish>): PlaceLocation(name,pos,cityName){
     init {
         this.categories.add(Category.RESTAURANT)
     }
 
-    private var ratings = ArrayList<Rating>()
-    private var ratingScore = 0f
 
-    fun getSpecializedDish(): Dish{
+    fun getSpecializedDish(): List<Dish>{
         return specializeIn
-    }
-
-    fun rate(newRating: Rating){
-        ratings.add(newRating)
-        ratingScore = calculateNewRatingScore(newRating)
-    }
-
-    private fun calculateNewRatingScore(newRating: Rating): Float{ //tính điểm đánh giá (cái này dùng mỗi khi có rating mới)
-        val n = ratings.size
-
-        var total = ratingScore*(n-1)
-
-        total += newRating.score
-
-        return total / n
-    }
-
-    fun getRatingScore(): Float{ //lấy điểm đánh giá
-        return ratingScore
     }
 
 

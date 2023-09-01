@@ -328,6 +328,8 @@ class PlaceView : ComponentActivity() {
         var listState = remember { mutableStateOf(mutableListOf<Review>()) }
         var originalState = remember { mutableStateOf(mutableListOf<Review>()) }
 
+        var totalScore by remember { mutableStateOf(0.0) }
+
         val coroutineScope = rememberCoroutineScope()
 
         LaunchedEffect(originalState) {
@@ -335,18 +337,35 @@ class PlaceView : ComponentActivity() {
                 originalState.value =
                     location.reviewRepository.refreshReviews() as MutableList<Review>
                 listState.value = originalState.value
+
+                totalScore = location.reviewRepository.calculateReviewScore()
             }
         }
 
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-            val (filter, reviews, submit) = createRefs()
+            val (total, filter, reviews, submit) = createRefs()
 
             Box(
                 modifier = Modifier
-                    .padding(vertical = 5.dp, horizontal = 10.dp)
+                    .padding(vertical = 5.dp, horizontal = 5.dp)
+                    .fillMaxWidth()
+                    .constrainAs(total) {
+                        top.linkTo(parent.top)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                        width = Dimension.fillToConstraints
+                    }
+            ) {
+                reviewScoreText(score = totalScore)
+            }
+
+
+            Box(
+                modifier = Modifier
+                    .padding(vertical = 5.dp, horizontal = 2.dp)
                     .fillMaxWidth()
                     .constrainAs(filter) {
-                        top.linkTo(parent.top)
+                        top.linkTo(total.bottom)
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
                         width = Dimension.fillToConstraints
@@ -395,6 +414,26 @@ class PlaceView : ComponentActivity() {
 
         }
     }
+    
+    @Composable
+    private fun reviewScoreText(score: Double){
+        var color: Color? = null
+        if (score in 0.0..4.0) {
+            color = colorFirst
+        } else if (score in 5.0..8.0) {
+            color = colorSecond
+        } else {
+            color = colorThird
+        }
+        Box(modifier = Modifier.padding(10.dp)) {
+            Text(
+                text = score.toString(),
+                fontWeight = FontWeight.Bold,
+                fontSize = 30.sp,
+                color = color
+            )
+        }
+    }
 
     @Composable
     fun reviewLayout(review: Review) {
@@ -422,22 +461,7 @@ class PlaceView : ComponentActivity() {
                     Text(text = review.content, fontSize = 15.sp)
                 }
 
-                var color: Color? = null
-                if (review.score in 0..4) {
-                    color = colorFirst
-                } else if (review.score in 5..8) {
-                    color = colorSecond
-                } else {
-                    color = colorThird
-                }
-                Box(modifier = Modifier.padding(10.dp)) {
-                    Text(
-                        text = review.score.toString(),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 30.sp,
-                        color = color
-                    )
-                }
+                reviewScoreText(score = review.score.toDouble())
 
             }
         }
