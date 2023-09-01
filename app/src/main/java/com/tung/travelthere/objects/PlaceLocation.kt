@@ -115,7 +115,7 @@ open class PlaceLocation protected constructor(private val name: String, private
                 "time" to formatter.format(review.time)
             )
             AppController.db.collection(collectionCities).document(cityName)
-                .collection(collectionLocations).document(name).collection("reviews").add(reviewData)
+                .collection(collectionLocations).document(pos.toString()).collection("reviews").add(reviewData)
                 .addOnSuccessListener {
                     Toast.makeText(context, "Added your review, thank you for your feedback",Toast.LENGTH_LONG).show()
                 }
@@ -133,7 +133,7 @@ open class PlaceLocation protected constructor(private val name: String, private
             reviews.clear()
             val query =
                 AppController.db.collection(collectionCities).document(cityName)
-                    .collection(collectionLocations).document(name)
+                    .collection(collectionLocations).document(pos.toString())
                     .get().await()
 
             val document = query.reference
