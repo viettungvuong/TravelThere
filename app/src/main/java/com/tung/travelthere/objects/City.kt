@@ -86,7 +86,7 @@ class City private constructor() {
         var locations = mutableSetOf<PlaceLocation>()
         var nearby = mutableSetOf<PlaceLocation>()
 
-        suspend fun refreshRecommendations(refresh: Boolean = false): Set<PlaceLocation> {
+        suspend fun refreshLocations(refresh: Boolean = false): Set<PlaceLocation> {
             if (locations.isNotEmpty()&&!refresh) {
                 return locations
             }
@@ -112,6 +112,13 @@ class City private constructor() {
                     val long = location.getDouble("long") ?: 0.0
 
                     val t = TouristPlace(placeName, Position(lat, long), cityName)
+
+                    val categoriesStr = location.get("categories") as List<String>
+
+                    for (categoryStr in categoriesStr){
+                        t.categories.add(convertStrToCategory(categoryStr)) //thêm category
+                    }
+
                     this.locations.add(t)
                 }
             }

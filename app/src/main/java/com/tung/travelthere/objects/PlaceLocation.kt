@@ -5,6 +5,7 @@ import android.location.Location
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.ui.text.toUpperCase
 import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -42,6 +43,18 @@ enum class Category{
     NATURE,
     SHOPPING,
     OTHERS
+}
+
+fun convertStrToCategory(string: String): Category{
+    return (when (string.uppercase()){
+        "RESTAURANT" -> Category.RESTAURANT
+        "BAR" -> Category.BAR
+        "ATTRACTION" -> Category.ATTRACTION
+        "NECESSITY" -> Category.NECESSITY
+        "NATURE" -> Category.NATURE
+        "SHOPPING" -> Category.SHOPPING
+        else -> Category.OTHERS
+    })
 }
 
 
@@ -195,12 +208,6 @@ class Restaurant(name: String, pos: Position, cityName: String, private val spec
     }
 
 
-}
-
-class PlaceOfInterest(name: String, pos: Position, cityName: String): PlaceLocation(name,pos,cityName){
-    init {
-        this.categories.add(Category.ATTRACTION)
-    }
 }
 
 class TouristPlace(name: String, pos: Position, cityName: String): PlaceLocation(name,pos,cityName){

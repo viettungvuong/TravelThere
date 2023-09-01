@@ -65,7 +65,7 @@ class MainActivity : ComponentActivity() {
     override fun onStart() {
         super.onStart()
         runBlocking {
-            City.getSingleton().locationsRepository.refreshRecommendations(true)
+            City.getSingleton().locationsRepository.refreshLocations(true)
             City.getSingleton().fetchImageUrl()
         }
         City.getSingleton().locationsRepository.nearbyLocations() //lấy những địa điểm gần
@@ -79,7 +79,7 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
     fun Home(context: Context) {
-        val tabTitles = listOf("Nearby", "Recommends", "Tourist attractions")
+        val tabTitles = listOf("Nearby", "Local recommends", "Tourist attractions")
         val pagerState = rememberPagerState(initialPage = 0)
         val coroutineScope = rememberCoroutineScope()
         val scaffoldState = rememberScaffoldState()
@@ -306,7 +306,7 @@ class MainActivity : ComponentActivity() {
         LaunchedEffect(originalState) {
             coroutineScope.launch {
                 originalState.value =
-                    city.locationsRepository.refreshRecommendations() as MutableSet<PlaceLocation>
+                    city.locationsRepository.refreshLocations() as MutableSet<PlaceLocation>
                 listState.value = originalState.value
             }
         }

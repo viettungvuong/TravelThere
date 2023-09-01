@@ -112,7 +112,7 @@ fun SearchPage(city: City, activity: Activity) {
 
     LaunchedEffect(listState) {
         coroutineScope.launch {
-            listState = city.locationsRepository.refreshRecommendations()
+            listState = city.locationsRepository.refreshLocations()
             Log.d("list state add", listState.size.toString())
         }
     }

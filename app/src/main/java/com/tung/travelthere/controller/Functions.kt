@@ -100,7 +100,7 @@ fun suggestPlace(context: Context, location: PlaceLocation) {
             }
 
             val locationRef = cityRef.collection(
-                collectionLocations).document(location.getPos().toString())
+                "recommends").document(location.getPos().toString())
             locationRef.get()
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
@@ -125,7 +125,8 @@ fun suggestPlace(context: Context, location: PlaceLocation) {
                             val locationData = hashMapOf(
                                 "name" to location.getName(),
                                 "lat" to location.getPos().lat,
-                                "long" to location.getPos().long
+                                "long" to location.getPos().long,
+                                "category" to "Recommended"
                             )
                             locationRef.set(locationData) // Create a new document with locationData
                                 .addOnSuccessListener {
@@ -145,5 +146,10 @@ fun suggestPlace(context: Context, location: PlaceLocation) {
         }
     }
 
+
+}
+
+//tạo lịch trình đi chơi
+fun createSchedule(){
 
 }
