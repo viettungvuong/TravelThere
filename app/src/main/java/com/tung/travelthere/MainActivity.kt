@@ -59,7 +59,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             Home(this)
         }
-
+        setContentView(R.layout.activity_menu)
 //        // Start RegisterLoginActivity immediately
 //        val intent = Intent(this@MainActivity, RegisterLoginActivity::class.java)
 //        startActivity(intent)

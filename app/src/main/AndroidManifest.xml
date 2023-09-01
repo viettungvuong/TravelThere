@@ -20,6 +20,9 @@
         android:theme="@style/Theme.TravelThere"
         tools:targetApi="31">
         <activity
+            android:name=".MenuActivity"
+            android:exported="false" />
+        <activity
             android:name=".SearchPlace"
             android:exported="false"
             android:label="@string/title_activity_search_place"
@@ -56,8 +59,7 @@
         <activity
             android:name=".RegisterLoginActivity"
             android:label="Register and Login"
-            android:theme="@style/Theme.AppCompat">
-        </activity>
+            android:theme="@style/Theme.AppCompat"></activity>
         <activity android:name=".PlaceView" />
     </application>
 
