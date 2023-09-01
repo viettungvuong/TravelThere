@@ -111,6 +111,7 @@ open class PlaceLocation protected constructor(private val name: String, private
                 return reviews
             }
 
+            reviews.clear()
             val query =
                 AppController.db.collection(collectionCities).document(cityName)
                     .collection(collectionLocations).document("0,0")

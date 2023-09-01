@@ -73,7 +73,7 @@ class PlaceView : ComponentActivity() {
     @Composable
     fun viewPlace(location: PlaceLocation) {
         var imageUrl by remember { mutableStateOf<String?>(null) }
-        val tabTitles = listOf("About", "Reviews", "Discussions")
+        val tabTitles = listOf("About", "Reviews", "Suggestions")
         val pagerState = rememberPagerState(initialPage = 0)
         val coroutineScope = rememberCoroutineScope()
 
@@ -197,7 +197,7 @@ class PlaceView : ComponentActivity() {
     }
 
     @Composable
-    fun aboutPlace(location: PlaceLocation) {
+    private fun aboutPlace(location: PlaceLocation) {
         var indexFav by remember {
             mutableStateOf(
                 AppController.Favorites.getSingleton().isFavorite(location)
@@ -327,11 +327,19 @@ class PlaceView : ComponentActivity() {
             }
         }
 
-        Column(modifier = Modifier.fillMaxSize()) {
+        ConstraintLayout(modifier = Modifier.fillMaxSize()) {
+            val (filter, reviews, submit) = createRefs()
+
             Box(
                 modifier = Modifier
-                    .padding(16.dp)
+                    .padding(vertical = 5.dp, horizontal = 10.dp)
                     .fillMaxWidth()
+                    .constrainAs(filter) {
+                        top.linkTo(parent.top)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                        width = Dimension.fillToConstraints
+                    }
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -343,13 +351,37 @@ class PlaceView : ComponentActivity() {
                 }
             }
 
-            LazyColumn() {
+            yourReview(modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    Color.White,
+                    shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp)
+                )
+                .border(
+                    width = 1.dp,
+                    color = Color.Black
+                )
+                .constrainAs(submit) {
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                    top.linkTo(filter.bottom)
+                    width = Dimension.fillToConstraints
+                })
+
+            LazyColumn(
+                modifier = Modifier.constrainAs(reviews) {
+                    top.linkTo(submit.bottom)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                    width = Dimension.fillToConstraints
+                }
+            ) {
                 itemsIndexed(listState.value.toTypedArray()) { index, review ->
                     reviewLayout(review = review)
                 }
             }
 
-            yourReview()
+
         }
     }
 
@@ -408,7 +440,7 @@ class PlaceView : ComponentActivity() {
     ) {
         var chosenIndex by remember { mutableStateOf(-1) }
 
-        LaunchedEffect(chosenState){
+        LaunchedEffect(chosenState) {
             chosenIndex = chosenState
         }
 
@@ -448,9 +480,9 @@ class PlaceView : ComponentActivity() {
             Row() {
                 Text(
                     text = reviewFilters[index],
-                    color = if (index==0) {
+                    color = if (index == 0) {
                         colorFirst
-                    } else if (index==1) {
+                    } else if (index == 1) {
                         colorSecond
                     } else {
                         colorThird
@@ -463,17 +495,23 @@ class PlaceView : ComponentActivity() {
     //nếu đã up review rồi thì hiện review của người dùng và cho chỉnh sửa
     //nếu chưa thì cho phép tạo review
     @Composable
-    private fun yourReview() {
+    private fun yourReview(modifier: Modifier) {
         val textState = remember { mutableStateOf("") }
         val integerState = remember { mutableStateOf(0) }
 
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Column(modifier = Modifier.weight(0.7f).padding(5.dp)){
+        Row(modifier = modifier, horizontalArrangement = Arrangement.SpaceBetween) {
+            Column(
+                modifier = Modifier
+                    .weight(0.55f)
+                    .padding(5.dp)
+            ) {
                 TextField(
                     value = textState.value,
                     onValueChange = { textState.value = it },
                     placeholder = { Text("Enter text") },
-                    modifier = Modifier.padding(vertical = 5.dp),
+                    modifier = Modifier
+                        .padding(vertical = 5.dp)
+                        .background(color = Color(0xffd5ede6)),
                 )
 
                 TextField(
@@ -481,11 +519,18 @@ class PlaceView : ComponentActivity() {
                     onValueChange = {
                         val input = it.toIntOrNull()
                         if (input != null) {
-                            integerState.value = input
+                            if (input in 0..10){
+                                integerState.value = input
+                            }
+                            else{
+                                integerState.value = input?.coerceIn(0, 10) ?: 0
+                            }
                         }
                     },
                     placeholder = { Text("Enter integer from 0 to 10") },
-                    modifier = Modifier.padding(vertical = 5.dp),
+                    modifier = Modifier
+                        .padding(vertical = 5.dp)
+                        .background(color = Color(0xffd5ede6)),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Number,
                         imeAction = ImeAction.Done
@@ -498,10 +543,22 @@ class PlaceView : ComponentActivity() {
                 onClick = {
                     // Do something with the text and integer values
                 },
-                modifier = Modifier.weight(0.3f).padding(10.dp)
+                modifier = Modifier
+                    .weight(0.45f)
+                    .padding(15.dp),
+                colors = ButtonDefaults.buttonColors(Color(0xff56a88b))
             ) {
+                Row{
+                    Box(modifier = Modifier.padding(horizontal = 10.dp)){
+                        Icon(
+                            imageVector = Icons.Default.Send,
+                            contentDescription = "Send",
+                            tint = Color.White
+                        )
+                    }
+                    Text("Submit", color = Color.White)
+                }
 
-                Text("Submit")
             }
         }
     }
