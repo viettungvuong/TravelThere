@@ -1,5 +1,7 @@
 package com.tung.travelthere
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.widget.ImageButton
@@ -291,6 +293,13 @@ class PlaceView : ComponentActivity() {
         Button(
             onClick = {
                 //mở google maps chỉ đường
+                val intent = Intent(Intent.ACTION_VIEW)
+                intent.setPackage("com.google.android.apps.maps")
+                intent.data = Uri.parse("google.navigation:q=${location.getPos().lat},${location.getPos().long}")
+
+                intent.putExtra("mode", "d") // Driving (default)
+                startActivity(intent)
+
             },
             colors = ButtonDefaults.buttonColors(backgroundColor = colorThird),
             modifier = Modifier.fillMaxWidth()
