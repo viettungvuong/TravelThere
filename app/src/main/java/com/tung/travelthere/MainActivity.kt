@@ -54,14 +54,24 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-
-
         Places.initialize(this, "AIzaSyCytvnlz93VlDAMs2RsndMo-HVgd0fl-lQ")
 
         setContent {
             Home(this)
         }
         //setContentView(R.layout.login_register_activity);
+    }
+
+    override fun onStart() {
+        super.onStart()
+        runBlocking {
+            City.getSingleton().locationsRepository.refreshRecommendations(true)
+        }
+        City.getSingleton().locationsRepository.nearbyLocations() //lấy những địa điểm gần
+    }
+
+    override fun onRestart() {
+        super.onRestart()
     }
 
     @OptIn(ExperimentalFoundationApi::class)
@@ -149,7 +159,7 @@ class MainActivity : ComponentActivity() {
                         HorizontalPager(state = pagerState, pageCount = tabTitles.size) { page ->
 
                             when (page) {
-                                0 -> LocalRecommended(
+                                0 -> NearbyPlaces(
                                     context,
                                     city = City.getSingleton(),
                                 )
@@ -284,7 +294,7 @@ class MainActivity : ComponentActivity() {
         LaunchedEffect(originalState) {
             coroutineScope.launch {
                 originalState.value =
-                    city.recommendationsRepository.refreshRecommendations() as MutableSet<PlaceLocation>
+                    city.locationsRepository.refreshRecommendations() as MutableSet<PlaceLocation>
                 listState.value=originalState.value
             }
         }
@@ -312,8 +322,38 @@ class MainActivity : ComponentActivity() {
 
 
     @Composable
-    fun NearbyPlaces(userPos: Position, city: City) { //đề xuất địa điểm gần với nơi đang đứng
+    fun NearbyPlaces(context: Context, city: City) { //đề xuất địa điểm gần với nơi đang đứng
+        var listState = remember { mutableStateOf(mutableSetOf<PlaceLocation>()) }
+        var chosenState = remember { mutableStateOf(mutableSetOf<Category>()) }
+        var originalState = remember { mutableStateOf(mutableSetOf<PlaceLocation>()) }
+        val coroutineScope = rememberCoroutineScope()
 
+        LaunchedEffect(originalState) {
+            coroutineScope.launch {
+                originalState.value =
+                    city.locationsRepository.nearbyLocations() as MutableSet<PlaceLocation>
+                listState.value=originalState.value
+            }
+        }
+
+        Column() {
+            LazyRow(modifier = Modifier.padding(15.dp)) {
+                itemsIndexed(Category.values()) { index, category -> //tương tự xuất ra location adapter
+                    categoryView(category, colorBlue, true, listState, chosenState, originalState)
+                }
+            }
+
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                modifier = Modifier.fillMaxSize(),
+                content = {
+                    items(listState.value.toTypedArray()) { location ->
+                        SneakViewPlace(context, location)
+                    }
+                }
+            )
+
+        }
     }
 
     @Composable

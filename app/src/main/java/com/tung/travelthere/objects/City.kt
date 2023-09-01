@@ -6,6 +6,7 @@ import android.app.DownloadManager
 import android.media.Image
 import android.os.Debug
 import android.util.Log
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -77,18 +78,20 @@ class City private constructor() {
         return res
     }
 
-    val recommendationsRepository = RecommendationsRepository()
+    val locationsRepository = LocationsRepository()
 
-    inner class RecommendationsRepository : ViewModel() {
+    inner class LocationsRepository : ViewModel() {
 
         //những nơi nên đi tới
-        var recommendations = mutableSetOf<PlaceLocation>()
+        var locations = mutableSetOf<PlaceLocation>()
+        var nearby = mutableSetOf<PlaceLocation>()
 
-        suspend fun refreshRecommendations(): Set<PlaceLocation> {
-            if (recommendations.isNotEmpty()) {
-                return recommendations
+        suspend fun refreshRecommendations(refresh: Boolean = false): Set<PlaceLocation> {
+            if (locations.isNotEmpty()&&!refresh) {
+                return locations
             }
 
+            locations.clear()
             val query =
                 AppController.db.collection(collectionCities).document(name!!)
                     .get().await()
@@ -109,11 +112,33 @@ class City private constructor() {
                     val long = location.getDouble("long") ?: 0.0
 
                     val t = TouristPlace(placeName, Position(lat, long), cityName)
-                    recommendations.add(t)
+                    this.locations.add(t)
                 }
             }
 
-            return recommendations
+            val currentPos = AppController.currentPosition.currentLocation
+
+            if (currentPos!=null){
+                locations.sortedBy {
+                    it.getPos().distanceTo(currentPos!!) //sắp xếp các địa điểm theo khoảng cách tới vị trí hiện tại
+                }
+            }
+            return locations
+        }
+
+        //lấy những địa điểm trong phạm vi 5000km
+        fun nearbyLocations(refresh: Boolean=false): Set<PlaceLocation> {
+            if (nearby.isNotEmpty()&&!refresh) {
+                return nearby
+            }
+
+            nearby.clear()
+            val currentPos = AppController.currentPosition.currentLocation ?: return emptySet()
+
+            nearby = locations.filter {
+                it.getPos().distanceTo(currentPos!!) <= 5000
+            }.toMutableSet()
+            return nearby
         }
 
 

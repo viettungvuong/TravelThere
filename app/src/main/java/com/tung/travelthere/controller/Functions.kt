@@ -49,12 +49,13 @@ fun getCurrentPosition(fusedLocationClient: FusedLocationProviderClient, context
             val geocoder = Geocoder(context, Locale.getDefault())
             val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
             if (addresses!=null&&addresses.isNotEmpty()) {
-                val cityName = if (addresses[0].locality==null){
+                var cityName = if (addresses[0].locality==null){
                     addresses[0].adminArea //lấy tên thành phố theo tên tỉnh
                 } else{
                     addresses[0].locality
                 }
-                Log.d("addresses[0]",addresses[0].toString())
+                if (cityName == "Thành phố Hồ Chí Minh")
+                    cityName="Ho Chi Minh City"
                 val countryName = addresses[0].countryName
 
                 AppController.currentPosition.cityName = cityName

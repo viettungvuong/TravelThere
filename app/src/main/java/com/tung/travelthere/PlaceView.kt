@@ -65,8 +65,8 @@ class PlaceView : ComponentActivity() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
+    override fun onStart() {
+        super.onStart()
 
         runBlocking {
             location.reviewRepository.refreshReviews(refreshNow = true) //lấy các review đánh giá

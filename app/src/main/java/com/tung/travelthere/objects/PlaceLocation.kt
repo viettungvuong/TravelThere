@@ -1,6 +1,7 @@
 package com.tung.travelthere.objects
 
 import android.content.Context
+import android.location.Location
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.mutableStateListOf
@@ -17,6 +18,17 @@ import kotlin.collections.ArrayList
 class Position(var lat: Double, var long: Double): java.io.Serializable{
     override fun toString(): String {
         return "$lat,$long"
+    }
+
+    fun distanceTo(other: Position): Float{
+        val locationA = Location("Current")
+        locationA.latitude=lat
+        locationA.longitude=long
+        val locationB = Location("That")
+        locationB.latitude=other.lat
+        locationB.longitude=other.long
+
+        return locationA.distanceTo(locationB)
     }
 }
 
@@ -35,22 +47,9 @@ enum class Category{
 
 //không cho phép tạo object từ class PlaceLocation
 open class PlaceLocation protected constructor(private val name: String, private val pos: Position, val cityName: String): java.io.Serializable{
-
-    private var drawableName: String?=null
     var categories: MutableSet<Category> = mutableSetOf() //các category của địa điểm này
     var imageUrl: String?=null
 
-    fun setDrawableName(name: String){
-        drawableName=name
-    }
-
-    fun getDrawableName(context: Context): Int?{
-        if (drawableName==null){
-            return null
-        }
-        val resourceId = context.resources.getIdentifier(drawableName,"drawable",context.packageName)
-        return resourceId
-    }
 
     fun getName(): String{
         return name
@@ -126,7 +125,7 @@ open class PlaceLocation protected constructor(private val name: String, private
 
         //lấy review về địa điểm
         suspend fun refreshReviews(refreshNow: Boolean=false): List<Review> {
-            if (reviews.isNotEmpty()&&refreshNow){
+            if (reviews.isNotEmpty()&&!refreshNow){
                 return reviews
             }
 
