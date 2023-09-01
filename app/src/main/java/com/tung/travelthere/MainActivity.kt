@@ -66,8 +66,10 @@ class MainActivity : ComponentActivity() {
         super.onStart()
         runBlocking {
             City.getSingleton().locationsRepository.refreshRecommendations(true)
+            City.getSingleton().fetchImageUrl()
         }
         City.getSingleton().locationsRepository.nearbyLocations() //lấy những địa điểm gần
+
     }
 
     override fun onRestart() {
@@ -77,7 +79,7 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
     fun Home(context: Context) {
-        val tabTitles = listOf("Nearby", "Recommended", "Tourist attractions")
+        val tabTitles = listOf("Nearby", "Recommends", "Tourist attractions")
         val pagerState = rememberPagerState(initialPage = 0)
         val coroutineScope = rememberCoroutineScope()
         val scaffoldState = rememberScaffoldState()
@@ -164,6 +166,10 @@ class MainActivity : ComponentActivity() {
                                     city = City.getSingleton(),
                                 )
                                 1 -> LocalRecommended(
+                                    context,
+                                    city = City.getSingleton(),
+                                )
+                                2 -> TouristAttractions(
                                     context,
                                     city = City.getSingleton(),
                                 )
@@ -275,7 +281,7 @@ class MainActivity : ComponentActivity() {
             Button(onClick = {
 //                val intent = Intent(this,TestActivity::class.java)
 //                startActivity(intent)
-            }){
+            }) {
                 Text("Test activity")
             }
 
@@ -286,6 +292,12 @@ class MainActivity : ComponentActivity() {
     //trang local recommended
     @Composable
     fun LocalRecommended(context: Context, city: City) {
+
+
+    }
+
+    @Composable
+    fun TouristAttractions(context: Context, city: City) {
         var listState = remember { mutableStateOf(mutableSetOf<PlaceLocation>()) }
         var chosenState = remember { mutableStateOf(mutableSetOf<Category>()) }
         var originalState = remember { mutableStateOf(mutableSetOf<PlaceLocation>()) }
@@ -295,7 +307,7 @@ class MainActivity : ComponentActivity() {
             coroutineScope.launch {
                 originalState.value =
                     city.locationsRepository.refreshRecommendations() as MutableSet<PlaceLocation>
-                listState.value=originalState.value
+                listState.value = originalState.value
             }
         }
 
@@ -332,7 +344,7 @@ class MainActivity : ComponentActivity() {
             coroutineScope.launch {
                 originalState.value =
                     city.locationsRepository.nearbyLocations() as MutableSet<PlaceLocation>
-                listState.value=originalState.value
+                listState.value = originalState.value
             }
         }
 
@@ -341,6 +353,11 @@ class MainActivity : ComponentActivity() {
                 itemsIndexed(Category.values()) { index, category -> //tương tự xuất ra location adapter
                     categoryView(category, colorBlue, true, listState, chosenState, originalState)
                 }
+            }
+
+            Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp)){
+                Text(text = "Places that are 5 km from your current position", fontWeight = FontWeight.Bold
+                    , textAlign = TextAlign.Center, modifier = Modifier)
             }
 
             LazyVerticalGrid(
@@ -367,10 +384,6 @@ class MainActivity : ComponentActivity() {
 
     }
 
-    @Composable
-    fun InteractLocal(city: City) {
-
-    }
 
 }
 

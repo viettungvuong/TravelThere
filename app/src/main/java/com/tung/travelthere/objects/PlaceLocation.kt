@@ -75,6 +75,10 @@ open class PlaceLocation protected constructor(private val name: String, private
         return name.hashCode() * cityName.hashCode() * 30
     }
 
+    fun distanceTo(placeLocation: PlaceLocation): Float{
+        return this.pos.distanceTo(placeLocation.getPos())
+    }
+
     suspend fun fetchImageUrl(): String? {
         if (imageUrl != null) {
             return imageUrl!!
@@ -138,7 +142,6 @@ open class PlaceLocation protected constructor(private val name: String, private
             val document = query.reference
 
             if (document != null) {
-                Log.d("document not null","not null")
                 val reviewCollection =
                     document.collection("reviews").get().await()
 
@@ -151,7 +154,6 @@ open class PlaceLocation protected constructor(private val name: String, private
                     val score = (document.getLong("score")?:0L).toInt()
 
                     val review = Review(userId,content,time,score)
-                    Log.d("review",review.toString())
                     reviews.add(review)
                 }
             }
