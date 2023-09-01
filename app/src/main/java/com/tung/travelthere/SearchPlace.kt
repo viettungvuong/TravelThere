@@ -29,6 +29,7 @@ import com.tung.travelthere.controller.colorBlue
 import com.tung.travelthere.objects.Category
 import com.tung.travelthere.objects.City
 import com.tung.travelthere.objects.PlaceLocation
+import com.tung.travelthere.objects.Restaurant
 import com.tung.travelthere.ui.theme.TravelThereTheme
 import kotlinx.coroutines.launch
 
@@ -60,6 +61,34 @@ class SearchViewModel : ViewModel() {
     var originalMatchedQuery = mutableStateListOf<PlaceLocation>()
 }
 
+//tìm kiếm nhà hàng theo tên món ăn mà nhà hàng bán
+fun searchRestaurantByDish(searchViewModel: SearchViewModel,newString: String,available: Set<PlaceLocation>){
+    searchViewModel.matchedQuery.clear()
+    if (newString.isNotBlank()){
+        searchViewModel.matchedQuery += available.filter {
+            it.categories.contains(Category.RESTAURANT)&&
+                    (it as Restaurant).getSpecializedDish().name.contains(newString, ignoreCase = true)
+        }
+    }
+    searchViewModel.originalMatchedQuery.clear()
+    searchViewModel.originalMatchedQuery+=searchViewModel.matchedQuery //chuẩn bị cho cái categoryview
+}
+
+fun search(searchViewModel: SearchViewModel,newString: String,available: Set<PlaceLocation>){
+    searchViewModel.matchedQuery.clear()
+    if (newString.isNotBlank()){
+        searchViewModel.matchedQuery += available.filter {
+            it.getName().contains(newString, ignoreCase = true)
+        }.sortedBy {
+            val similarity = it.getName()
+                .commonPrefixWith(newString).length.toDouble() / newString.length
+            similarity //sắp xếp theo độ tương đồng so với từ đang nhập
+        }
+    }
+    searchViewModel.originalMatchedQuery.clear()
+    searchViewModel.originalMatchedQuery+=searchViewModel.matchedQuery //chuẩn bị cho cái categoryview
+}
+
 //thanh tìm kiếm
 @Composable
 fun SearchBar(
@@ -73,18 +102,7 @@ fun SearchBar(
             onValueChange = { newString ->
                 searchQuery = newString
 
-                searchViewModel.matchedQuery.clear()
-                if (newString.text.isNotBlank()){
-                    searchViewModel.matchedQuery += available.filter {
-                        it.getName().contains(searchQuery.text, ignoreCase = true)
-                    }.sortedBy {
-                        val similarity = it.getName()
-                            .commonPrefixWith(searchQuery.text).length.toDouble() / searchQuery.text.length
-                        similarity //sắp xếp theo độ tương đồng so với từ đang nhập
-                    }
-                }
-                searchViewModel.originalMatchedQuery.clear()
-                searchViewModel.originalMatchedQuery+=searchViewModel.matchedQuery //chuẩn bị cho cái categoryview
+                search(searchViewModel,newString.text,available)
                 //không dùng assignment operator vì nó là truyền reference
             },
             textStyle = TextStyle(fontSize = 17.sp),

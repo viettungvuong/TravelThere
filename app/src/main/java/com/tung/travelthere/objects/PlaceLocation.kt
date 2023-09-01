@@ -33,7 +33,7 @@ class Position(var lat: Double, var long: Double): java.io.Serializable{
     }
 }
 
-class Dish(var name: String, var type: String): java.io.Serializable
+class Dish(var name: String): java.io.Serializable
 
 enum class Category{
     RESTAURANT,
