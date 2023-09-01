@@ -53,6 +53,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".RegisterLoginActivity"
+            android:label="Register and Login"
+            android:theme="@style/Theme.AppCompat">
+        </activity>
         <activity android:name=".PlaceView" />
     </application>
 

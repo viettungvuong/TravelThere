@@ -56,10 +56,13 @@ class MainActivity : ComponentActivity() {
 
         Places.initialize(this, "AIzaSyCytvnlz93VlDAMs2RsndMo-HVgd0fl-lQ")
 
-        setContent {
-            Home(this)
-        }
-        //setContentView(R.layout.login_register_activity);
+//        setContent {
+//            Home(this)
+//        }
+
+        // Start RegisterLoginActivity immediately
+        val intent = Intent(this@MainActivity, RegisterLoginActivity::class.java)
+        startActivity(intent)
     }
 
     override fun onStart() {
