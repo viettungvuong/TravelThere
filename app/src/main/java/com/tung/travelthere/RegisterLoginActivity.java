@@ -66,9 +66,31 @@ public class RegisterLoginActivity extends AppCompatActivity {
                 String email = emailEditText.getText().toString();
                 String password = passwordEditText.getText().toString();
 
-                emailEditText.setText("logged in");
-                // Perform login logic
-                // You can call your login function or navigate to the login activity here
+                if (TextUtils.isEmpty(email)) {
+                    Toast.makeText(getApplicationContext(), "Enter email address!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                if (TextUtils.isEmpty(password)) {
+                    Toast.makeText(getApplicationContext(), "Enter password!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                // Sign in the user with the provided email and password
+                auth.signInWithEmailAndPassword(email, password)
+                        .addOnCompleteListener(RegisterLoginActivity.this, task -> {
+                            if (task.isSuccessful()) {
+                                // Login success
+                                Toast.makeText(getApplicationContext(), "Login successful!", Toast.LENGTH_SHORT).show();
+
+                                // You can navigate to a new activity here if needed
+
+                            } else {
+                                // Login failed
+                                Toast.makeText(getApplicationContext(), "Login failed. " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        });
+
             }
         });
     }
