@@ -2,6 +2,7 @@ package com.tung.travelthere.objects
 
 import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.ktx.firestore
@@ -105,6 +106,24 @@ open class PlaceLocation protected constructor(private val name: String, private
     inner class ReviewRepository : ViewModel(), java.io.Serializable {
         var reviews=mutableListOf<Review>()
 
+        //đăng review lên firebase
+        fun submitReview(review: Review, context: Context){
+            val reviewData= hashMapOf(
+                "sender" to review.userId,
+                "content" to review.content,
+                "score" to review.score,
+                "time" to formatter.format(review.time)
+            )
+            AppController.db.collection(collectionCities).document(cityName)
+                .collection(collectionLocations).document(name).collection("reviews").add(reviewData)
+                .addOnSuccessListener {
+                    Toast.makeText(context, "Added your review, thank you for your feedback",Toast.LENGTH_LONG).show()
+                }
+                .addOnFailureListener{
+                    Toast.makeText(context, "Cannot add your review, please try again",Toast.LENGTH_LONG).show()
+                }
+        }
+
         //lấy review về địa điểm
         suspend fun refreshReviews(refreshNow: Boolean=false): List<Review> {
             if (reviews.isNotEmpty()&&refreshNow){
@@ -114,7 +133,7 @@ open class PlaceLocation protected constructor(private val name: String, private
             reviews.clear()
             val query =
                 AppController.db.collection(collectionCities).document(cityName)
-                    .collection(collectionLocations).document("0,0")
+                    .collection(collectionLocations).document(name)
                     .get().await()
 
             val document = query.reference

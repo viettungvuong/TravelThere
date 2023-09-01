@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -42,6 +43,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import java.util.*
 
 val reviewFilters = listOf("0 - 4", "5 - 8", "9 - 10")
 val colorFirst = Color.Red
@@ -541,7 +543,12 @@ class PlaceView : ComponentActivity() {
 
             Button(
                 onClick = {
-                    // Do something with the text and integer values
+                    val review = Review(AppController.currentUser.getName(),textState.value, Date(), integerState.value)
+                    location.reviewRepository.submitReview(review, applicationContext)
+                    //đăng review lên
+                    runBlocking {
+                        location.reviewRepository.refreshReviews(true) //refresh lại các review
+                    }
                 },
                 modifier = Modifier
                     .weight(0.45f)
