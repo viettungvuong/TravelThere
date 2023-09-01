@@ -55,7 +55,7 @@
 
 
     <Button
-        android:id="@+id/registerImageButton"
+        android:id="@+id/registerButton"
         android:layout_width="93dp"
         android:layout_height="42dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -70,7 +70,7 @@
          />
 
     <Button
-        android:id="@+id/loginImageButton"
+        android:id="@+id/loginButton"
         android:layout_width="93dp"
         android:layout_height="42dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -79,7 +79,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.7"
         android:scaleType="fitCenter"
-        android:text="Sign out"
+        android:text="Log In"
         android:textColor="@color/white"
         android:backgroundTint="#477bb3"/>
 
