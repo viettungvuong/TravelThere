@@ -64,12 +64,6 @@ fun getCurrentPosition(fusedLocationClient: FusedLocationProviderClient, context
     }
 }
 
-fun initialize(context: Context, callback: ()->Unit){
-
-
-}
-
-
 //tìm kiếm và hiện đề xuất tìm kiếm
 fun search(searchQuery: String){
 

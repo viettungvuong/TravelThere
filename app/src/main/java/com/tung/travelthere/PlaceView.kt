@@ -12,7 +12,6 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 
-
 import androidx.compose.foundation.lazy.LazyColumn
 
 import androidx.compose.foundation.lazy.LazyRow
@@ -80,7 +79,7 @@ class PlaceView : ComponentActivity() {
         }
     }
 
-    @OptIn(ExperimentalFoundationApi::class)
+    @OptIn(ExperimentalFoundationApi::class, ExperimentalLayoutApi::class)
     @Composable
     fun viewPlace(location: PlaceLocation) {
         var imageUrl by remember { mutableStateOf<String?>(null) }
@@ -160,6 +159,7 @@ class PlaceView : ComponentActivity() {
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .padding(16.dp)
+                                    .weight(1f)
                             ) {
                                 when (page) {
                                     0 -> aboutPlace(location)
@@ -367,19 +367,13 @@ class PlaceView : ComponentActivity() {
             totalScore = reviewTotalScoreViewModel.totalScore
         }
 
-        ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-            val (total, filter, reviews, submit) = createRefs()
+        Column(modifier = Modifier.fillMaxSize()) {
 
             Box(
                 modifier = Modifier
                     .padding(vertical = 5.dp, horizontal = 5.dp)
                     .fillMaxWidth()
-                    .constrainAs(total) {
-                        top.linkTo(parent.top)
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                        width = Dimension.fillToConstraints
-                    }
+
             ) {
                 reviewScoreText(score = totalScore, modifier = Modifier.padding(2.dp))
             }
@@ -389,12 +383,7 @@ class PlaceView : ComponentActivity() {
                 modifier = Modifier
                     .padding(vertical = 2.dp, horizontal = 2.dp)
                     .fillMaxWidth()
-                    .constrainAs(filter) {
-                        top.linkTo(total.bottom)
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                        width = Dimension.fillToConstraints
-                    }
+
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -416,21 +405,10 @@ class PlaceView : ComponentActivity() {
                     width = 1.dp,
                     color = Color.Black
                 )
-                .constrainAs(submit) {
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                    top.linkTo(filter.bottom)
-                    width = Dimension.fillToConstraints
-                }, keyboardController!!)
+                , keyboardController!!)
 
             FlowColumn(
-                modifier = Modifier.constrainAs(reviews) {
-                    top.linkTo(submit.bottom)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                    width = Dimension.fillToConstraints
-                    height = Dimension.wrapContent
-                }
+                modifier = Modifier.weight(1f)
             ) {
                 for (review in listState.value){
                     reviewLayout(review = review)
