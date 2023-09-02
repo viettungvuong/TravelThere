@@ -135,6 +135,7 @@ open class PlaceLocation protected constructor(private val name: String, private
         fun submitReview(review: Review, context: Context){
             val reviewData= hashMapOf(
                 "sender" to review.userId,
+                "sender-name" to review.name,
                 "content" to review.content,
                 "score" to review.score,
                 "time" to formatter.format(review.time)
@@ -171,11 +172,12 @@ open class PlaceLocation protected constructor(private val name: String, private
                 for (document in fetchedReviews) {
 
                     val userId = document.getString("sender")?:""
+                    val name = document.getString("sender-name")?:""
                     val content = document.getString("content")?:""
                     val time = formatter.parse(document.getString("time"))
                     val score = (document.getLong("score")?:0L).toInt()
 
-                    val review = Review(userId,content,time,score)
+                    val review = Review(userId,name,content,time,score)
                     reviews.add(review)
                 }
             }

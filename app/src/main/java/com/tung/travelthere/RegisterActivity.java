@@ -18,6 +18,9 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.tung.travelthere.controller.AppController;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class RegisterActivity extends AppCompatActivity {
     private EditText emailEditText, passwordEditText, nameEditText;
 
@@ -67,35 +70,38 @@ public class RegisterActivity extends AppCompatActivity {
                         }
 
                         //create user
-                        AppController.auth.createUserWithEmailAndPassword(email, password)
-                                .addOnCompleteListener(RegisterActivity.this, task -> {
-                                    if (task.isSuccessful()) {
-                                        // Registration success
-                                        FirebaseUser user = auth.getCurrentUser();
-                                        UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-                                                .setDisplayName(name) //đặt tên người dùng
-                                                .build();
-
-                                        user.updateProfile(profileUpdates)
-                                                .addOnCompleteListener(task1 -> {
-                                                    if (task1.isSuccessful()) {
-                                                        Toast.makeText(getApplicationContext(), "Registration successful!", Toast.LENGTH_SHORT).show();
-                                                        Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
-                                                        startActivity(intent);
-                                                        finish();
-                                                    } else {
-                                                        Toast.makeText(getApplicationContext(), "Registration successful, but failed to set display name. " + task1.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                                                    }
-                                                });
-                                    } else {
-                                        Toast.makeText(getApplicationContext(), "Registration failed. " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                                    }
-                                });
+                        register(email,password,name);
 
                     }
                 }
         );
+    }
 
+    private void register(String email, String password, String name){
+        AppController.auth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(RegisterActivity.this, task -> {
+                    if (task.isSuccessful()) {
+                        // Registration success
+                        FirebaseUser user = auth.getCurrentUser();
 
+                        UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                                .setDisplayName(name) //đặt tên người dùng
+                                .build();
+
+                        user.updateProfile(profileUpdates)
+                                .addOnCompleteListener(task1 -> {
+                                    if (task1.isSuccessful()) {
+                                        Toast.makeText(getApplicationContext(), "Registration successful!", Toast.LENGTH_SHORT).show();
+                                        Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
+                                        startActivity(intent);
+                                        finish();
+                                    } else {
+                                        Toast.makeText(getApplicationContext(), "Registration successful, but failed to set display name. " + task1.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                    } else {
+                        Toast.makeText(getApplicationContext(), "Registration failed. " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 }

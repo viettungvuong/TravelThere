@@ -36,7 +36,7 @@
         android:drawableStart="@drawable/name"
         android:drawablePadding="10dp"
         android:ems="10"
-        android:hint="Full name"
+        android:hint="Name"
         android:inputType="text"
         android:textColor="@color/blue"
         app:layout_constraintBottom_toBottomOf="parent"

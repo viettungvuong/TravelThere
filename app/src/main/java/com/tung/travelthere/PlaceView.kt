@@ -436,7 +436,7 @@ class PlaceView : ComponentActivity() {
     }
 
     @Composable
-    fun reviewLayout(review: Review) {
+    private fun reviewLayout(review: Review) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -450,7 +450,7 @@ class PlaceView : ComponentActivity() {
                 //sẽ có mục cho biết người dùng này là local hay foreigner
                 Row(modifier = Modifier.padding(10.dp)) {
 
-                    Text(text = review.userId, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                    Text(text = review.name, fontWeight = FontWeight.Bold, fontSize = 15.sp)
 
                     Box(modifier = Modifier.padding(horizontal = 10.dp)) {
                         Text(text = formatter.format(review.time), fontWeight = FontWeight.Light)
@@ -576,8 +576,9 @@ class PlaceView : ComponentActivity() {
 
             Button(
                 onClick = {
-                    val review = Review(AppController.currentUser.getName(),textState.value, Date(), integerState.value)
-                    location.reviewRepository.submitReview(review, applicationContext)
+                    val review =
+                        Review(AppController.auth.currentUser!!.uid,AppController.auth.currentUser!!.displayName?:"",textState.value, Date(), integerState.value)
+                    location.reviewRepository.submitReview(review, applicationContext) //đăng review lên
                     //đăng review lên
                     runBlocking {
                         location.reviewRepository.refreshReviews(true) //refresh lại các review
