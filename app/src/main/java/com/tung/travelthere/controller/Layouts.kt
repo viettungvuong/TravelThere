@@ -244,7 +244,7 @@ fun SneakViewPlaceLong(context: Context, location: PlaceLocation, hasImage: Bool
     Card(
         modifier = Modifier
             .padding(
-                horizontal = 10.dp, vertical = 20.dp
+                vertical = 20.dp
             )
             .clickable(onClick = {
                 val intent = Intent(context, PlaceView::class.java)
