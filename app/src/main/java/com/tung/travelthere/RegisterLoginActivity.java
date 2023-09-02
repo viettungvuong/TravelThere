@@ -85,6 +85,17 @@ public class RegisterLoginActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+
+        if (AppController.auth.getCurrentUser()!=null){ //có đăng nhập rồi thì vào luôn
+            Intent intent = new Intent(RegisterLoginActivity.this,MainActivity.class);
+            startActivity(intent);
+            finish();
+        }
+    }
+
+    @Override
     public void onBackPressed() {
         finishAffinity();
         System.exit(0);//thoát khỏi app luôn
