@@ -33,6 +33,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlin.math.roundToInt
 
+
 //sẽ có thêm filter theo tên thành phố, theo loại category
 class FavoritePage : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) { super.onCreate(savedInstanceState)
@@ -63,7 +64,7 @@ class FavoritePage : ComponentActivity() {
         var listState = remember { mutableStateOf(setOf<PlaceLocation>()) }
         var coroutineScope = rememberCoroutineScope()
 
-        LaunchedEffect(listState){
+        SideEffect{
             coroutineScope.launch {
                 listState.value = AppController.Favorites.getSingleton().refreshFavorites()
             }

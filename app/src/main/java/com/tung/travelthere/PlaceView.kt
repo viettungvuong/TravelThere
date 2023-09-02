@@ -275,6 +275,8 @@ class PlaceView : ComponentActivity() {
                     Toast.makeText(this, "Remove from favorites", Toast.LENGTH_SHORT).show()
                     false
                 }
+                val intent = Intent(this, FavoritePage::class.java)
+                startActivity(intent)
             },
             colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFF36D72)),
             modifier = Modifier.fillMaxWidth()

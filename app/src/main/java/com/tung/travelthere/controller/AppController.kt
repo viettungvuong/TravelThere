@@ -22,6 +22,7 @@ import com.google.firebase.ktx.Firebase
 import com.tung.travelthere.PlaceAutocompleteViewModel
 import com.tung.travelthere.Review
 import com.tung.travelthere.objects.*
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
 import java.text.SimpleDateFormat
 import java.time.format.DateTimeFormatter
