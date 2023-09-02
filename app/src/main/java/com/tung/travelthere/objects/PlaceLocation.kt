@@ -131,7 +131,7 @@ open class PlaceLocation protected constructor(private val name: String, private
             for (review in reviews){
                 res+=review.score
             }
-            return res
+            return res/reviews.size
         }
 
         //đăng review lên firebase

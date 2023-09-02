@@ -11,6 +11,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+
+
 import androidx.compose.foundation.lazy.LazyColumn
 
 import androidx.compose.foundation.lazy.LazyRow
@@ -340,7 +342,7 @@ class PlaceView : ComponentActivity() {
 
     //phần xem những đánh giá về địa điểm
     @Composable
-    @OptIn(ExperimentalComposeUiApi::class)
+    @OptIn(ExperimentalComposeUiApi::class, ExperimentalLayoutApi::class)
     private fun reviewsPlace(location: PlaceLocation) {
         var listState = remember { mutableStateOf(mutableListOf<Review>()) }
         var originalState = remember { mutableStateOf(mutableListOf<Review>()) }
@@ -421,17 +423,16 @@ class PlaceView : ComponentActivity() {
                     width = Dimension.fillToConstraints
                 }, keyboardController!!)
 
-            LazyColumn(
+            FlowColumn(
                 modifier = Modifier.constrainAs(reviews) {
                     top.linkTo(submit.bottom)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
                     width = Dimension.fillToConstraints
-                    height = Dimension.preferredWrapContent
-                },
-                userScrollEnabled = true
+                    height = Dimension.wrapContent
+                }
             ) {
-                itemsIndexed(listState.value.toTypedArray()) { index, review ->
+                for (review in listState.value){
                     reviewLayout(review = review)
                 }
             }
