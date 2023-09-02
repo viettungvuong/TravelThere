@@ -7,6 +7,7 @@ import android.widget.EditText;
 import android.widget.Button;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.tung.travelthere.controller.AppController;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,14 +19,11 @@ import android.widget.Toast;
 public class RegisterLoginActivity extends AppCompatActivity {
     private EditText emailEditText, passwordEditText;
     private Button registerButton, loginButton;
-    private FirebaseAuth auth;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login_activity);
-
-        auth = FirebaseAuth.getInstance();
 
         emailEditText = findViewById(R.id.emailEditText);
         passwordEditText = findViewById(R.id.passwordEditText);
@@ -65,7 +63,7 @@ public class RegisterLoginActivity extends AppCompatActivity {
                 }
 
                 // Sign in the user with the provided email and password
-                auth.signInWithEmailAndPassword(email, password)
+                AppController.auth.signInWithEmailAndPassword(email, password)
                         .addOnCompleteListener(RegisterLoginActivity.this, task -> {
                             if (task.isSuccessful()) {
                                 // Login success

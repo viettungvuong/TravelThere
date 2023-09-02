@@ -113,11 +113,14 @@ class City private constructor() {
 
                     val t = TouristPlace(placeName, Position(lat, long), cityName)
 
-                    val categoriesStr = location.get("categories") as List<String>
+                    val categoriesStr = location.get("categories") as List<String>?
 
-                    for (categoryStr in categoriesStr){
-                        t.categories.add(convertStrToCategory(categoryStr)) //thêm category
+                    if (categoriesStr!=null){
+                        for (categoryStr in categoriesStr){
+                            t.categories.add(convertStrToCategory(categoryStr)) //thêm category
+                        }
                     }
+
 
                     this.locations.add(t)
                 }

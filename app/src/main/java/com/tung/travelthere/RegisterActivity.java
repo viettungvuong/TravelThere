@@ -1,5 +1,7 @@
 package com.tung.travelthere;
 
+import static com.tung.travelthere.controller.AppController.auth;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -14,16 +16,17 @@ import android.widget.Toast;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.tung.travelthere.controller.AppController;
 
 public class RegisterActivity extends AppCompatActivity {
     private EditText emailEditText, passwordEditText, nameEditText;
 
-    private FirebaseAuth auth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.register_activity);
+
 
         nameEditText = findViewById(R.id.nameEditText);
         ImageButton back = findViewById(R.id.back_btn);
@@ -64,7 +67,7 @@ public class RegisterActivity extends AppCompatActivity {
                         }
 
                         //create user
-                        auth.createUserWithEmailAndPassword(email, password)
+                        AppController.auth.createUserWithEmailAndPassword(email, password)
                                 .addOnCompleteListener(RegisterActivity.this, task -> {
                                     if (task.isSuccessful()) {
                                         // Registration success

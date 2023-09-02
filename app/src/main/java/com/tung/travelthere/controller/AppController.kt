@@ -15,6 +15,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import coil.compose.rememberImagePainter
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.tung.travelthere.PlaceAutocompleteViewModel
@@ -75,13 +76,17 @@ class AppController {
     }
 
     companion object{
-        @JvmStatic
-
-        val currentUser = User() //user hiện tại
 
         lateinit var currentPosition: UserPlace //địa điểm hiện tại
 
+        @JvmField
+        val currentUser = User() //user hiện tại
+
+        @JvmField
         val db = Firebase.firestore
+
+        @JvmField
+        val auth = FirebaseAuth.getInstance()
     }
 }
 
