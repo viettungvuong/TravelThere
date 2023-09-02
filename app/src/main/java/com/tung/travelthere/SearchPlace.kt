@@ -71,7 +71,7 @@ fun searchRestaurantByDish(searchViewModel: SearchViewModel,newString: String,av
                         //tìm trong các dish của nhà hàng có món nào có chứa cụm từ hiện tại hay kh
                         val dishes = it.getSpecializedDish().sortedBy {
                             dish -> dish.name //sắp xếp các dish theo tên
-                        }.filter { dish -> dish.name.contains(newString) }
+                        }.filter { dish -> dish.name.contains(newString,ignoreCase = false) }
 
                         dishes.isNotEmpty()
                     }
