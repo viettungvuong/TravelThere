@@ -93,6 +93,7 @@ fun Greeting() {
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.size(32.dp),
+                colorFilter = ColorFilter.tint(Color.White)
             )
         }
     }

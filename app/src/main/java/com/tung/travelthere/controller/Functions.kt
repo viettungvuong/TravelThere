@@ -7,7 +7,9 @@ import android.graphics.Bitmap
 import android.location.Geocoder
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.palette.graphics.Palette
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.libraries.places.api.Places
@@ -21,14 +23,6 @@ import com.tung.travelthere.objects.Position
 import kotlinx.coroutines.runBlocking
 import java.util.*
 
-fun getDrawableNameFromName(resourceName: String): Int {
-    try {
-        val field = R.drawable::class.java.getField(resourceName)
-        return field.getInt(null)
-    } catch (e: Exception) {
-        return 0
-    }
-}
 
 fun colorFromImage(bitmap: Bitmap): Color {
     val palette = Palette.Builder(bitmap!!).generate()

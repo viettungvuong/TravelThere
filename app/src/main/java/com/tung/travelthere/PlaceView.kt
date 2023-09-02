@@ -1,5 +1,6 @@
 package com.tung.travelthere
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -18,16 +19,20 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -169,7 +174,7 @@ class PlaceView : ComponentActivity() {
 
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
-    fun tabLayout(pagerState: PagerState, tabTitles: List<String>, coroutineScope: CoroutineScope) {
+    private fun tabLayout(pagerState: PagerState, tabTitles: List<String>, coroutineScope: CoroutineScope) {
         TabRow(
             selectedTabIndex = pagerState.currentPage,
             backgroundColor = Color.White,
@@ -320,17 +325,30 @@ class PlaceView : ComponentActivity() {
 
     }
 
+    //phần review
     var chosenState by mutableStateOf(-1)
+    val reviewTotalScoreViewModel = ReviewTotalScoreViewModel()
+    val chosenScoreViewModel = ChosenScoreViewModel()
+
+    class ReviewTotalScoreViewModel(): ViewModel(){
+        var totalScore by mutableStateOf(0.0)
+    }
+
+    class ChosenScoreViewModel(): ViewModel(){
+        var chosenScore by mutableStateOf(0)
+    }
 
     //phần xem những đánh giá về địa điểm
     @Composable
+    @OptIn(ExperimentalComposeUiApi::class)
     private fun reviewsPlace(location: PlaceLocation) {
         var listState = remember { mutableStateOf(mutableListOf<Review>()) }
         var originalState = remember { mutableStateOf(mutableListOf<Review>()) }
-
         var totalScore by remember { mutableStateOf(0.0) }
 
         val coroutineScope = rememberCoroutineScope()
+
+        val keyboardController = LocalSoftwareKeyboardController.current
 
         LaunchedEffect(originalState) {
             coroutineScope.launch {
@@ -338,8 +356,13 @@ class PlaceView : ComponentActivity() {
                     location.reviewRepository.refreshReviews() as MutableList<Review>
                 listState.value = originalState.value
 
-                totalScore = location.reviewRepository.calculateReviewScore()
+                reviewTotalScoreViewModel.totalScore = location.reviewRepository.calculateReviewScore()
+                totalScore = reviewTotalScoreViewModel.totalScore
             }
+        }
+
+        LaunchedEffect(totalScore){
+            totalScore = reviewTotalScoreViewModel.totalScore
         }
 
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
@@ -356,13 +379,13 @@ class PlaceView : ComponentActivity() {
                         width = Dimension.fillToConstraints
                     }
             ) {
-                reviewScoreText(score = totalScore)
+                reviewScoreText(score = totalScore, modifier = Modifier.padding(2.dp))
             }
 
 
             Box(
                 modifier = Modifier
-                    .padding(vertical = 5.dp, horizontal = 2.dp)
+                    .padding(vertical = 2.dp, horizontal = 2.dp)
                     .fillMaxWidth()
                     .constrainAs(filter) {
                         top.linkTo(total.bottom)
@@ -381,7 +404,7 @@ class PlaceView : ComponentActivity() {
                 }
             }
 
-            yourReview(modifier = Modifier
+            yourReview(reviewTotalScoreViewModel = reviewTotalScoreViewModel, modifier = Modifier
                 .fillMaxWidth()
                 .background(
                     Color.White,
@@ -396,7 +419,7 @@ class PlaceView : ComponentActivity() {
                     end.linkTo(parent.end)
                     top.linkTo(filter.bottom)
                     width = Dimension.fillToConstraints
-                })
+                }, keyboardController!!)
 
             LazyColumn(
                 modifier = Modifier.constrainAs(reviews) {
@@ -404,7 +427,8 @@ class PlaceView : ComponentActivity() {
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
                     width = Dimension.fillToConstraints
-                }
+                },
+                userScrollEnabled = true
             ) {
                 itemsIndexed(listState.value.toTypedArray()) { index, review ->
                     reviewLayout(review = review)
@@ -414,9 +438,10 @@ class PlaceView : ComponentActivity() {
 
         }
     }
-    
+
+    //giao diện điểm số review
     @Composable
-    private fun reviewScoreText(score: Double){
+    private fun reviewScoreText(modifier: Modifier, score: Double){
         var color: Color? = null
         if (score in 0.0..4.0) {
             color = colorFirst
@@ -425,7 +450,7 @@ class PlaceView : ComponentActivity() {
         } else {
             color = colorThird
         }
-        Box(modifier = Modifier.padding(10.dp)) {
+        Box(modifier = modifier) {
             Text(
                 text = score.toString(),
                 fontWeight = FontWeight.Bold,
@@ -435,6 +460,7 @@ class PlaceView : ComponentActivity() {
         }
     }
 
+    //giao diện của mỗi review
     @Composable
     private fun reviewLayout(review: Review) {
         Card(
@@ -461,13 +487,14 @@ class PlaceView : ComponentActivity() {
                     Text(text = review.content, fontSize = 15.sp)
                 }
 
-                reviewScoreText(score = review.score.toDouble())
+                reviewScoreText(score = review.score.toDouble(), modifier = Modifier.padding(horizontal = 10.dp))
 
             }
         }
     }
 
 
+    //phần lọc đánh giá
     @Composable
     private fun filterReviewEach(
         index: Int, reviewState: MutableState<MutableList<Review>>,
@@ -527,12 +554,56 @@ class PlaceView : ComponentActivity() {
         }
     }
 
+    //dropdown menu chọn điểm số đang chọn
+    @OptIn(ExperimentalMaterialApi::class)
+    @Composable
+    fun DropDownMenu(modifier: Modifier, context: Context, options: List<String>, selectedItemViewModel: ChosenScoreViewModel) {
+        var expanded by remember { mutableStateOf(false) }
+
+        Box(
+            modifier = modifier
+        ) {
+            ExposedDropdownMenuBox(
+                expanded = expanded,
+                onExpandedChange = {
+                    expanded = !expanded
+                }
+            ) {
+                TextField(
+                    value = selectedItemViewModel.chosenScore.toString(),
+                    onValueChange = {},
+                    readOnly = true,
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                )
+
+                ExposedDropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    options.forEach { item ->
+                        DropdownMenuItem(
+                            onClick = {
+                                selectedItemViewModel.chosenScore = item.toInt()
+                                expanded = false
+                                Toast.makeText(context, item, Toast.LENGTH_SHORT).show()
+                            }
+                        ){
+                            Text(text = item)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+
     //nếu đã up review rồi thì hiện review của người dùng và cho chỉnh sửa
     //nếu chưa thì cho phép tạo review
+    @OptIn(ExperimentalComposeUiApi::class)
     @Composable
-    private fun yourReview(modifier: Modifier) {
+    private fun yourReview(reviewTotalScoreViewModel: ReviewTotalScoreViewModel, modifier: Modifier, keyboardController: SoftwareKeyboardController) {
         val textState = remember { mutableStateOf("") }
-        val integerState = remember { mutableStateOf(0) }
 
         Row(modifier = modifier, horizontalArrangement = Arrangement.SpaceBetween) {
             Column(
@@ -549,40 +620,26 @@ class PlaceView : ComponentActivity() {
                         .background(color = Color(0xffd5ede6)),
                 )
 
-                TextField(
-                    value = integerState.value.toString(),
-                    onValueChange = {
-                        val input = it.toIntOrNull()
-                        if (input != null) {
-                            if (input in 0..10){
-                                integerState.value = input
-                            }
-                            else{
-                                integerState.value = input?.coerceIn(0, 10) ?: 0
-                            }
-                        }
-                    },
-                    placeholder = { Text("Enter integer from 0 to 10") },
-                    modifier = Modifier
-                        .padding(vertical = 5.dp)
-                        .background(color = Color(0xffd5ede6)),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number,
-                        imeAction = ImeAction.Done
-                    )
-                )
+                val options = mutableListOf<String>()
+                for (i in 0..10) {
+                    options.add(i.toString())
+                }
+
+                DropDownMenu(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 5.dp), context = LocalContext.current, options = options, selectedItemViewModel = chosenScoreViewModel)
             }
 
 
             Button(
                 onClick = {
+                    //ẩn bàn phím
+                    keyboardController!!.hide()
+
                     val review =
-                        Review(AppController.auth.currentUser!!.uid,AppController.auth.currentUser!!.displayName?:"",textState.value, Date(), integerState.value)
+                        Review(AppController.auth.currentUser!!.uid,AppController.auth.currentUser!!.displayName?:"",textState.value, Date(), chosenScoreViewModel.chosenScore)
                     location.reviewRepository.submitReview(review, applicationContext) //đăng review lên
-                    //đăng review lên
-                    runBlocking {
-                        location.reviewRepository.refreshReviews(true) //refresh lại các review
-                    }
+                    reviewTotalScoreViewModel.totalScore = location.reviewRepository.calculateReviewScore() //tính lại tổng điểm
                 },
                 modifier = Modifier
                     .weight(0.45f)
@@ -605,8 +662,9 @@ class PlaceView : ComponentActivity() {
     }
 
 
+    //phần suggestions
     @Composable
-    private fun discussionsPlace(location: PlaceLocation) {
+    private fun suggestionsPlace(location: PlaceLocation) {
 
     }
 

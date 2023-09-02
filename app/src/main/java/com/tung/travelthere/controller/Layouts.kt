@@ -3,6 +3,7 @@ package com.tung.travelthere.controller
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -303,6 +304,7 @@ fun ImageFromUrl(url: String, contentDescription: String?, size: Double) {
         contentScale = ContentScale.Crop,
     )
 }
+
 
 
 

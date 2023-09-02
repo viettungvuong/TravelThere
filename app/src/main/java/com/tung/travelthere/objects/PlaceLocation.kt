@@ -4,7 +4,10 @@ import android.content.Context
 import android.location.Location
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.toUpperCase
 import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.ktx.firestore
@@ -144,6 +147,7 @@ open class PlaceLocation protected constructor(private val name: String, private
                 .collection(collectionLocations).document(pos.toString()).collection("reviews").add(reviewData)
                 .addOnSuccessListener {
                     Toast.makeText(context, "Added your review, thank you for your feedback",Toast.LENGTH_LONG).show()
+                    reviews.add(review)
                 }
                 .addOnFailureListener{
                     Toast.makeText(context, "Cannot add your review, please try again",Toast.LENGTH_LONG).show()
@@ -182,7 +186,7 @@ open class PlaceLocation protected constructor(private val name: String, private
                 }
             }
 
-            return reviews as List<Review>
+            return reviews
         }
     }
 }
