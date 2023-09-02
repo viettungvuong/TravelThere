@@ -427,6 +427,7 @@ class PlaceView : ComponentActivity() {
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
                     width = Dimension.fillToConstraints
+                    height = Dimension.preferredWrapContent
                 },
                 userScrollEnabled = true
             ) {
