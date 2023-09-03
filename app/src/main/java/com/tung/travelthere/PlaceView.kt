@@ -667,6 +667,28 @@ class PlaceView : ComponentActivity() {
                 }
             )
 
+            Button(
+                onClick = {
+                          //recommend địa điểm này
+                    suggestPlace(this@PlaceView, location, null)
+                },
+                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xffa39662)),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.LocationOn,
+                        contentDescription = "Favorite",
+                        tint = Color.White
+                    )
+
+                    Spacer(modifier = Modifier.width(20.dp))
+
+                    Text(text = "Recommend this place", color = Color.White)
+                }
+            }
+
             Text(text = "Images")
 
             LazyVerticalGrid(

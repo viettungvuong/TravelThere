@@ -365,7 +365,7 @@ class SuggestPlace : ComponentActivity() {
 fun suggestPlace(
     context: Context,
     location: PlaceLocation,
-    imageViewModel: SuggestPlace.ImageViewModel
+    imageViewModel: SuggestPlace.ImageViewModel?
 ) {
     val cityRef = AppController.db.collection(collectionCities).document(location.cityName)
     cityRef.get().addOnCompleteListener { task ->
@@ -390,13 +390,31 @@ fun suggestPlace(
                         val documentSnapshot = task.result
                         val documentExists = documentSnapshot?.exists() ?: false
 
-                        CoroutineScope(Dispatchers.Main).launch {
-                            uploadImages(context, imageViewModel, location)
-                            Log.d("upload image", "true")
-                        }
+                        if (imageViewModel!=null){
+                            CoroutineScope(Dispatchers.Main).launch {
+                                uploadImages(context, imageViewModel, location)
+                                Log.d("upload image", "true")
+                            }
+                        } //nếu có hình ảnh
+
 
                         if (documentExists) {
                             //có tồn tại
+                            var recommendIds = documentSnapshot.get("recommend-ids") as List<String>
+                            if (recommendIds==null){
+                                recommendIds= emptyList()
+                            }
+                            val index = recommendIds.binarySearch(AppController.auth.currentUser!!.uid)
+                            if (index>=0){ //người dùng đã recommend rồi, không cho recommend
+                                Toast.makeText(
+                                    context,
+                                    "You have already recommended this place",
+                                    Toast.LENGTH_LONG
+                                ).show()
+
+                                return@addOnCompleteListener
+                            }
+
                             val recommendedNum = documentSnapshot.getLong("recommends")
                                 ?: 0 //số lượng được recommends
                             val updatedField = mapOf("recommends" to recommendedNum + 1)
