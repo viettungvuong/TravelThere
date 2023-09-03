@@ -42,6 +42,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.ViewModel
 import com.tung.travelthere.controller.colorBlue
 import com.tung.travelthere.objects.*
@@ -49,8 +50,6 @@ import kotlinx.coroutines.runBlocking
 import java.io.File
 
 class SuggestPlace : ComponentActivity() {
-
-
 
     inner class ImageViewModel {
         var currentChosenImage by mutableStateOf<String>("")
@@ -153,12 +152,31 @@ class SuggestPlace : ComponentActivity() {
             padding ->
             Column(
                 modifier = Modifier
-                    .padding(16.dp)
+                    .padding(10.dp)
+
                     .fillMaxSize()
             ) {
-                Text(
-                    text = "Find your place"
-                )
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                ) {
+                    FloatingActionButton(
+                        onClick = { finish() },
+                        backgroundColor = Color.White,
+                        content = {
+                            Icon(
+                                imageVector = Icons.Default.ArrowBack,
+                                contentDescription = "Back",
+                                tint = colorBlue
+                            )
+                        }
+                    )
+                }
+
+                Text(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 25.dp), text="Suggest a place", textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
+
 
                 Spacer(
                     Modifier.height(20.dp)

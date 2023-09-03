@@ -38,6 +38,7 @@ class PlaceAutocompleteViewModel(private val context: Context): ViewModel() {
         val request = FindAutocompletePredictionsRequest.builder()
             .setTypesFilter(listOf(PlaceTypes.ESTABLISHMENT))
             .setSessionToken(token)
+            .setCountry("VN") //app dùng cho Việt Nam ở thời điểm hiện tại
             .setQuery(query)
             .build()
 

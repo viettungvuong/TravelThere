@@ -460,3 +460,37 @@ fun tabLayout(pagerState: PagerState, tabTitles: List<String>, coroutineScope: C
         }
     }
 }
+
+@Composable
+fun dateTimePicker(modifier: Modifier){
+    var dateStr by remember{ mutableStateOf("") }
+
+    Row(modifier = modifier){
+        TextField(
+            value = dateStr,
+            onValueChange = { newString ->
+                dateStr = newString
+            },
+            textStyle = TextStyle(fontSize = 17.sp),
+            leadingIcon = { Icon(Icons.Filled.Search, null, tint = Color.Gray) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 5.dp)
+                .background(Color(0xFF99b1d1), RoundedCornerShape(16.dp)),
+            placeholder = { Text(text = "Search") },
+            colors = TextFieldDefaults.textFieldColors(
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                backgroundColor = Color.Transparent,
+                cursorColor = Color.DarkGray
+            )
+        )
+
+        Box(modifier = Modifier.size(24.dp).clickable {
+
+        }){
+
+        }
+    }
+
+}

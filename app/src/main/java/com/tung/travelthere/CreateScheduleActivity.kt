@@ -64,7 +64,6 @@ class CreateScheduleActivity : ComponentActivity() {
 
     @Composable
     private fun CreateSchedule(){
-
     }
 
     @Composable
