@@ -3,4 +3,5 @@
     <string name="title_activity_favorite_page">FavoritePage</string>
     <string name="title_activity_splash_screen">SplashScreen</string>
     <string name="title_activity_search_place">SearchPlace</string>
+    <string name="title_activity_create_schedule">CreateScheduleActivity</string>
 </resources>

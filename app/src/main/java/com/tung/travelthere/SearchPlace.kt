@@ -117,6 +117,7 @@ fun SearchPage(city: City, activity: Activity) {
 
         Column() {
 
+
             Box(
                 modifier = Modifier
                     .size(32.dp)

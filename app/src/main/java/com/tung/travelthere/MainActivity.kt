@@ -22,10 +22,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,6 +42,8 @@ import kotlinx.coroutines.*
 import java.net.URL
 import java.util.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 
 
 class MainActivity : ComponentActivity() {
@@ -117,6 +116,28 @@ class MainActivity : ComponentActivity() {
                             imageVector = Icons.Default.Add,
                             tint = Color.White,
                             contentDescription = "Add"
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(10.dp))
+                    IconButton(onClick = {
+                        val intent = Intent(context, SuggestPlace::class.java)
+                        context.startActivity(intent)
+                    }) {
+                        Image(
+                            painter = painterResource(id = R.drawable.luggage),
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp),
+                            contentScale = ContentScale.Fit,
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(10.dp))
+                    IconButton(onClick = {
+                        /*TODO*/
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            tint = Color.White,
+                            contentDescription = "User"
                         )
                     }
                 }
