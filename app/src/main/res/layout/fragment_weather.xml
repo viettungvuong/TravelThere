@@ -40,6 +40,7 @@
                 android:importantForAutofill="no"
                 android:inputType="text"
                 android:textColor="@color/black"
+                android:id="@+id/edit_text_city_name"
                 android:hint="Enter City Name"
                 android:textSize="14sp"/>
 
@@ -51,6 +52,7 @@
             android:layout_height="match_parent"
             android:layout_gravity="center"
             android:layout_weight="0.5"
+            android:id="@+id/image_weather_search"
             android:src="@drawable/password"
             android:layout_marginRight="10dp"
             android:background="@android:color/transparent"/>
