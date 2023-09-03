@@ -182,14 +182,17 @@ class MainActivity : ComponentActivity() {
 
                             when (page) {
                                 0 -> NearbyPlaces(
+                                    modifier = Modifier.padding(padding),
                                     context,
                                     city = City.getSingleton(),
                                 )
                                 1 -> LocalRecommended(
+                                    modifier = Modifier.padding(padding),
                                     context,
                                     city = City.getSingleton(),
                                 )
                                 2 -> TouristAttractions(
+                                    modifier = Modifier.padding(padding),
                                     context,
                                     city = City.getSingleton(),
                                 )
@@ -311,7 +314,7 @@ class MainActivity : ComponentActivity() {
 
     //trang local recommended
     @Composable
-    fun LocalRecommended(context: Context, city: City) {
+    fun LocalRecommended(modifier: Modifier,context: Context, city: City) {
         var listState = remember { mutableStateListOf<PlaceLocation>()  }
         var chosenState = remember { mutableStateOf(mutableSetOf<Category>()) }
         var originalState = remember { mutableStateListOf<PlaceLocation>()  }
@@ -325,7 +328,7 @@ class MainActivity : ComponentActivity() {
         }
 
 
-        Column() {
+        Column(modifier = modifier) {
             LazyRow(modifier = Modifier.padding(15.dp)) {
                 itemsIndexed(Category.values()) { index, category -> //tương tự xuất ra location adapter
                     categoryView(category, colorBlue, true, listState, chosenState, originalState)
@@ -346,7 +349,7 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    fun TouristAttractions(context: Context, city: City) {
+    fun TouristAttractions(modifier: Modifier, context: Context, city: City) {
         var listState = remember { mutableStateListOf<PlaceLocation>()  }
         var chosenState = remember { mutableStateOf(mutableSetOf<Category>()) }
         var originalState = remember { mutableStateListOf<PlaceLocation>()  }
@@ -360,7 +363,7 @@ class MainActivity : ComponentActivity() {
         }
 
 
-        Column() {
+        Column(modifier=modifier) {
             LazyRow(modifier = Modifier.padding(15.dp)) {
                 itemsIndexed(Category.values()) { index, category -> //tương tự xuất ra location adapter
                     categoryView(category, colorBlue, true, listState, chosenState, originalState)
@@ -383,7 +386,7 @@ class MainActivity : ComponentActivity() {
 
 
     @Composable
-    fun NearbyPlaces(context: Context, city: City) { //đề xuất địa điểm gần với nơi đang đứng
+    fun NearbyPlaces(modifier: Modifier,context: Context, city: City) { //đề xuất địa điểm gần với nơi đang đứng
         var listState = remember { mutableStateListOf<PlaceLocation>()  }
         var chosenState = remember { mutableStateOf(mutableSetOf<Category>()) }
         var originalState = remember { mutableStateListOf<PlaceLocation>()  }
@@ -396,7 +399,7 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        Column() {
+        Column(modifier=modifier) {
             LazyRow(modifier = Modifier.padding(15.dp)) {
                 itemsIndexed(Category.values()) { index, category -> //tương tự xuất ra location adapter
                     categoryView(category, colorBlue, true, listState, chosenState, originalState)
