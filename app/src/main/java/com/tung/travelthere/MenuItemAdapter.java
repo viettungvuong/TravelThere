@@ -16,6 +16,11 @@ import java.util.ArrayList;
 public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.MenuItemListHolder> {
 
     ArrayList<MenuItem> menuItemList;
+
+    public MenuItemAdapter(ArrayList<MenuItem> menuItemList) {
+        this.menuItemList = menuItemList;
+    }
+
     @Override
     public MenuItemListHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.menu_item, parent, false);
