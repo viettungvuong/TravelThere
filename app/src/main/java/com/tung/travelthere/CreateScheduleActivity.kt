@@ -332,7 +332,7 @@ class CreateScheduleActivity : ComponentActivity() {
 
                     Spacer(modifier = Modifier.width(5.dp))
 
-                    Text(text = "$distance km", fontSize = 15.sp)
+                    Text(text = "${roundDecimal(distance.toDouble(),2)} km", fontSize = 15.sp)
                 }
             }
         }
@@ -408,7 +408,7 @@ class CreateScheduleActivity : ComponentActivity() {
 
                                                 Spacer(modifier = Modifier.width(5.dp))
 
-                                                Text(text = "$distance km")
+                                                Text(text = "${roundDecimal(distance.toDouble(),2)} km")
                                             }
 
                                         }

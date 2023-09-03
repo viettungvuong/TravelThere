@@ -22,6 +22,8 @@ import com.tung.travelthere.objects.PlaceLocation
 import com.tung.travelthere.objects.Position
 import kotlinx.coroutines.runBlocking
 import java.util.*
+import kotlin.math.pow
+import kotlin.math.roundToInt
 
 
 fun colorFromImage(bitmap: Bitmap): Color {
@@ -140,4 +142,8 @@ fun suggestPlace(context: Context, location: PlaceLocation) {
 //tạo lịch trình đi chơi
 fun createSchedule(){
 
+}
+
+fun roundDecimal(value: Double, places: Int): Double{
+    return (value * 100.0).roundToInt() / 10.0.pow(places.toDouble())
 }
