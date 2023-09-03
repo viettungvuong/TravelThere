@@ -153,7 +153,6 @@ class SuggestPlace : ComponentActivity() {
             Column(
                 modifier = Modifier
                     .padding(10.dp)
-
                     .fillMaxSize()
             ) {
                 Box(
@@ -318,7 +317,5 @@ class SuggestPlace : ComponentActivity() {
         //lấy các thông tin của địa điểm chọn
         placeViewModel.getName(autocompleteResult)
         placeViewModel.retrieveOtherInfo(autocompleteResult)
-
-
     }
 }

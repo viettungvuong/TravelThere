@@ -22,7 +22,7 @@ data class AutocompleteResult(
 )
 
 class PlaceAutocompleteViewModel(private val context: Context): ViewModel() {
-    private val placesClient = Places.createClient(context)
+    val placesClient = Places.createClient(context)
 
     var placeSuggestions= mutableStateListOf<AutocompleteResult>() //chứa autocomplete
 

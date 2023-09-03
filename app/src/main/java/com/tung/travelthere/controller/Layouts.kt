@@ -391,6 +391,7 @@ fun SneakViewPlaceLong(context: Context, location: PlaceLocation, hasImage: Bool
     }
 }
 
+
 @Composable
 fun ImageFromUrl(url: String, contentDescription: String?, size: Double) {
     var modifier: Modifier? = null
@@ -411,11 +412,11 @@ fun ImageFromUrl(url: String, contentDescription: String?, size: Double) {
 //thanh tìm kiếm (cho searchplace.kt)
 @Composable
 fun SearchBar(
-    available: Set<PlaceLocation>, searchViewModel: SearchViewModel
+    available: Set<PlaceLocation>, searchViewModel: SearchViewModel,modifier: Modifier
 ) {
     var searchQuery by remember { mutableStateOf(TextFieldValue()) }
 
-    Column {
+    Column(modifier=modifier) {
         TextField(
             value = searchQuery,
             onValueChange = { newString ->
@@ -478,10 +479,10 @@ fun tabLayout(
 }
 
 @Composable
-fun dateTimePicker(modifier: Modifier, mDate: MutableState<String>, datePicker: ()->Unit) {
+fun dateTimePicker(modifier: Modifier, mDate: MutableState<String>, datePicker: () -> Unit) {
     var dateStr by remember { mutableStateOf("") }
 
-    LaunchedEffect(mDate.value){
+    LaunchedEffect(mDate.value) {
         dateStr = mDate.value
     }
 

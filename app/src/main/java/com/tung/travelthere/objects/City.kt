@@ -85,6 +85,7 @@ class City private constructor() {
         //những nơi nên đi tới
         var locations = mutableSetOf<PlaceLocation>()
         var nearby = mutableSetOf<PlaceLocation>()
+        var recommends = mutableSetOf<PlaceLocation>()
 
         suspend fun refreshLocations(refresh: Boolean = false): Set<PlaceLocation> {
             if (locations.isNotEmpty()&&!refresh) {
