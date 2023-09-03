@@ -61,18 +61,21 @@ class SuggestPlace : ComponentActivity() {
 
     lateinit var imageViewModel: ImageViewModel
 
-    val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-        if (uri != null) {
-            imageViewModel.currentChosenImage = uri.toString()
-            val bitmap =
-                MediaStore.Images.Media.getBitmap(
-                    this.getContentResolver(),
-                    Uri.parse(imageViewModel.currentChosenImage)
-                )
-            imageViewModel.currentChosenImage=""
-            imageViewModel.chosenImages.add(bitmap)
+    val pickMedia = registerForActivityResult(ActivityResultContracts.PickMultipleVisualMedia()) { uris ->
+        if (uris != null) {
+            for (uri in uris){
+                imageViewModel.currentChosenImage = uri.toString()
+                val bitmap =
+                    MediaStore.Images.Media.getBitmap(
+                        this.getContentResolver(),
+                        Uri.parse(imageViewModel.currentChosenImage)
+                    )
+                imageViewModel.currentChosenImage=""
+                imageViewModel.chosenImages.add(bitmap)
+            }
+
         } else {
-            Log.d("không chọn ảnh", "chưa chọn ảnh")
+            Toast.makeText(this,"No images have been selected",Toast.LENGTH_LONG).show()
         }
     }
 
@@ -244,12 +247,12 @@ class SuggestPlace : ComponentActivity() {
 
                 ) {
                     LazyRow {
-                        items(imageViewModel.chosenImages) {
-                            Box(
+                        itemsIndexed(imageViewModel.chosenImages) {
+                            index, image ->Box(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Image(
-                                    bitmap = it.asImageBitmap(),
+                                    bitmap = image.asImageBitmap(),
                                     contentDescription = null,
                                     modifier = Modifier.size(200.dp),
                                     contentScale = ContentScale.Fit
@@ -259,7 +262,9 @@ class SuggestPlace : ComponentActivity() {
                                     .align(Alignment.BottomCenter)
                                     .size(25.dp)
                                     .background(Color.Red, shape = RoundedCornerShape(4.dp))
-                                    .clickable {  },
+                                    .clickable {
+                                        imageViewModel.chosenImages.removeAt(index)
+                                    },
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                     verticalArrangement = Arrangement.Center){
                                     Icon(
@@ -402,6 +407,6 @@ fun suggestPlace(context: Context, location: PlaceLocation) {
     }
 }
 
-fun UploadImage(){
+fun UploadImage(bitmap: Bitmap){
 
 }
