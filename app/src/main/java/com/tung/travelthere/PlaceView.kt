@@ -98,7 +98,9 @@ class PlaceView : ComponentActivity() {
                     ImageFromUrl(url = imageUrl ?: "", contentDescription = null, 0.0)
 
                     FloatingActionButton(
-                        modifier = Modifier.align(Alignment.TopStart).size(32.dp),
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .size(32.dp),
                         onClick = { finish() },
                         backgroundColor = Color.White,
                         content = {
@@ -388,7 +390,7 @@ class PlaceView : ComponentActivity() {
             Text(
                 text = score.toString(),
                 fontWeight = FontWeight.Bold,
-                fontSize = 30.sp,
+                fontSize = 20.sp,
                 color = color
             )
         }
@@ -402,23 +404,25 @@ class PlaceView : ComponentActivity() {
                 .fillMaxWidth()
                 .padding(
                     horizontal = 20.dp,
-                    vertical = 20.dp
+                    vertical = 2.dp
                 ),
             elevation = 10.dp
         ) {
-            Column() {
+            Row() {
                 //sẽ có mục cho biết người dùng này là local hay foreigner
-                Row(modifier = Modifier.padding(10.dp)) {
+                Column() {
+                    Row(modifier = Modifier.padding(10.dp)) {
 
-                    Text(text = review.name, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                        Text(text = review.name, fontWeight = FontWeight.Bold, fontSize = 15.sp)
 
-                    Box(modifier = Modifier.padding(horizontal = 10.dp)) {
-                        Text(text = formatter.format(review.time), fontWeight = FontWeight.Light)
+                        Box(modifier = Modifier.padding(horizontal = 10.dp)) {
+                            Text(text = formatter.format(review.time), fontWeight = FontWeight.Light)
+                        }
                     }
-                }
 
-                Box(modifier = Modifier.padding(10.dp)) {
-                    Text(text = review.content, fontSize = 15.sp)
+                    Box(modifier = Modifier.padding(10.dp)) {
+                        Text(text = review.content, fontSize = 15.sp)
+                    }
                 }
 
                 reviewScoreText(score = review.score.toDouble(), modifier = Modifier.padding(horizontal = 10.dp))
