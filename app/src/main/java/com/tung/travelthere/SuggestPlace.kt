@@ -49,10 +49,8 @@ import com.google.firebase.storage.ktx.component1
 import com.google.firebase.storage.ktx.component2
 import com.tung.travelthere.controller.*
 import com.tung.travelthere.objects.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.await
-import kotlinx.coroutines.withContext
 
 class SuggestPlace : ComponentActivity() {
 
@@ -392,6 +390,11 @@ fun suggestPlace(
                         val documentSnapshot = task.result
                         val documentExists = documentSnapshot?.exists() ?: false
 
+                        CoroutineScope(Dispatchers.Main).launch {
+                            uploadImages(context, imageViewModel, location)
+                            Log.d("upload image", "true")
+                        }
+
                         if (documentExists) {
                             //có tồn tại
                             val recommendedNum = documentSnapshot.getLong("recommends")
@@ -420,20 +423,18 @@ fun suggestPlace(
                                 "location-name" to location.getName(),
                                 "lat" to location.getPos().lat,
                                 "long" to location.getPos().long,
-                                "category" to "Recommended"
+                                "categories" to listOf("Recommend"),
+                                "recommends" to 1
                             )
                             locationRef.set(locationData) // Create a new document with locationData
                                 .addOnSuccessListener {
+
                                     Toast.makeText(
                                         context,
                                         "Thank you for your suggestion!",
                                         Toast.LENGTH_LONG
                                     ).show()
 
-                                    runBlocking {
-                                        uploadImages(context, imageViewModel, location)
-                                        Log.d("upload image","true")
-                                    }
                                 }
                                 .addOnFailureListener { e ->
                                     Toast.makeText(
@@ -453,10 +454,10 @@ fun suggestPlace(
     }
 }
 
-private fun uploadImages(
+private suspend fun uploadImages(
     context: Context,
     imageViewModel: SuggestPlace.ImageViewModel,
-    location: PlaceLocation
+    location: PlaceLocation,
 ) {
     var imageCount = 0
     val listRef = AppController.storage.reference.child("files/${location.getPos()}")
@@ -464,12 +465,12 @@ private fun uploadImages(
     listRef.listAll()
         .addOnSuccessListener { (items, prefixes) ->
             imageCount = items.size //tìm số hình ảnh
-            Log.d("image count",imageCount.toString())
+            Log.d("image count", imageCount.toString())
 
             runBlocking {
                 withContext(Dispatchers.IO) {
                     for (uri in imageViewModel.chosenImagesUri) {
-                        Log.d("uri",uri.toString())
+                        Log.d("uri", uri.toString())
                         val fileExtension = getFileExtension(context.contentResolver, uri)
 
                         val uploadTask = listRef.child("$imageCount$fileExtension").putFile(uri)
@@ -503,8 +504,8 @@ private fun uploadImages(
 
             }
         }
-        .addOnFailureListener {
-            exception -> Log.d("error upload image",exception.message.toString())
+        .addOnFailureListener { exception ->
+            Log.d("error upload image", exception.message.toString())
         }
 }
 

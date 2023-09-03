@@ -2,12 +2,17 @@ package com.tung.travelthere.objects
 
 import android.content.Context
 import android.location.Location
+import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.component1
+import com.google.firebase.storage.ktx.component2
 import com.google.firebase.storage.ktx.storage
 import com.tung.travelthere.controller.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 
 class Position(var lat: Double, var long: Double): java.io.Serializable{
     override fun toString(): String {
@@ -85,32 +90,30 @@ open class PlaceLocation protected constructor(private val name: String, private
         return this.pos.distanceTo(placeLocation.getPos())
     }
 
-    suspend fun fetchImageUrl(): String? {
+    suspend fun fetchImageUrl(): String? = withContext(Dispatchers.IO) {
         if (imageUrl != null) {
-            return imageUrl!!
+            return@withContext imageUrl
         }
 
-        var res: String? = null
+        try {
+            val listResult = AppController.storage.reference.child("files/${pos}").listAll().await()
 
-        val query = AppController.db.collection(collectionCities).whereEqualTo(cityNameField, cityName)
-            .limit(1).get().await()
-        val document = query.documents.firstOrNull()
-        if (document != null) {
-            val locationCollection = document.reference.collection(collectionLocations).whereEqualTo(
-                locationNameField,name).limit(1).get().await()
-            val document2 = locationCollection.documents.firstOrNull()
-            if (document2!=null){
-                res = document2.getString("file-name")
-                val storageRef = Firebase.storage.reference
-                if (res!=null&&res.isNotBlank()){
-                    val imageRef = storageRef.child(res)
-                    res = imageRef.downloadUrl.await().toString()
-                }
+            if (listResult.items.isNotEmpty()) {
+                // Get the first item in the list
+                val firstItem = listResult.items[0]
 
+                val uri = firstItem.downloadUrl.await()
+                imageUrl = uri.toString()
+                Log.d("res image url", imageUrl ?: "")
+                return@withContext imageUrl
+            } else {
+                println("No files found in the directory.")
             }
+        } catch (exception: Exception) {
+            println("Failed to list files: ${exception.message}")
         }
-        imageUrl = res
-        return res
+
+        return@withContext null
     }
 
     val reviewRepository = ReviewRepository()
