@@ -123,6 +123,10 @@ open class PlaceLocation protected constructor(private val name: String, private
 
         //lấy tổng điểm
         fun calculateReviewScore(): Double{
+            if (reviews.isEmpty()){
+                return 0.0
+            }
+
             var res = 0.0
             for (review in reviews){
                 res+=review.score

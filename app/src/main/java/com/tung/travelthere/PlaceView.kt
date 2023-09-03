@@ -19,6 +19,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -87,32 +88,17 @@ class PlaceView : ComponentActivity() {
 
 
         MaterialTheme {
-            ConstraintLayout {
-                val (image, button, detail) = createRefs()
+            Column {
 
                 Box(
                     modifier = Modifier
                         .heightIn(max = 300.dp)
                         .fillMaxWidth()
-                        .constrainAs(image) {
-                            top.linkTo(parent.top)
-                            start.linkTo(parent.start)
-                            end.linkTo(parent.end)
-                            width = Dimension.fillToConstraints
-                        }
                 ) {
                     ImageFromUrl(url = imageUrl ?: "", contentDescription = null, 0.0)
-                }
 
-                Box(
-                    modifier = Modifier
-                        .size(32.dp)
-                        .constrainAs(button) {
-                            top.linkTo(parent.top)
-                            start.linkTo(parent.start)
-                        }
-                ) {
                     FloatingActionButton(
+                        modifier = Modifier.align(Alignment.TopStart).size(32.dp),
                         onClick = { finish() },
                         backgroundColor = Color.White,
                         content = {
@@ -125,6 +111,7 @@ class PlaceView : ComponentActivity() {
                     )
                 }
 
+
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -132,12 +119,7 @@ class PlaceView : ComponentActivity() {
                             Color.White,
                             shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp)
                         )
-                        .constrainAs(detail) {
-                            top.linkTo(image.bottom, margin = 200.dp)
-                            start.linkTo(parent.start)
-                            end.linkTo(parent.end)
-                            bottom.linkTo(parent.bottom)
-                        }
+
                 ) {
                     Column {
                         tabLayout(
@@ -369,7 +351,7 @@ class PlaceView : ComponentActivity() {
                     width = 1.dp,
                     color = Color.Black
                 )
-                , keyboardController!!)
+                , listState)
 
             if (listState.value.isNotEmpty()){
                 FlowColumn(
@@ -537,7 +519,6 @@ class PlaceView : ComponentActivity() {
                             onClick = {
                                 selectedItemViewModel.chosenScore = item.toInt()
                                 expanded = false
-                                Toast.makeText(context, item, Toast.LENGTH_SHORT).show()
                             }
                         ){
                             Text(text = item)
@@ -554,8 +535,10 @@ class PlaceView : ComponentActivity() {
     //nếu chưa thì cho phép tạo review
     @OptIn(ExperimentalComposeUiApi::class)
     @Composable
-    private fun yourReview(reviewTotalScoreViewModel: ReviewTotalScoreViewModel, modifier: Modifier, keyboardController: SoftwareKeyboardController) {
+    private fun yourReview(reviewTotalScoreViewModel: ReviewTotalScoreViewModel, modifier: Modifier, listState: MutableState<MutableList<Review>>) {
         val textState = remember { mutableStateOf("") }
+
+        val keyboardController = LocalSoftwareKeyboardController.current
 
         Row(modifier = modifier, horizontalArrangement = Arrangement.SpaceBetween) {
             Column(
@@ -586,11 +569,13 @@ class PlaceView : ComponentActivity() {
             Button(
                 onClick = {
                     //ẩn bàn phím
+
                     keyboardController!!.hide()
 
                     val review =
                         Review(AppController.auth.currentUser!!.uid,AppController.auth.currentUser!!.displayName?:"",textState.value, Date(), chosenScoreViewModel.chosenScore)
                     location.reviewRepository.submitReview(review, applicationContext) //đăng review lên
+                    listState.value.add(review)
                     reviewTotalScoreViewModel.totalScore = location.reviewRepository.calculateReviewScore() //tính lại tổng điểm
                 },
                 modifier = Modifier
