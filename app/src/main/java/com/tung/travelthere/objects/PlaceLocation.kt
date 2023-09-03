@@ -2,6 +2,7 @@ package com.tung.travelthere.objects
 
 import android.content.Context
 import android.location.Location
+import android.net.Uri
 import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.ViewModel
@@ -60,8 +61,7 @@ fun convertStrToCategory(string: String): Category{
 open class PlaceLocation protected constructor(private val name: String, private val pos: Position, val cityName: String): java.io.Serializable{
     var categories: MutableSet<Category> = mutableSetOf() //các category của địa điểm này
     var imageUrl: String?=null
-
-
+    var recommendsCount = 0
 
     fun getName(): String{
         return name
@@ -95,28 +95,12 @@ open class PlaceLocation protected constructor(private val name: String, private
             return@withContext imageUrl
         }
 
-        try {
-            val listResult = AppController.storage.reference.child("files/${pos}").listAll().await()
-
-            if (listResult.items.isNotEmpty()) {
-                // Get the first item in the list
-                val firstItem = listResult.items[0]
-
-                val uri = firstItem.downloadUrl.await()
-                imageUrl = uri.toString()
-                Log.d("res image url", imageUrl ?: "")
-                return@withContext imageUrl
-            } else {
-                println("No files found in the directory.")
-            }
-        } catch (exception: Exception) {
-            println("Failed to list files: ${exception.message}")
-        }
-
-        return@withContext null
+        imageViewModel.fetchAllImageUrls(true)
+        return@withContext imageViewModel.urls.first()
     }
 
     val reviewRepository = ReviewRepository()
+    val imageViewModel = ImageViewModel()
 
     inner class ReviewRepository : ViewModel(), java.io.Serializable {
         var reviews=mutableListOf<Review>()
@@ -187,6 +171,30 @@ open class PlaceLocation protected constructor(private val name: String, private
             }
 
             return reviews
+        }
+    }
+
+    inner class ImageViewModel: ViewModel(), java.io.Serializable{
+        var urls = mutableListOf<String>()
+
+        suspend fun fetchAllImageUrls(refreshNow: Boolean=false): List<String>{
+            if (urls.isNotEmpty()&&!refreshNow){
+                return urls
+            }
+
+            urls.clear()
+            val listResult = AppController.storage.reference.child("files/${pos}").listAll().await()
+
+            if (listResult.items.isNotEmpty()) {
+                for (item in listResult.items){
+                    val uri = item.downloadUrl.await()
+                    urls.add(uri.toString())
+                }
+            } else {
+                println("No files found in the directory.")
+            }
+
+            return urls
         }
     }
 }

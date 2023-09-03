@@ -111,6 +111,7 @@ class City private constructor() {
                     val cityName = this@City.name ?: ""
                     val lat = location.getDouble("lat") ?: 0.0
                     val long = location.getDouble("long") ?: 0.0
+
                     val categoriesStr = location.get("categories") as List<String>?
                     val categoriesArr: MutableList<Category> = mutableListOf()
                     var isRestaurant = false
@@ -134,6 +135,8 @@ class City private constructor() {
                     }
 
                     val recommendedNum = location.getLong("recommends") ?: 0
+                    t.recommendsCount=recommendedNum.toInt()
+
                     if (recommendedNum>=5) //có nhiều hơn 5 lượt recommend
                     {
                         this.recommends.add(t) //thì thêm vào recommends luôn

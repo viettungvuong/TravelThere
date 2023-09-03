@@ -11,6 +11,9 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -23,6 +26,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.SoftwareKeyboardController
@@ -33,6 +38,7 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.ViewModel
+import coil.compose.AsyncImage
 import com.tung.travelthere.controller.*
 import com.tung.travelthere.objects.PlaceLocation
 import com.tung.travelthere.objects.Review
@@ -141,6 +147,7 @@ class PlaceView : ComponentActivity() {
                                 when (page) {
                                     0 -> aboutPlace(location)
                                     1 -> reviewsPlace(location)
+                                    2 -> suggestionsPlace(location)
                                 }
                             }
                         }
@@ -150,7 +157,6 @@ class PlaceView : ComponentActivity() {
             }
         }
     }
-
 
 
     @Composable
@@ -250,7 +256,8 @@ class PlaceView : ComponentActivity() {
                 //mở google maps chỉ đường
                 val intent = Intent(Intent.ACTION_VIEW)
                 intent.setPackage("com.google.android.apps.maps")
-                intent.data = Uri.parse("google.navigation:q=${location.getPos().lat},${location.getPos().long}")
+                intent.data =
+                    Uri.parse("google.navigation:q=${location.getPos().lat},${location.getPos().long}")
 
                 intent.putExtra("mode", "d") // Driving (default)
                 startActivity(intent)
@@ -280,11 +287,11 @@ class PlaceView : ComponentActivity() {
     val reviewTotalScoreViewModel = ReviewTotalScoreViewModel()
     val chosenScoreViewModel = ChosenScoreViewModel()
 
-    class ReviewTotalScoreViewModel(): ViewModel(){
+    class ReviewTotalScoreViewModel() : ViewModel() {
         var totalScore by mutableStateOf(0.0)
     }
 
-    class ChosenScoreViewModel(): ViewModel(){
+    class ChosenScoreViewModel() : ViewModel() {
         var chosenScore by mutableStateOf(0)
     }
 
@@ -306,12 +313,13 @@ class PlaceView : ComponentActivity() {
                     location.reviewRepository.refreshReviews() as MutableList<Review>
                 listState.value = originalState.value
 
-                reviewTotalScoreViewModel.totalScore = location.reviewRepository.calculateReviewScore()
+                reviewTotalScoreViewModel.totalScore =
+                    location.reviewRepository.calculateReviewScore()
                 totalScore = reviewTotalScoreViewModel.totalScore
             }
         }
 
-        LaunchedEffect(totalScore){
+        LaunchedEffect(totalScore) {
             totalScore = reviewTotalScoreViewModel.totalScore
         }
 
@@ -343,33 +351,36 @@ class PlaceView : ComponentActivity() {
                 }
             }
 
-            yourReview(reviewTotalScoreViewModel = reviewTotalScoreViewModel, modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    Color.White,
-                    shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp)
-                )
-                .border(
-                    width = 1.dp,
-                    color = Color.Black
-                )
-                , listState)
+            yourReview(
+                reviewTotalScoreViewModel = reviewTotalScoreViewModel, modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        Color.White,
+                        shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp)
+                    )
+                    .border(
+                        width = 1.dp,
+                        color = Color.Black
+                    ), listState
+            )
 
-            if (listState.value.isNotEmpty()){
+            if (listState.value.isNotEmpty()) {
                 FlowColumn(
                     modifier = Modifier.weight(1f)
                 ) {
-                    for (review in listState.value){
+                    for (review in listState.value) {
                         reviewLayout(review = review)
                     }
                 }
+            } else {
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 25.dp),
+                    text = "No reviews",
+                    textAlign = TextAlign.Center
+                )
             }
-            else{
-                Text(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 25.dp), text="No reviews", textAlign = TextAlign.Center)
-            }
-
 
 
         }
@@ -377,7 +388,7 @@ class PlaceView : ComponentActivity() {
 
     //giao diện điểm số review
     @Composable
-    private fun reviewScoreText(modifier: Modifier, score: Double){
+    private fun reviewScoreText(modifier: Modifier, score: Double) {
         var color: Color? = null
         if (score in 0.0..4.0) {
             color = colorFirst
@@ -416,7 +427,10 @@ class PlaceView : ComponentActivity() {
                         Text(text = review.name, fontWeight = FontWeight.Bold, fontSize = 15.sp)
 
                         Box(modifier = Modifier.padding(horizontal = 10.dp)) {
-                            Text(text = formatter.format(review.time), fontWeight = FontWeight.Light)
+                            Text(
+                                text = formatter.format(review.time),
+                                fontWeight = FontWeight.Light
+                            )
                         }
                     }
 
@@ -425,7 +439,10 @@ class PlaceView : ComponentActivity() {
                     }
                 }
 
-                reviewScoreText(score = review.score.toDouble(), modifier = Modifier.padding(horizontal = 10.dp))
+                reviewScoreText(
+                    score = review.score.toDouble(),
+                    modifier = Modifier.padding(horizontal = 10.dp)
+                )
 
             }
         }
@@ -495,7 +512,12 @@ class PlaceView : ComponentActivity() {
     //dropdown menu chọn điểm số đang chọn
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
-    private fun DropDownMenu(modifier: Modifier, context: Context, options: List<String>, selectedItemViewModel: ChosenScoreViewModel) {
+    private fun DropDownMenu(
+        modifier: Modifier,
+        context: Context,
+        options: List<String>,
+        selectedItemViewModel: ChosenScoreViewModel
+    ) {
         var expanded by remember { mutableStateOf(false) }
 
         Box(
@@ -524,7 +546,7 @@ class PlaceView : ComponentActivity() {
                                 selectedItemViewModel.chosenScore = item.toInt()
                                 expanded = false
                             }
-                        ){
+                        ) {
                             Text(text = item)
                         }
                     }
@@ -534,12 +556,15 @@ class PlaceView : ComponentActivity() {
     }
 
 
-
     //nếu đã up review rồi thì hiện review của người dùng và cho chỉnh sửa
     //nếu chưa thì cho phép tạo review
     @OptIn(ExperimentalComposeUiApi::class)
     @Composable
-    private fun yourReview(reviewTotalScoreViewModel: ReviewTotalScoreViewModel, modifier: Modifier, listState: MutableState<MutableList<Review>>) {
+    private fun yourReview(
+        reviewTotalScoreViewModel: ReviewTotalScoreViewModel,
+        modifier: Modifier,
+        listState: MutableState<MutableList<Review>>
+    ) {
         val textState = remember { mutableStateOf("") }
 
         val keyboardController = LocalSoftwareKeyboardController.current
@@ -564,9 +589,14 @@ class PlaceView : ComponentActivity() {
                     options.add(i.toString())
                 }
 
-                DropDownMenu(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 5.dp), context = LocalContext.current, options = options, selectedItemViewModel = chosenScoreViewModel)
+                DropDownMenu(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 5.dp),
+                    context = LocalContext.current,
+                    options = options,
+                    selectedItemViewModel = chosenScoreViewModel
+                )
             }
 
 
@@ -577,18 +607,28 @@ class PlaceView : ComponentActivity() {
                     keyboardController!!.hide()
 
                     val review =
-                        Review(AppController.auth.currentUser!!.uid,AppController.auth.currentUser!!.displayName?:"",textState.value, Date(), chosenScoreViewModel.chosenScore)
-                    location.reviewRepository.submitReview(review, applicationContext) //đăng review lên
+                        Review(
+                            AppController.auth.currentUser!!.uid,
+                            AppController.auth.currentUser!!.displayName ?: "",
+                            textState.value,
+                            Date(),
+                            chosenScoreViewModel.chosenScore
+                        )
+                    location.reviewRepository.submitReview(
+                        review,
+                        applicationContext
+                    ) //đăng review lên
                     listState.value.add(review)
-                    reviewTotalScoreViewModel.totalScore = location.reviewRepository.calculateReviewScore() //tính lại tổng điểm
+                    reviewTotalScoreViewModel.totalScore =
+                        location.reviewRepository.calculateReviewScore() //tính lại tổng điểm
                 },
                 modifier = Modifier
                     .weight(0.45f)
                     .padding(15.dp),
                 colors = ButtonDefaults.buttonColors(Color(0xff56a88b))
             ) {
-                Row{
-                    Box(modifier = Modifier.padding(horizontal = 10.dp)){
+                Row {
+                    Box(modifier = Modifier.padding(horizontal = 10.dp)) {
                         Icon(
                             imageVector = Icons.Default.Send,
                             contentDescription = "Send",
@@ -603,10 +643,52 @@ class PlaceView : ComponentActivity() {
     }
 
 
-    //phần suggestions
+    //phần suggestions (hiện điểm số và hình ảnh)
     @Composable
     private fun suggestionsPlace(location: PlaceLocation) {
+        var imageUrls = remember { mutableStateListOf<String>() }
+        val coroutineScope = rememberCoroutineScope()
 
+        LaunchedEffect(imageUrls) {
+            coroutineScope.launch {
+                imageUrls.addAll(location.imageViewModel.fetchAllImageUrls())
+            }
+        }
+
+        Column() {
+            Text(
+                text = "Recommendation score: ${location.recommendsCount}",
+                fontWeight = FontWeight.Bold,
+                fontSize = 25.sp,
+                color = if (location.recommendsCount >= 10) {
+                    colorThird
+                } else {
+                    Color.Black
+                }
+            )
+
+            Text(text = "Images")
+
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                modifier = Modifier.fillMaxSize(),
+                content = {
+                    items(imageUrls) { imageUrl ->
+                        Box(modifier = Modifier.padding(horizontal = 5.dp)){
+                            AsyncImage(
+                                model = imageUrl,
+                                contentDescription = null,
+                                modifier = Modifier.size(150.dp),
+                                contentScale = ContentScale.Fit
+                            )
+                        }
+
+                    }
+                }
+            )
+
+
+        }
     }
-
 }
+
