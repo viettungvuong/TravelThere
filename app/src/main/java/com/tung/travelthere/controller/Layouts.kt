@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
@@ -19,12 +20,15 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.startActivity
 import coil.compose.rememberImagePainter
+import com.google.android.libraries.places.api.model.Place
 import com.tung.travelthere.*
 import com.tung.travelthere.R
 import com.tung.travelthere.objects.Category
@@ -39,7 +43,7 @@ fun categoryView(
     color: Color,
     clickable: Boolean,
     locationState: MutableState<MutableSet<PlaceLocation>>? = null,
-    chosenState: MutableState<MutableSet<Category>>? = null,
+    chosenState: MutableState<MutableSet<Category>>? = null, //danh sách các category được chọn
     originalState: MutableState<MutableSet<PlaceLocation>>? = null
 ) {
     var chosen by remember { mutableStateOf(false) }
@@ -113,6 +117,89 @@ fun categoryView(
     }
 }
 
+//dung cho favoritepage
+@Composable
+fun categoryView(
+    category: Category,
+    color: Color,
+    clickable: Boolean,
+    locationState: SnapshotStateList<PlaceLocation>? = null,
+    chosenState: MutableState<MutableSet<Category>>? = null, //danh sách các category được chọn
+    originalState: SnapshotStateList<PlaceLocation>? = null
+) {
+    var chosen by remember { mutableStateOf(false) }
+
+    var painter: Painter? = null
+
+    painter = when (category) {
+        Category.RESTAURANT -> painterResource(R.drawable.restaurant)
+        Category.BAR -> painterResource(R.drawable.bar)
+        Category.ATTRACTION -> painterResource(R.drawable.attraction)
+        Category.NATURE -> painterResource(R.drawable.nature)
+        Category.NECESSITY -> painterResource(R.drawable.hospital)
+        Category.OTHERS -> painterResource(R.drawable.other)
+        Category.SHOPPING -> painterResource(R.drawable.shopping)
+    }
+
+
+    var categoryName: String? = null
+    categoryName = when (category) {
+        Category.RESTAURANT -> "Restaurant"
+        Category.BAR -> "Bar"
+        Category.ATTRACTION -> "Attraction"
+        Category.NATURE -> "Nature"
+        Category.NECESSITY -> "Necessity"
+        Category.OTHERS -> "Others"
+        Category.SHOPPING -> "Shopping"
+    }
+
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .padding(vertical = 10.dp)
+            .border(
+                width = if (chosen) 1.dp else 0.dp,
+                color = if (chosen) Color(0xff365875) else Color.Transparent,
+                shape = RoundedCornerShape(4.dp),
+            )
+            .then(if (clickable) Modifier.clickable {
+                chosen = !chosen //chọn hay chưa
+                if (chosen) {
+                    chosenState!!.value.add(category)
+                } else {
+                    chosenState!!.value.remove(category)
+                }
+                locationState!!.clear()
+                if (chosenState!!.value.isNotEmpty()){ //nếu có chọn category rồi
+                    locationState!!.addAll(originalState!!.filter {
+                        chosenState!!.value.all{
+                                category -> it.categories.contains(category)
+                        }
+                    })
+                }
+                else{ //nếu không chọn category nào hết
+                    locationState.addAll(originalState!!)
+                }
+            } else Modifier)
+    ) {
+        Image(
+            painter = painter!!,
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.size(24.dp),
+            colorFilter = ColorFilter.tint(color = color)
+        )
+
+        Box(
+            modifier = Modifier.padding(10.dp)
+        ) {
+            Text(text = categoryName, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+        }
+    }
+}
+
+//category view dùng cho search place
 @Composable
 fun categoryView(
     category: Category,
@@ -305,7 +392,36 @@ fun ImageFromUrl(url: String, contentDescription: String?, size: Double) {
     )
 }
 
+//thanh tìm kiếm (cho searchplace.kt)
+@Composable
+fun SearchBar(
+    available: Set<PlaceLocation>, searchViewModel: SearchViewModel
+) {
+    var searchQuery by remember { mutableStateOf(TextFieldValue()) }
 
+    Column {
+        TextField(
+            value = searchQuery,
+            onValueChange = { newString ->
+                searchQuery = newString
 
-
+                search(searchViewModel,newString.text,available)
+                //không dùng assignment operator vì nó là truyền reference
+            },
+            textStyle = TextStyle(fontSize = 17.sp),
+            leadingIcon = { Icon(Icons.Filled.Search, null, tint = Color.Gray) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 5.dp)
+                .background(Color(0xFFE7F1F1), RoundedCornerShape(16.dp)),
+            placeholder = { Text(text = "Search") },
+            colors = TextFieldDefaults.textFieldColors(
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                backgroundColor = Color.Transparent,
+                cursorColor = Color.DarkGray
+            )
+        )
+    }
+}
 

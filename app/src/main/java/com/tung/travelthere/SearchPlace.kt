@@ -18,14 +18,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
+import com.tung.travelthere.controller.*
 
-import com.tung.travelthere.controller.SneakViewPlaceLong
-import com.tung.travelthere.controller.categoryView
-import com.tung.travelthere.controller.colorBlue
 import com.tung.travelthere.objects.Category
 import com.tung.travelthere.objects.City
 import com.tung.travelthere.objects.PlaceLocation
@@ -56,13 +56,10 @@ class SearchPlace : ComponentActivity() {
     }
 }
 
-class SearchViewModel : ViewModel() {
-    var matchedQuery = mutableStateListOf<PlaceLocation>()
-    var originalMatchedQuery = mutableStateListOf<PlaceLocation>()
-}
+
 
 //tìm kiếm nhà hàng theo tên món ăn mà nhà hàng bán
-fun searchRestaurantByDish(searchViewModel: SearchViewModel,newString: String,available: Set<PlaceLocation>){
+fun searchRestaurantByDish(searchViewModel: SearchViewModel, newString: String, available: Set<PlaceLocation>){
     searchViewModel.matchedQuery.clear()
     if (newString.isNotBlank()){
         searchViewModel.matchedQuery += available.filter {
@@ -101,38 +98,7 @@ fun search(searchViewModel: SearchViewModel,newString: String,available: Set<Pla
     searchViewModel.originalMatchedQuery+=searchViewModel.matchedQuery //chuẩn bị cho cái categoryview
 }
 
-//thanh tìm kiếm
-@Composable
-fun SearchBar(
-    available: Set<PlaceLocation>, searchViewModel: SearchViewModel
-) {
-    var searchQuery by remember { mutableStateOf(TextFieldValue()) }
 
-    Column {
-        TextField(
-            value = searchQuery,
-            onValueChange = { newString ->
-                searchQuery = newString
-
-                search(searchViewModel,newString.text,available)
-                //không dùng assignment operator vì nó là truyền reference
-            },
-            textStyle = TextStyle(fontSize = 17.sp),
-            leadingIcon = { Icon(Icons.Filled.Search, null, tint = Color.Gray) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 5.dp)
-                .background(Color(0xFFE7F1F1), RoundedCornerShape(16.dp)),
-            placeholder = { Text(text = "Search") },
-            colors = TextFieldDefaults.textFieldColors(
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                backgroundColor = Color.Transparent,
-                cursorColor = Color.DarkGray
-            )
-        )
-    }
-}
 
 @Composable
 fun SearchPage(city: City, activity: Activity) {
@@ -143,13 +109,34 @@ fun SearchPage(city: City, activity: Activity) {
     LaunchedEffect(listState) {
         coroutineScope.launch {
             listState = city.locationsRepository.refreshLocations()
-            Log.d("list state add", listState.size.toString())
         }
     }
 
 
     MaterialTheme() {
+
         Column() {
+
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+            ) {
+                FloatingActionButton(
+                    onClick = { activity.finish() },
+                    backgroundColor = Color.White,
+                    content = {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Back",
+                            tint = colorBlue
+                        )
+                    }
+                )
+            }
+
+            Text(modifier = Modifier.fillMaxWidth().padding(vertical = 25.dp), text="Search", textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
+
+
             SearchBar(available = listState, searchViewModel = searchViewModel)
 
             LazyRow(modifier = Modifier.padding(15.dp)) {

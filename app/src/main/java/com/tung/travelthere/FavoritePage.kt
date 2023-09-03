@@ -20,18 +20,18 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.tung.travelthere.controller.AppController
-import com.tung.travelthere.controller.SneakViewPlaceLong
-import com.tung.travelthere.controller.categoryView
-import com.tung.travelthere.controller.colorBlue
+import com.tung.travelthere.controller.*
 import com.tung.travelthere.objects.Category
 import com.tung.travelthere.objects.PlaceLocation
 import com.tung.travelthere.ui.theme.TravelThereTheme
@@ -42,7 +42,10 @@ import kotlin.math.roundToInt
 
 //sẽ có thêm filter theo tên thành phố, theo loại category
 class FavoritePage : ComponentActivity() {
+    lateinit var searchViewModel: SearchViewModel
     override fun onCreate(savedInstanceState: Bundle?) { super.onCreate(savedInstanceState)
+
+        searchViewModel= SearchViewModel()
 
         setContent {
             TravelThereTheme {
@@ -69,18 +72,24 @@ class FavoritePage : ComponentActivity() {
     @Composable
     fun FavoriteList(activity: Activity) {
         var listState = remember { mutableStateListOf<PlaceLocation>() }
+        var originalState = remember { mutableStateListOf<PlaceLocation>() }
+        var chosenState = remember { mutableStateOf(mutableSetOf<Category>()) }
+
         var lazyListState = rememberLazyListState()
         var coroutineScope = rememberCoroutineScope()
 
-        SideEffect{
+        LaunchedEffect(originalState){
             coroutineScope.launch {
+                originalState.clear()
+                originalState.addAll(AppController.Favorites.getSingleton().refreshFavorites())
                 listState.clear()
-                listState.addAll(AppController.Favorites.getSingleton().refreshFavorites())
+                listState.addAll(originalState)
             }
         }
 
         MaterialTheme {
             Column {
+
                 Box(
                     modifier = Modifier
                         .size(32.dp)
@@ -98,11 +107,16 @@ class FavoritePage : ComponentActivity() {
                     )
                 }
 
-/*                LazyRow(modifier = Modifier.padding(15.dp)) {
+                Text(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 25.dp), text="Favorites", textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
+
+
+                LazyRow(modifier = Modifier.padding(15.dp)) {
                     itemsIndexed(Category.values()) { index, category -> //tương tự xuất ra location adapter
-                        categoryView(category, colorBlue, true)
+                        categoryView(category, colorBlue, true, listState, chosenState, originalState)
                     }
-                }*/
+                }
 
                 LazyColumn(
                     state= lazyListState,
@@ -132,41 +146,41 @@ class FavoritePage : ComponentActivity() {
         }
     }
 
-    @Composable
-    @OptIn(ExperimentalMaterialApi::class)
-    fun SwipeBackground(dismissState: DismissState) {
 
-        val color by animateColorAsState(
-            when (dismissState.targetValue) {
-                DismissValue.Default -> Color.Transparent
-                DismissValue.DismissedToEnd -> Color.Red
-                DismissValue.DismissedToStart -> Color.Red
-
-            }
-        )
-        val alignment = Alignment.CenterEnd
-        val icon = Icons.Default.Delete
-        val scale by animateFloatAsState(
-            if (dismissState.targetValue == DismissValue.Default) 0.75f else 1f
-        )
-
-        Box(
-            Modifier
-                .fillMaxSize()
-                .background(color),
-            contentAlignment = alignment
-        ) {
-            Icon(
-                icon,
-                contentDescription = null,
-                modifier = Modifier
-                    .scale(scale)
-                    .size(50.dp)
-            )
-        }
-    }
 }
 
+@Composable
+@OptIn(ExperimentalMaterialApi::class)
+fun SwipeBackground(dismissState: DismissState) {
 
+    val color by animateColorAsState(
+        when (dismissState.targetValue) {
+            DismissValue.Default -> Color.Transparent
+            DismissValue.DismissedToEnd -> Color.Red
+            DismissValue.DismissedToStart -> Color.Red
+
+        }
+    )
+    val alignment = Alignment.CenterEnd
+    val icon = Icons.Default.Delete
+    val scale by animateFloatAsState(
+        if (dismissState.targetValue == DismissValue.Default) 0.75f else 1f
+    )
+
+    Box(
+        Modifier
+            .fillMaxSize()
+            .background(color),
+        contentAlignment = alignment
+    ) {
+        Icon(
+            icon,
+            contentDescription = null,
+            modifier = Modifier
+                .scale(scale)
+                .size(50.dp)
+        )
+    }
+}
 
 

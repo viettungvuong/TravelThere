@@ -164,3 +164,7 @@ class AppController {
     }
 }
 
+class SearchViewModel : ViewModel() {
+    var matchedQuery = mutableStateListOf<PlaceLocation>()
+    var originalMatchedQuery = mutableStateListOf<PlaceLocation>()
+}
