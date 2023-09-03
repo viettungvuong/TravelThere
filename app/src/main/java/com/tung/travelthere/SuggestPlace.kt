@@ -203,7 +203,7 @@ class SuggestPlace : ComponentActivity() {
                     )
                 }
 
-                placeSuggestionsAutocomplete(listState, searchPlace, keyboardController, placeViewModel)
+                placeSuggestionsAutocomplete(listState, searchPlace, placeViewModel)
 
                 Box(
                     modifier = Modifier
@@ -265,7 +265,9 @@ class SuggestPlace : ComponentActivity() {
 
     @OptIn(ExperimentalComposeUiApi::class)
     @Composable
-    private fun placeSuggestionsAutocomplete(listState: LazyListState = rememberLazyListState(), searchPlace: MutableState<String>, keyboardController: SoftwareKeyboardController?, placeViewModel: PlaceAutocompleteViewModel){
+    private fun placeSuggestionsAutocomplete(listState: LazyListState = rememberLazyListState(), searchPlace: MutableState<String>, placeViewModel: PlaceAutocompleteViewModel){
+        val keyboardController = LocalSoftwareKeyboardController.current
+
         LazyColumn(state = listState) {
             items(placeViewModel.placeSuggestions) {
                 Box(

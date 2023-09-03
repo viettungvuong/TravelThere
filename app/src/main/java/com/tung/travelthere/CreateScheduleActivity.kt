@@ -23,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -39,12 +40,18 @@ import com.tung.travelthere.controller.dateTimePicker
 import com.tung.travelthere.controller.formatter
 import com.tung.travelthere.controller.tabLayout
 import com.tung.travelthere.objects.Checkpoint
+import com.tung.travelthere.objects.PlaceLocation
 import com.tung.travelthere.ui.theme.TravelThereTheme
 import java.util.*
 
 class CreateScheduleActivity : ComponentActivity() {
+    lateinit var placeViewModel: PlaceAutocompleteViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        placeViewModel = PlaceAutocompleteViewModel(this)
+
         setContent {
             CreateScheduleView()
         }
@@ -109,6 +116,7 @@ class CreateScheduleActivity : ComponentActivity() {
         }
     }
 
+    @OptIn(ExperimentalComposeUiApi::class)
     @Composable
     private fun CreateSchedule() {
         val mYear: Int
@@ -126,7 +134,9 @@ class CreateScheduleActivity : ComponentActivity() {
         val mDate = remember { mutableStateOf("$mDay/${mMonth+1}/$mYear") } //lưu ngày hiện tại
 
 
-        var checkpointList = remember { mutableStateListOf<Checkpoint>() } //danh sách các checkpoint
+        var checkpointList = remember { mutableStateListOf<Checkpoint?>() } //danh sách các checkpoint
+
+        val keyboardController = LocalSoftwareKeyboardController.current
 
         val mDatePickerDialog = DatePickerDialog(
             LocalContext.current,
@@ -160,6 +170,24 @@ class CreateScheduleActivity : ComponentActivity() {
                 }
             }
 
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    tint = Color(0xff468a55),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .height(40.dp)
+                        .clickable {
+                            checkpointList.add(null)
+                            keyboardController?.hide()
+                        }
+                )
+            }
+
+
         }
 
     }
@@ -167,11 +195,11 @@ class CreateScheduleActivity : ComponentActivity() {
     @OptIn(ExperimentalComposeUiApi::class)
     @Composable
     private fun Checkpoint(
-        checkpoint: Checkpoint,
+        checkpoint: Checkpoint?,
         index: Int,
-        checkpointList: SnapshotStateList<Checkpoint>
+        checkpointList: SnapshotStateList<Checkpoint?>
     ) {
-        var text by remember { mutableStateOf(checkpointText) }
+        var location by remember { mutableStateOf<PlaceLocation?>(null) }
         val keyboardController = LocalSoftwareKeyboardController.current
 
         Row(
@@ -195,22 +223,22 @@ class CreateScheduleActivity : ComponentActivity() {
 
             Spacer(modifier = Modifier.width(10.dp))
 
-            BasicTextField(
-                value = text,
-                onValueChange = {
-                    text = it
-                    onTextChanged(it)
-                },
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    imeAction = androidx.compose.ui.text.input.ImeAction.Done
-                ),
-                keyboardActions = KeyboardActions(
-                    onDone = {
-                        keyboardController?.hide()
-                    }
-                ),
-                textStyle = MaterialTheme.typography.body1.copy(fontSize = 16.sp)
-            )
+            location?.getName()?.let {
+                BasicTextField(
+                    value = it,
+                    onValueChange = {
+                    },
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        imeAction = androidx.compose.ui.text.input.ImeAction.Done
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            keyboardController?.hide()
+                        }
+                    ),
+                    textStyle = MaterialTheme.typography.body1.copy(fontSize = 16.sp)
+                )
+            }
 
             Spacer(modifier = Modifier.weight(1f))
 
@@ -222,27 +250,11 @@ class CreateScheduleActivity : ComponentActivity() {
                     modifier = Modifier
                         .height(40.dp)
                         .clickable {
-                            onAddClick()
+                            checkpointList.removeAt(index)
                             keyboardController?.hide()
                         }
                 )
 
-
-                if (index>=checkpointList.size-1){
-                    Spacer(modifier = Modifier.width(5.dp))
-
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        tint = Color(0xff146325),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .height(40.dp)
-                            .clickable {
-                                onAddClick()
-                                keyboardController?.hide()
-                            }
-                    )
-                }
             }
 
 
