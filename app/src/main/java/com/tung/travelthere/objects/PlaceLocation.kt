@@ -2,22 +2,12 @@ package com.tung.travelthere.objects
 
 import android.content.Context
 import android.location.Location
-import android.util.Log
 import android.widget.Toast
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.text.toUpperCase
 import androidx.lifecycle.ViewModel
-import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
-import com.tung.travelthere.Review
 import com.tung.travelthere.controller.*
 import kotlinx.coroutines.tasks.await
-import java.util.*
-import kotlin.collections.ArrayList
 
 class Position(var lat: Double, var long: Double): java.io.Serializable{
     override fun toString(): String {

@@ -494,7 +494,7 @@ fun dateTimePicker(modifier: Modifier, mDate: MutableState<String>, datePicker: 
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp, vertical = 5.dp)
-                .background(Color(0xFF99b1d1), RoundedCornerShape(16.dp)),
+                .background(Color(0xFF445787), RoundedCornerShape(16.dp)),
             placeholder = { Text(text = "Date", color = Color.White) },
             colors = TextFieldDefaults.textFieldColors(
                 focusedIndicatorColor = Color.Transparent,

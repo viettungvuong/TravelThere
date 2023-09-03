@@ -1,4 +1,4 @@
-package com.tung.travelthere
+package com.tung.travelthere.objects
 
 import com.tung.travelthere.controller.AppController
 import com.tung.travelthere.controller.collectionCities
