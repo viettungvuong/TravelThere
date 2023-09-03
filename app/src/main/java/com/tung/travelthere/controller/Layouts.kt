@@ -6,6 +6,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -15,6 +16,8 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.painter.Painter
@@ -26,6 +29,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.core.content.ContextCompat.startActivity
 import coil.compose.rememberImagePainter
 import com.google.android.libraries.places.api.model.Place
@@ -34,6 +38,7 @@ import com.tung.travelthere.R
 import com.tung.travelthere.objects.Category
 import com.tung.travelthere.objects.City
 import com.tung.travelthere.objects.PlaceLocation
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 //phần hiện ra danh sách các categories
@@ -425,3 +430,33 @@ fun SearchBar(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun tabLayout(pagerState: PagerState, tabTitles: List<String>, coroutineScope: CoroutineScope, contentColor: Color) {
+    TabRow(
+        selectedTabIndex = pagerState.currentPage,
+        backgroundColor = Color.White,
+        contentColor = contentColor,
+        modifier = Modifier
+            .padding(vertical = 4.dp, horizontal = 8.dp)
+            .clip(RoundedCornerShape(50))
+            .shadow(AppBarDefaults.TopAppBarElevation)
+            .zIndex(10f),
+    ) {
+        tabTitles.forEachIndexed { index, title ->
+            Tab(
+                selected = (pagerState.currentPage == index), //current index có phải là index
+                onClick = {
+                    run {
+                        coroutineScope.launch {
+                            pagerState.animateScrollToPage(
+                                index
+                            )
+                        }
+                    }
+                },
+                text = { Text(text = title) }
+            )
+        }
+    }
+}

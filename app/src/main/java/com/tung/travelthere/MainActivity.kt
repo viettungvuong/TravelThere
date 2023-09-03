@@ -120,7 +120,7 @@ class MainActivity : ComponentActivity() {
                     }
                     Spacer(modifier = Modifier.width(10.dp))
                     IconButton(onClick = {
-                        val intent = Intent(context, SuggestPlace::class.java)
+                        val intent = Intent(context, CreateScheduleActivity::class.java)
                         context.startActivity(intent)
                     }) {
                         Image(

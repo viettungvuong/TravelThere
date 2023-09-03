@@ -157,7 +157,8 @@ class PlaceView : ComponentActivity() {
                         tabLayout(
                             pagerState = pagerState,
                             tabTitles = tabTitles,
-                            coroutineScope = coroutineScope
+                            coroutineScope = coroutineScope,
+                            contentColor = Color.Red
                         )
 
                         HorizontalPager(state = pagerState, pageCount = tabTitles.size) { page ->
@@ -180,38 +181,7 @@ class PlaceView : ComponentActivity() {
         }
     }
 
-    @OptIn(ExperimentalFoundationApi::class)
-    @Composable
-    private fun tabLayout(pagerState: PagerState, tabTitles: List<String>, coroutineScope: CoroutineScope) {
-        TabRow(
-            selectedTabIndex = pagerState.currentPage,
-            backgroundColor = Color.White,
-            contentColor = Color.Red,
-            modifier = Modifier
-                .padding(vertical = 4.dp, horizontal = 8.dp)
-                .clip(RoundedCornerShape(50))
-                .shadow(AppBarDefaults.TopAppBarElevation)
-                .zIndex(10f),
-        ) {
-            tabTitles.forEachIndexed { index, title ->
-                Tab(
-                    selected = (pagerState.currentPage == index), //current index có phải là index
-                    onClick = {
-                        run {
-                            coroutineScope.launch {
-                                pagerState.animateScrollToPage(
-                                    index
-                                )
-                            }
-                        }
-                    },
-                    text = { Text(text = title) }
-                )
-            }
-        }
 
-
-    }
 
     @Composable
     private fun aboutPlace(location: PlaceLocation) {
