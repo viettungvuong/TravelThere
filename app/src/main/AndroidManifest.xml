@@ -23,7 +23,7 @@
             android:name=".CreateScheduleActivity"
             android:exported="false"
             android:label="@string/title_activity_create_schedule"
-            android:theme="@style/Theme.TravelThere" />
+            android:theme="@style/AppFullScreenTheme" />
         <activity
             android:name=".RegisterActivity"
             android:exported="false"

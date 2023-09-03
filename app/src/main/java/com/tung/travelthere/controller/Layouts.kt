@@ -471,8 +471,12 @@ fun tabLayout(
 }
 
 @Composable
-fun dateTimePicker(modifier: Modifier, datePicker: ()->Unit) {
+fun dateTimePicker(modifier: Modifier, mDate: MutableState<String>, datePicker: ()->Unit) {
     var dateStr by remember { mutableStateOf("") }
+
+    LaunchedEffect(mDate.value){
+        dateStr = mDate.value
+    }
 
     Row(modifier = modifier) {
         TextField(
@@ -484,7 +488,7 @@ fun dateTimePicker(modifier: Modifier, datePicker: ()->Unit) {
             leadingIcon = {
                 Icon(Icons.Filled.DateRange, null, tint = Color.White, modifier =
                 Modifier.clickable {
-                    datePicker
+                    datePicker()
                 })
             },
             modifier = Modifier
@@ -497,7 +501,8 @@ fun dateTimePicker(modifier: Modifier, datePicker: ()->Unit) {
                 unfocusedIndicatorColor = Color.Transparent,
                 backgroundColor = Color.Transparent,
                 cursorColor = Color.DarkGray
-            )
+            ),
+            enabled = false
         )
 
         Box(modifier = Modifier

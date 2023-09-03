@@ -1,6 +1,8 @@
 package com.tung.travelthere
 
+import android.app.DatePickerDialog
 import android.os.Bundle
+import android.widget.DatePicker
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
@@ -14,6 +16,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -95,35 +98,37 @@ class CreateScheduleActivity : AppCompatActivity() {
 
     @Composable
     private fun CreateSchedule() {
-        val selectedDate = remember { mutableStateOf<Date?>(null) }
+        val mYear: Int
+        val mMonth: Int
+        val mDay: Int
+
+        val mCalendar = Calendar.getInstance()
+
+        mYear = mCalendar.get(Calendar.YEAR)
+        mMonth = mCalendar.get(Calendar.MONTH)
+        mDay = mCalendar.get(Calendar.DAY_OF_MONTH)
+
+        mCalendar.time = Date()
+
+        val mDate = remember { mutableStateOf("$mDay/${mMonth+1}/$mYear") } //lưu ngày hiện tại
+
+        val mDatePickerDialog = DatePickerDialog(
+            LocalContext.current,
+            { _: DatePicker, mYear: Int, mMonth: Int, mDayOfMonth: Int ->
+                mDate.value = "$mDayOfMonth/${mMonth+1}/$mYear"
+            }, mYear, mMonth, mDay
+        )
 
         Column() {
             dateTimePicker(
-                modifier = Modifier.padding(20.dp)
-            ) { showDatePicker(selectedDate) }
-            
-            Box(modifier = Modifier.padding(12.dp)) {
-                Text(text = formatter.format(selectedDate))
-            }
+                modifier = Modifier.padding(20.dp),mDate
+            ) {mDatePickerDialog.show()}
         }
     }
 
     @Composable
     private fun ViewSchedules() {
 
-    }
-
-    private fun showDatePicker(selectedDate: MutableState<Date?>) {
-        val picker = MaterialDatePicker.Builder.datePicker().build()
-        let {
-            picker.show(it.supportFragmentManager, picker.toString())
-            picker.addOnPositiveButtonClickListener { selectedMillis ->
-                val selectedDateValue = Date(selectedMillis)
-
-                //cập nhật ngày đã chọn
-                selectedDate.value = selectedDateValue
-            }
-        }
     }
 
 }
