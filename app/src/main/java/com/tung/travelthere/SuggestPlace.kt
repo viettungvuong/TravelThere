@@ -348,7 +348,7 @@ class SuggestPlace : ComponentActivity() {
 
 //cho phép người dùng thêm địa điểm
 fun suggestPlace(context: Context, location: PlaceLocation) {
-    Log.d("location city name",location.cityName)
+
     val cityRef = AppController.db.collection(collectionCities).document(location.cityName)
     cityRef.get().addOnCompleteListener{
             task ->
@@ -365,7 +365,7 @@ fun suggestPlace(context: Context, location: PlaceLocation) {
             }
 
             val locationRef = cityRef.collection(
-                "recommends").document(location.getPos().toString())
+                collectionLocations).document(location.getPos().toString())
             locationRef.get()
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
@@ -412,6 +412,6 @@ fun suggestPlace(context: Context, location: PlaceLocation) {
     }
 }
 
-fun UploadImage(bitmap: Bitmap){
+private fun uploadImage(posStr: String, bitmap: Bitmap){
 
 }

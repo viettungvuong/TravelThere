@@ -112,6 +112,8 @@ class City private constructor() {
                     val lat = location.getDouble("lat") ?: 0.0
                     val long = location.getDouble("long") ?: 0.0
 
+
+
                     val t = TouristPlace(placeName, Position(lat, long), cityName)
 
                     val categoriesStr = location.get("categories") as List<String>?
@@ -120,6 +122,12 @@ class City private constructor() {
                         for (categoryStr in categoriesStr){
                             t.categories.add(convertStrToCategory(categoryStr)) //thêm category
                         }
+                    }
+
+                    val recommendedNum = location.getLong("recommends") ?: 0
+                    if (recommendedNum>=5) //có nhiều hơn 5 lượt recommend
+                    {
+                        this.recommends.add(RecommendedPlace(t)) //thì thêm vào recommends luôn
                     }
 
 
@@ -135,56 +143,6 @@ class City private constructor() {
                 }
             }
             return locations
-        }
-
-        suspend fun refreshRecommends(refresh: Boolean = false): Set<PlaceLocation> {
-            if (recommends.isNotEmpty()&&!refresh) {
-                return recommends
-            }
-
-            recommends.clear()
-            val query =
-                AppController.db.collection(collectionCities).document(name!!)
-                    .get().await()
-
-            val document = query.reference
-
-            if (document != null) {
-
-                val locationCollection =
-                    document.collection("recommends").get().await()
-
-                val locations = locationCollection.documents
-                for (location in locations) {
-
-                    val placeName = location.getString(locationNameField) ?: ""
-                    val cityName = this@City.name ?: ""
-                    val lat = location.getDouble("lat") ?: 0.0
-                    val long = location.getDouble("long") ?: 0.0
-
-                    val t = RecommendedPlace(placeName, Position(lat, long), cityName)
-
-                    val categoriesStr = location.get("categories") as List<String>?
-
-                    if (categoriesStr!=null){
-                        for (categoryStr in categoriesStr){
-                            t.categories.add(convertStrToCategory(categoryStr)) //thêm category
-                        }
-                    }
-
-
-                    this.recommends.add(t)
-                }
-            }
-
-            val currentPos = AppController.currentPosition.currentLocation
-
-            if (currentPos!=null){
-                recommends.sortedBy {
-                    it.getPos().distanceTo(currentPos!!) //sắp xếp các địa điểm theo khoảng cách tới vị trí hiện tại
-                }
-            }
-            return recommends
         }
 
         //lấy những địa điểm trong phạm vi 5000km

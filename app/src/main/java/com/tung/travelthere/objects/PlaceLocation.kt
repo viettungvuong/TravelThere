@@ -57,6 +57,7 @@ open class PlaceLocation protected constructor(private val name: String, private
     var imageUrl: String?=null
 
 
+
     fun getName(): String{
         return name
     }
@@ -64,7 +65,6 @@ open class PlaceLocation protected constructor(private val name: String, private
     fun getPos(): Position{
         return pos
     }
-
 
     override fun toString(): String {
         return "$name,$cityName"
@@ -102,8 +102,11 @@ open class PlaceLocation protected constructor(private val name: String, private
             if (document2!=null){
                 res = document2.getString("file-name")
                 val storageRef = Firebase.storage.reference
-                val imageRef = storageRef.child(res!!)
-                res = imageRef.downloadUrl.await().toString()
+                if (res!=null&&res.isNotBlank()){
+                    val imageRef = storageRef.child(res)
+                    res = imageRef.downloadUrl.await().toString()
+                }
+
             }
         }
         imageUrl = res
@@ -200,4 +203,7 @@ class TouristPlace(name: String, pos: Position, cityName: String): PlaceLocation
     }
 }
 
-class RecommendedPlace(name: String, pos: Position, cityName: String): PlaceLocation(name,pos,cityName)
+class RecommendedPlace(name: String, pos: Position, cityName: String): PlaceLocation(name,pos,cityName){
+    constructor(other: PlaceLocation) : this(other.getName(),other.getPos(),other.cityName)
+    //copy constructor
+}

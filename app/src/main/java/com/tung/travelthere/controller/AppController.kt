@@ -7,6 +7,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.FirebaseStorage
 import com.tung.travelthere.objects.*
 import kotlinx.coroutines.tasks.await
 import java.text.SimpleDateFormat
@@ -145,6 +146,9 @@ class AppController {
 
         @JvmField
         val auth = FirebaseAuth.getInstance()
+
+        @JvmField
+        val storage = FirebaseStorage.getInstance()
     }
 }
 

@@ -64,7 +64,6 @@ class MainActivity : ComponentActivity() {
         super.onStart()
         runBlocking {
             City.getSingleton().locationsRepository.refreshLocations(true)
-            City.getSingleton().locationsRepository.refreshRecommends(true)
             City.getSingleton().fetchImageUrl()
         }
         City.getSingleton().locationsRepository.nearbyLocations() //lấy những địa điểm gần
@@ -321,7 +320,7 @@ class MainActivity : ComponentActivity() {
         LaunchedEffect(originalState) {
             coroutineScope.launch {
                 originalState.value =
-                    city.locationsRepository.refreshRecommends() as MutableSet<PlaceLocation>
+                    city.locationsRepository.recommends
                 listState.value = originalState.value
             }
         }
