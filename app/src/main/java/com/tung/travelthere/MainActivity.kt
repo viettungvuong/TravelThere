@@ -44,6 +44,8 @@ import java.util.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import com.tung.travelthere.controller.AppController.Companion.currentUser
+import java.io.Serializable
 
 
 class MainActivity : ComponentActivity() {
@@ -128,7 +130,8 @@ class MainActivity : ComponentActivity() {
                     }
                     Spacer(modifier = Modifier.width(10.dp))
                     IconButton(onClick = {
-                        /*TODO*/
+                        val intent = Intent(context, ProfileActivity::class.java)
+                        context.startActivity(intent)
                     }) {
                         Icon(
                             imageVector = Icons.Default.Person,

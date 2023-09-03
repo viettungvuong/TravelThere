@@ -6,7 +6,8 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.MANAGE_DOCUMENTS"
+    <uses-permission
+        android:name="android.permission.MANAGE_DOCUMENTS"
         tools:ignore="ProtectedPermissions" />
 
     <meta-data
@@ -23,10 +24,14 @@
         android:theme="@style/Theme.TravelThere"
         tools:targetApi="31">
         <activity
+            android:name=".ProfileActivity"
+            android:exported="false"
+            android:theme="@style/Theme.TravelThere" />
+        <activity
             android:name=".CreateScheduleActivity"
             android:exported="false"
             android:label="@string/title_activity_create_schedule"
-            android:theme="@style/Theme.TravelThere"  />
+            android:theme="@style/Theme.TravelThere" />
         <activity
             android:name=".RegisterActivity"
             android:exported="false"
