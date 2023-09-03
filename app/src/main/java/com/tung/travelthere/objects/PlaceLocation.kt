@@ -202,8 +202,3 @@ class TouristPlace(name: String, pos: Position, cityName: String): PlaceLocation
         this.categories.add(Category.ATTRACTION)
     }
 }
-
-class RecommendedPlace(name: String, pos: Position, cityName: String): PlaceLocation(name,pos,cityName){
-    constructor(other: PlaceLocation) : this(other.getName(),other.getPos(),other.cityName)
-    //copy constructor
-}

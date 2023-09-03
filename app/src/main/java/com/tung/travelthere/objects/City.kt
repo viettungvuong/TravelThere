@@ -111,25 +111,33 @@ class City private constructor() {
                     val cityName = this@City.name ?: ""
                     val lat = location.getDouble("lat") ?: 0.0
                     val long = location.getDouble("long") ?: 0.0
-
-
-
-                    val t = TouristPlace(placeName, Position(lat, long), cityName)
-
                     val categoriesStr = location.get("categories") as List<String>?
+                    val categoriesArr: MutableList<Category> = mutableListOf()
+                    var isRestaurant = false
 
                     if (categoriesStr!=null){
                         for (categoryStr in categoriesStr){
-                            t.categories.add(convertStrToCategory(categoryStr)) //thêm category
+                            categoriesArr.add(convertStrToCategory(categoryStr)) //thêm category
+
+                            if (categoryStr=="Restaurant"){
+                                isRestaurant=true
+                            }
                         }
+                    }
+
+                    val t = if (!isRestaurant){
+                        TouristPlace(placeName, Position(lat, long), cityName)
+                    }
+                    else{
+                        Restaurant(placeName, Position(lat, long), cityName, mutableListOf()) //specialize dish để thêm sau
+                        //refresh restaurant
                     }
 
                     val recommendedNum = location.getLong("recommends") ?: 0
                     if (recommendedNum>=5) //có nhiều hơn 5 lượt recommend
                     {
-                        this.recommends.add(RecommendedPlace(t)) //thì thêm vào recommends luôn
+                        this.recommends.add(t) //thì thêm vào recommends luôn
                     }
-
 
                     this.locations.add(t)
                 }

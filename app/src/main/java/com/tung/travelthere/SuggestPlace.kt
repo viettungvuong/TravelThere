@@ -117,7 +117,7 @@ class SuggestPlace : ComponentActivity() {
             chosenPlacePos = placeViewModel.currentPos
 
             if (chosenPlaceName.isNotBlank()){
-                currentLocation = RecommendedPlace(chosenPlaceName,chosenPlacePos,chosenPlaceCity) //đặt location đang được suggest
+                currentLocation = TouristPlace(chosenPlaceName,chosenPlacePos,chosenPlaceCity) //đặt location đang được suggest
             }
             else{
                 currentLocation = null //trong trường hợp xoá mất địa điểm

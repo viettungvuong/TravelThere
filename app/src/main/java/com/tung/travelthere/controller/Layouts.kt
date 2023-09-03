@@ -42,6 +42,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
 import androidx.core.content.ContextCompat.startActivity
+import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
 import coil.compose.rememberImagePainter
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.material.datepicker.MaterialDatePicker
@@ -406,12 +408,14 @@ fun ImageFromUrl(url: String, contentDescription: String?, size: Double) {
         Modifier.size(size.dp)
     }
 
-    Image(
-        painter = rememberImagePainter(url),
-        contentDescription = contentDescription,
-        modifier = modifier,
-        contentScale = ContentScale.Crop,
-    )
+    AsyncImage(model = url, contentDescription = null, modifier = modifier, contentScale = ContentScale.Crop)
+
+//    Image(
+//        painter = rememberAsyncImagePainter(url),
+//        contentDescription = contentDescription,
+//        modifier = modifier,
+//        contentScale = ContentScale.Crop,
+//    )
 }
 
 //thanh tìm kiếm (cho searchplace.kt)

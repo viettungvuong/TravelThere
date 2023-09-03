@@ -312,18 +312,18 @@ class MainActivity : ComponentActivity() {
     //trang local recommended
     @Composable
     fun LocalRecommended(context: Context, city: City) {
-        var listState = remember { mutableStateOf(mutableSetOf<PlaceLocation>()) }
+        var listState = remember { mutableStateListOf<PlaceLocation>()  }
         var chosenState = remember { mutableStateOf(mutableSetOf<Category>()) }
-        var originalState = remember { mutableStateOf(mutableSetOf<PlaceLocation>()) }
+        var originalState = remember { mutableStateListOf<PlaceLocation>()  }
         val coroutineScope = rememberCoroutineScope()
 
         LaunchedEffect(originalState) {
             coroutineScope.launch {
-                originalState.value =
-                    city.locationsRepository.recommends
-                listState.value = originalState.value
+                originalState.addAll( city.locationsRepository.recommends)
+                listState.addAll(originalState)
             }
         }
+
 
         Column() {
             LazyRow(modifier = Modifier.padding(15.dp)) {
@@ -336,7 +336,7 @@ class MainActivity : ComponentActivity() {
                 columns = GridCells.Fixed(2),
                 modifier = Modifier.fillMaxSize(),
                 content = {
-                    items(listState.value.toTypedArray()) { location ->
+                    items(listState) { location ->
                         SneakViewPlace(context, location)
                     }
                 }
@@ -347,18 +347,18 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun TouristAttractions(context: Context, city: City) {
-        var listState = remember { mutableStateOf(mutableSetOf<PlaceLocation>()) }
+        var listState = remember { mutableStateListOf<PlaceLocation>()  }
         var chosenState = remember { mutableStateOf(mutableSetOf<Category>()) }
-        var originalState = remember { mutableStateOf(mutableSetOf<PlaceLocation>()) }
+        var originalState = remember { mutableStateListOf<PlaceLocation>()  }
         val coroutineScope = rememberCoroutineScope()
 
         LaunchedEffect(originalState) {
             coroutineScope.launch {
-                originalState.value =
-                    city.locationsRepository.refreshLocations() as MutableSet<PlaceLocation>
-                listState.value = originalState.value
+                originalState.addAll( city.locationsRepository.refreshLocations())
+                listState.addAll(originalState)
             }
         }
+
 
         Column() {
             LazyRow(modifier = Modifier.padding(15.dp)) {
@@ -371,7 +371,7 @@ class MainActivity : ComponentActivity() {
                 columns = GridCells.Fixed(2),
                 modifier = Modifier.fillMaxSize(),
                 content = {
-                    items(listState.value.toTypedArray()) { location ->
+                    items(listState) { location ->
                         SneakViewPlace(context, location)
                     }
                 }
@@ -384,16 +384,15 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun NearbyPlaces(context: Context, city: City) { //đề xuất địa điểm gần với nơi đang đứng
-        var listState = remember { mutableStateOf(mutableSetOf<PlaceLocation>()) }
+        var listState = remember { mutableStateListOf<PlaceLocation>()  }
         var chosenState = remember { mutableStateOf(mutableSetOf<Category>()) }
-        var originalState = remember { mutableStateOf(mutableSetOf<PlaceLocation>()) }
+        var originalState = remember { mutableStateListOf<PlaceLocation>()  }
         val coroutineScope = rememberCoroutineScope()
 
         LaunchedEffect(originalState) {
             coroutineScope.launch {
-                originalState.value =
-                    city.locationsRepository.nearbyLocations() as MutableSet<PlaceLocation>
-                listState.value = originalState.value
+                originalState.addAll( city.locationsRepository.nearbyLocations())
+                listState.addAll(originalState)
             }
         }
 
@@ -413,7 +412,7 @@ class MainActivity : ComponentActivity() {
                 columns = GridCells.Fixed(2),
                 modifier = Modifier.fillMaxSize(),
                 content = {
-                    items(listState.value.toTypedArray()) { location ->
+                    items(listState) { location ->
                         SneakViewPlace(context, location)
                     }
                 }
