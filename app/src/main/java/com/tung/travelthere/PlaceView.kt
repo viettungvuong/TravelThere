@@ -37,6 +37,7 @@ import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
@@ -385,13 +386,21 @@ class PlaceView : ComponentActivity() {
                 )
                 , keyboardController!!)
 
-            FlowColumn(
-                modifier = Modifier.weight(1f)
-            ) {
-                for (review in listState.value){
-                    reviewLayout(review = review)
+            if (listState.value.isNotEmpty()){
+                FlowColumn(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    for (review in listState.value){
+                        reviewLayout(review = review)
+                    }
                 }
             }
+            else{
+                Text(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 25.dp), text="No reviews", textAlign = TextAlign.Center)
+            }
+
 
 
         }

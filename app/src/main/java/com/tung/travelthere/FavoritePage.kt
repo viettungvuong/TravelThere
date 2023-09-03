@@ -118,30 +118,38 @@ class FavoritePage : ComponentActivity() {
                     }
                 }
 
-                LazyColumn(
-                    state= lazyListState,
-                    modifier = Modifier.padding(15.dp)
-                ) {
-                    itemsIndexed(listState) { index, location ->
-                        val currentItem by rememberUpdatedState(newValue = location)
-                        val dismissState = rememberDismissState(
-                            confirmStateChange = {
-                                listState.remove(currentItem)
-                                AppController.Favorites.getSingleton().removeFavorite(currentItem)
-                                true
-                            }
-                        )
+                if (listState.isNotEmpty()){
+                    LazyColumn(
+                        state= lazyListState,
+                        modifier = Modifier.padding(15.dp)
+                    ) {
+                        itemsIndexed(listState) { index, location ->
+                            val currentItem by rememberUpdatedState(newValue = location)
+                            val dismissState = rememberDismissState(
+                                confirmStateChange = {
+                                    listState.remove(currentItem)
+                                    AppController.Favorites.getSingleton().removeFavorite(currentItem)
+                                    true
+                                }
+                            )
 
-                        SwipeToDismiss(state = dismissState, background = {SwipeBackground(dismissState)}
-                            , dismissThresholds = { direction ->
-                                FractionalThreshold(0.4f)
-                            }
-                            , modifier = Modifier
-                                .animateItemPlacement()
-                            , dismissContent = {SneakViewPlaceLong(context = LocalContext.current, location = location)})
+                            SwipeToDismiss(state = dismissState, background = {SwipeBackground(dismissState)}
+                                , dismissThresholds = { direction ->
+                                    FractionalThreshold(0.4f)
+                                }
+                                , modifier = Modifier
+                                    .animateItemPlacement()
+                                , dismissContent = {SneakViewPlaceLong(context = LocalContext.current, location = location)})
 
+                        }
                     }
                 }
+                else{
+                    Text(modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 25.dp), text="List is empty", textAlign = TextAlign.Center)
+                }
+
             }
         }
     }

@@ -3,6 +3,8 @@ package com.tung.travelthere.controller
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import android.widget.CalendarView
+import android.widget.DatePicker
 import android.widget.Toast
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -10,6 +12,7 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
@@ -29,10 +32,12 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
 import androidx.core.content.ContextCompat.startActivity
 import coil.compose.rememberImagePainter
 import com.google.android.libraries.places.api.model.Place
+import com.google.android.material.datepicker.MaterialDatePicker
 import com.tung.travelthere.*
 import com.tung.travelthere.R
 import com.tung.travelthere.objects.Category
@@ -94,14 +99,15 @@ fun categoryView(
                 } else {
                     chosenState!!.value.remove(category)
                 }
-                if (chosenState!!.value.isNotEmpty()){ //nếu có chọn category rồi
-                    locationState!!.value = originalState!!.value.filter {
-                        chosenState!!.value.all{
-                                category -> it.categories.contains(category)
+                if (chosenState!!.value.isNotEmpty()) { //nếu có chọn category rồi
+                    locationState!!.value = originalState!!.value
+                        .filter {
+                            chosenState!!.value.all { category ->
+                                it.categories.contains(category)
+                            }
                         }
-                    }.toMutableSet()
-                }
-                else{ //nếu không chọn category nào hết
+                        .toMutableSet()
+                } else { //nếu không chọn category nào hết
                     locationState!!.value = originalState!!.value
                 }
             } else Modifier)
@@ -176,14 +182,13 @@ fun categoryView(
                     chosenState!!.value.remove(category)
                 }
                 locationState!!.clear()
-                if (chosenState!!.value.isNotEmpty()){ //nếu có chọn category rồi
+                if (chosenState!!.value.isNotEmpty()) { //nếu có chọn category rồi
                     locationState!!.addAll(originalState!!.filter {
-                        chosenState!!.value.all{
-                                category -> it.categories.contains(category)
+                        chosenState!!.value.all { category ->
+                            it.categories.contains(category)
                         }
                     })
-                }
-                else{ //nếu không chọn category nào hết
+                } else { //nếu không chọn category nào hết
                     locationState.addAll(originalState!!)
                 }
             } else Modifier)
@@ -210,7 +215,7 @@ fun categoryView(
     category: Category,
     color: Color,
     clickable: Boolean,
-    searchViewModel: SearchViewModel?=null,
+    searchViewModel: SearchViewModel? = null,
     chosenState: MutableState<MutableSet<Category>>? = null
 ) {
     var chosen by remember { mutableStateOf(false) }
@@ -257,14 +262,13 @@ fun categoryView(
                     chosenState!!.value.remove(category)
                 }
                 searchViewModel!!.matchedQuery.clear()
-                if (chosenState!!.value.isNotEmpty()){ //nếu có chọn category rồi
-                    searchViewModel!!.matchedQuery+=(searchViewModel!!.originalMatchedQuery.filter {
-                        chosenState!!.value.all{
-                                category -> it.categories.contains(category)
+                if (chosenState!!.value.isNotEmpty()) { //nếu có chọn category rồi
+                    searchViewModel!!.matchedQuery += (searchViewModel!!.originalMatchedQuery.filter {
+                        chosenState!!.value.all { category ->
+                            it.categories.contains(category)
                         }
                     })
-                }
-                else{ //nếu không chọn category nào hết
+                } else { //nếu không chọn category nào hết
                     searchViewModel!!.matchedQuery.addAll(searchViewModel!!.originalMatchedQuery)
                 }
             } else Modifier)
@@ -410,7 +414,7 @@ fun SearchBar(
             onValueChange = { newString ->
                 searchQuery = newString
 
-                search(searchViewModel,newString.text,available)
+                search(searchViewModel, newString.text, available)
                 //không dùng assignment operator vì nó là truyền reference
             },
             textStyle = TextStyle(fontSize = 17.sp),
@@ -432,7 +436,12 @@ fun SearchBar(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun tabLayout(pagerState: PagerState, tabTitles: List<String>, coroutineScope: CoroutineScope, contentColor: Color) {
+fun tabLayout(
+    pagerState: PagerState,
+    tabTitles: List<String>,
+    coroutineScope: CoroutineScope,
+    contentColor: Color
+) {
     TabRow(
         selectedTabIndex = pagerState.currentPage,
         backgroundColor = Color.White,
@@ -462,22 +471,27 @@ fun tabLayout(pagerState: PagerState, tabTitles: List<String>, coroutineScope: C
 }
 
 @Composable
-fun dateTimePicker(modifier: Modifier){
-    var dateStr by remember{ mutableStateOf("") }
+fun dateTimePicker(modifier: Modifier, datePicker: ()->Unit) {
+    var dateStr by remember { mutableStateOf("") }
 
-    Row(modifier = modifier){
+    Row(modifier = modifier) {
         TextField(
             value = dateStr,
             onValueChange = { newString ->
                 dateStr = newString
             },
-            textStyle = TextStyle(fontSize = 17.sp),
-            leadingIcon = { Icon(Icons.Filled.Search, null, tint = Color.Gray) },
+            textStyle = TextStyle(fontSize = 17.sp, color = Color.White),
+            leadingIcon = {
+                Icon(Icons.Filled.DateRange, null, tint = Color.White, modifier =
+                Modifier.clickable {
+                    datePicker
+                })
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp, vertical = 5.dp)
                 .background(Color(0xFF99b1d1), RoundedCornerShape(16.dp)),
-            placeholder = { Text(text = "Search") },
+            placeholder = { Text(text = "Date", color = Color.White) },
             colors = TextFieldDefaults.textFieldColors(
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
@@ -486,11 +500,14 @@ fun dateTimePicker(modifier: Modifier){
             )
         )
 
-        Box(modifier = Modifier.size(24.dp).clickable {
+        Box(modifier = Modifier
+            .size(24.dp)
+            .clickable {
 
-        }){
+            }) {
 
         }
     }
+
 
 }
