@@ -3,11 +3,15 @@ package com.tung.travelthere;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.bumptech.glide.Glide;
 
 import org.w3c.dom.Text;
 
@@ -30,10 +34,22 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.MenuIt
     @Override
     public void onBindViewHolder(@NonNull MenuItemListHolder holder, int position) {
         MenuItem menuItem = menuItemList.get(position);
+        if (menuItem == null)
+        {
+            return;
+        }
         holder.userName.setText(menuItem.getUserName());
         holder.itemContent.setText(menuItem.getContent());
-        holder.userImage.setImageResource(R.drawable.email);
-        holder.itemImage.setImageResource(R.drawable.benthanh);
+        Glide.with(holder.itemView.getContext()).load(menuItemList.get(position).getUserImageURL()).into(holder.userImage);
+        Glide.with(holder.itemView.getContext()).load(menuItemList.get(position).getContentImageURL()).into(holder.itemImage);
+
+        holder.btnAnswer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(holder.itemView.getContext(), "Button Answer is clicked !", Toast.LENGTH_SHORT).show();
+            }
+        });
+
     }
 
     @Override
@@ -46,6 +62,7 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.MenuIt
         TextView itemContent;
         ImageView userImage;
         ImageView itemImage;
+        Button btnAnswer;
 
         public MenuItemListHolder(View itemView){
             super(itemView);
@@ -54,6 +71,7 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.MenuIt
             itemContent = itemView.findViewById(R.id.text_menu_item_content);
             userImage = itemView.findViewById(R.id.image_menu_item_info);
             itemImage = itemView.findViewById(R.id.image_menu_item_content);
+            btnAnswer = itemView.findViewById(R.id.btn_menu_item_answer);
         }
 
 
