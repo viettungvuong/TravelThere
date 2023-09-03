@@ -25,14 +25,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import com.tung.travelthere.controller.*
+import com.tung.travelthere.objects.*
 
-import com.tung.travelthere.objects.Category
-import com.tung.travelthere.objects.City
-import com.tung.travelthere.objects.PlaceLocation
-import com.tung.travelthere.objects.Restaurant
 import com.tung.travelthere.ui.theme.TravelThereTheme
 import kotlinx.coroutines.launch
-
 
 
 class SearchPlace : ComponentActivity() {
@@ -57,32 +53,32 @@ class SearchPlace : ComponentActivity() {
     }
 
     //tìm kiếm nhà hàng theo tên món ăn mà nhà hàng bán
-    fun searchRestaurantByDish(searchViewModel: SearchViewModel, newString: String, available: Set<PlaceLocation>){
+    fun searchRestaurantByDish(
+        searchViewModel: SearchViewModel,
+        newString: String,
+        available: Set<PlaceLocation>
+    ) {
         searchViewModel.matchedQuery.clear()
-        if (newString.isNotBlank()){
+        if (newString.isNotBlank()) {
             searchViewModel.matchedQuery += available.filter {
                 val hasDish = (
-                        if (it is Restaurant){
+                        if (it is Restaurant) {
                             //tìm trong các dish của nhà hàng có món nào có chứa cụm từ hiện tại hay kh
-                            val dishes = it.getSpecializedDish().sortedBy {
-                                    dish -> dish.name //sắp xếp các dish theo tên
-                            }.filter { dish -> dish.name.contains(newString,ignoreCase = false) }
+                            val dishes = it.getSpecializedDish().sortedBy { dish ->
+                                dish.name //sắp xếp các dish theo tên
+                            }.filter { dish -> dish.name.contains(newString, ignoreCase = false) }
 
                             dishes.isNotEmpty()
-                        }
-                        else
+                        } else
                             false
                         )
-                it.categories.contains(Category.RESTAURANT)&&
+                it.categories.contains(Category.RESTAURANT) &&
                         hasDish
             }
         }
         searchViewModel.originalMatchedQuery.clear()
-        searchViewModel.originalMatchedQuery+=searchViewModel.matchedQuery //chuẩn bị cho cái categoryview
+        searchViewModel.originalMatchedQuery += searchViewModel.matchedQuery //chuẩn bị cho cái categoryview
     }
-
-
-
 
 
     @Composable
@@ -117,10 +113,21 @@ class SearchPlace : ComponentActivity() {
                     )
                 }
 
-                Text(modifier = Modifier.fillMaxWidth().padding(vertical = 25.dp), text="Search", textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 25.dp),
+                    text = "Search",
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Bold
+                )
 
 
-                SearchBar(available = listState, searchViewModel = searchViewModel, modifier = Modifier.padding(10.dp))
+                SearchBar(
+                    available = listState,
+                    searchViewModel = searchViewModel,
+                    modifier = Modifier.padding(10.dp)
+                )
 
                 LazyRow(modifier = Modifier.padding(15.dp)) {
                     itemsIndexed(Category.values()) { index, category -> //tương tự xuất ra location adapter
@@ -130,7 +137,11 @@ class SearchPlace : ComponentActivity() {
 
                 LazyColumn() {
                     items(searchViewModel.matchedQuery) { location ->
-                        SneakViewPlaceLong(context = activity, location = location, hasImage = false)
+                        SneakViewPlaceLong(
+                            context = activity,
+                            location = location,
+                            hasImage = false
+                        )
                     }
                 }
             }
@@ -139,20 +150,37 @@ class SearchPlace : ComponentActivity() {
 
 }
 
-fun search(searchViewModel: SearchViewModel,newString: String,available: Set<PlaceLocation>){
+fun search(
+    searchViewModel: SearchViewModel,
+    newString: String,
+    available: Set<PlaceLocation>,
+    checkpoint: Checkpoint? = null
+) {
     searchViewModel.matchedQuery.clear()
-    if (newString.isNotBlank()){
+    if (newString.isNotBlank()) {
         searchViewModel.matchedQuery += available.filter {
             it.getName().contains(newString, ignoreCase = true)
         }.sortedBy {
             val similarity = it.getName()
                 .commonPrefixWith(newString).length.toDouble() / newString.length
+
             similarity //sắp xếp theo độ tương đồng so với từ đang nhập
+
+            val distance = if (checkpoint!=null){
+                (it.distanceTo(checkpoint!!.getLocation()) / 1000).toDouble()
+            }
+            else{
+                (it.getPos().distanceTo(AppController.currentPosition.currentLocation?:Position(0.0,0.0)) / 1000).toDouble()
+            }
+
+
+            val criteria = similarity + distance
+            criteria
+
         }
     }
     searchViewModel.originalMatchedQuery.clear()
-    searchViewModel.originalMatchedQuery+=searchViewModel.matchedQuery //chuẩn bị cho cái categoryview
-
+    searchViewModel.originalMatchedQuery += searchViewModel.matchedQuery //chuẩn bị cho cái categoryview
 }
 
 
