@@ -27,8 +27,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.tung.travelthere.controller.AppController
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.filled.*
@@ -39,6 +41,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
@@ -111,7 +114,6 @@ class SuggestPlace : ComponentActivity() {
             chosenPlacePos = placeViewModel.currentPos
 
             currentLocation = RecommendedPlace(chosenPlaceName,chosenPlacePos,chosenPlaceCity) //đặt location đang được suggest
-            Log.d("current location",currentLocation.toString())
         }
 
 
@@ -244,14 +246,28 @@ class SuggestPlace : ComponentActivity() {
                     LazyRow {
                         items(imageViewModel.chosenImages) {
                             Box(
-                                modifier = Modifier
-                                    .padding(10.dp)
+                                contentAlignment = Alignment.Center
                             ) {
                                 Image(
                                     bitmap = it.asImageBitmap(),
                                     contentDescription = null,
-                                    alignment = Alignment.Center
+                                    modifier = Modifier.size(200.dp),
+                                    contentScale = ContentScale.Fit
                                 )
+
+                                Column(modifier = Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .size(25.dp)
+                                    .background(Color.Red, shape = RoundedCornerShape(4.dp))
+                                    .clickable {  },
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center){
+                                    Icon(
+                                        imageVector = Icons.Default.Delete,
+                                        contentDescription = null,
+                                        tint = Color.White
+                                    )
+                                }
                             }
                         }
                     }
@@ -384,6 +400,8 @@ fun suggestPlace(context: Context, location: PlaceLocation) {
             Log.d("error","fetching city unsuccessful")
         }
     }
+}
 
+fun UploadImage(){
 
 }
