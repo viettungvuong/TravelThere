@@ -58,16 +58,13 @@ class MainActivity : ComponentActivity() {
         setContent {
             Home(this)
         }
-
-//        // Start RegisterLoginActivity immediately
-//        val intent = Intent(this@MainActivity, RegisterLoginActivity::class.java)
-//        startActivity(intent)
     }
 
     override fun onStart() {
         super.onStart()
         runBlocking {
             City.getSingleton().locationsRepository.refreshLocations(true)
+            City.getSingleton().locationsRepository.refreshRecommends(true)
             City.getSingleton().fetchImageUrl()
         }
         City.getSingleton().locationsRepository.nearbyLocations() //lấy những địa điểm gần
@@ -316,8 +313,37 @@ class MainActivity : ComponentActivity() {
     //trang local recommended
     @Composable
     fun LocalRecommended(context: Context, city: City) {
+        var listState = remember { mutableStateOf(mutableSetOf<PlaceLocation>()) }
+        var chosenState = remember { mutableStateOf(mutableSetOf<Category>()) }
+        var originalState = remember { mutableStateOf(mutableSetOf<PlaceLocation>()) }
+        val coroutineScope = rememberCoroutineScope()
 
+        LaunchedEffect(originalState) {
+            coroutineScope.launch {
+                originalState.value =
+                    city.locationsRepository.refreshRecommends() as MutableSet<PlaceLocation>
+                listState.value = originalState.value
+            }
+        }
 
+        Column() {
+            LazyRow(modifier = Modifier.padding(15.dp)) {
+                itemsIndexed(Category.values()) { index, category -> //tương tự xuất ra location adapter
+                    categoryView(category, colorBlue, true, listState, chosenState, originalState)
+                }
+            }
+
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                modifier = Modifier.fillMaxSize(),
+                content = {
+                    items(listState.value.toTypedArray()) { location ->
+                        SneakViewPlace(context, location)
+                    }
+                }
+            )
+
+        }
     }
 
     @Composable

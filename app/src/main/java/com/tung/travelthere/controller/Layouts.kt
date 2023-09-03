@@ -323,7 +323,10 @@ fun SneakViewPlace(context: Context, location: PlaceLocation) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            ImageFromUrl(url = imageUrl ?: "", contentDescription = null, 150.0)
+            if (imageUrl!=null){
+                ImageFromUrl(url = imageUrl!!, contentDescription = null, 150.0)
+            }
+
 
             Text(
                 text = location.getName()
@@ -357,7 +360,9 @@ fun SneakViewPlaceLong(context: Context, location: PlaceLocation, hasImage: Bool
     ) {
         Row {
             if (hasImage) {
-                ImageFromUrl(url = imageUrl ?: "", contentDescription = null, 150.0)
+                if (imageUrl!=null){
+                    ImageFromUrl(url = imageUrl!!, contentDescription = null, 150.0)
+                }
             }
 
             Column(

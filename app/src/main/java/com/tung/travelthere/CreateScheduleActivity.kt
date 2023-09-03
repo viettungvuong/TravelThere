@@ -148,6 +148,8 @@ class CreateScheduleActivity : ComponentActivity() {
         var checkpointList =
             remember { mutableStateListOf<Checkpoint?>() } //danh sách các checkpoint
 
+        var totalDistance = remember { mutableStateOf(0.0) }
+
         val keyboardController = LocalSoftwareKeyboardController.current
 
         val mDatePickerDialog = DatePickerDialog(
@@ -182,7 +184,7 @@ class CreateScheduleActivity : ComponentActivity() {
 
             LazyColumn {
                 itemsIndexed(checkpointList) { index, item ->
-                    Checkpoint(index, checkpointList, showDialog)
+                    Checkpoint(index, checkpointList, showDialog, totalDistance)
                 }
             }
 
@@ -191,6 +193,7 @@ class CreateScheduleActivity : ComponentActivity() {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+
                 Icon(imageVector = Icons.Default.Add,
                     tint = Color(0xff468a55),
                     contentDescription = null,
@@ -255,7 +258,7 @@ class CreateScheduleActivity : ComponentActivity() {
     @Composable
     private fun Checkpoint(
         index: Int, checkpointList: SnapshotStateList<Checkpoint?>,
-        showDialog: MutableState<Boolean>
+        showDialog: MutableState<Boolean>, totalDistance: MutableState<Double>
     ) {
         var location = remember { mutableStateOf<PlaceLocation?>(null) }
 
@@ -292,23 +295,24 @@ class CreateScheduleActivity : ComponentActivity() {
 
                     Spacer(modifier = Modifier.weight(1f))
 
-                    Column(modifier = Modifier
-                        .size(32.dp)
-                        .background(Color(0xff185241), shape = RoundedCornerShape(4.dp))
-                        .clickable { showDialog.value = true },
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center){
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = null,
-                            tint = Color.White
-                        )
+                    if (index==checkpointList.size-1){
+                        Column(modifier = Modifier
+                            .size(32.dp)
+                            .background(Color(0xff185241), shape = RoundedCornerShape(4.dp))
+                            .clickable { showDialog.value = true },
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center){
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = null,
+                                tint = Color.White
+                            )
+                        }
+
+                        SearchDialog(index = index, checkpointList = checkpointList, totalDistance = totalDistance, showDialog = showDialog.value, searchViewModel = searchViewModel, setShowDialog = {showDialog.value=it}, setLocation = {
+                            location.value = it
+                        })
                     }
-
-                    SearchDialog(index = index, checkpointList = checkpointList, showDialog = showDialog.value, searchViewModel = searchViewModel, setShowDialog = {showDialog.value=it}, setLocation = {
-                        location.value = it
-                    })
-
 
                 }
 
@@ -320,7 +324,6 @@ class CreateScheduleActivity : ComponentActivity() {
                 if (index<checkpointList.size-1&&checkpointList[index]!=null&&checkpointList[index+1]!=null){
                     distance = checkpointList[index]!!.distanceTo(checkpointList[index+1]!!)/1000
                 }
-                Log.d("distance",distance.toString())
 
                 if (distance>0f){
                     Icon(
@@ -340,7 +343,11 @@ class CreateScheduleActivity : ComponentActivity() {
     }
 
     @Composable
-    private fun SearchDialog(index: Int, checkpointList: SnapshotStateList<Checkpoint?>, showDialog: Boolean, searchViewModel: SearchViewModel, setShowDialog: (Boolean) -> Unit, setLocation: (PlaceLocation)->Unit){
+    private fun SearchDialog(index: Int, checkpointList: SnapshotStateList<Checkpoint?>
+                             , totalDistance: MutableState<Double>
+                             , showDialog: Boolean, searchViewModel: SearchViewModel, setShowDialog: (Boolean) -> Unit
+                             , setLocation: (PlaceLocation)->Unit){
+        var distance by remember { mutableStateOf(0f) }
         if (showDialog){
             Dialog(onDismissRequest = { setShowDialog(false) }) {
                 Surface(
@@ -374,7 +381,9 @@ class CreateScheduleActivity : ComponentActivity() {
                                         .clickable(onClick = {
                                             setLocation(location)
                                             checkpointList[index] = Checkpoint(location)
-                                            setShowDialog(false)
+
+                                            setShowDialog(false) //đóng cửa sổ lại
+
                                             searchViewModel.matchedQuery.clear()
                                         }), elevation = 10.dp
                                 ) {
@@ -393,11 +402,11 @@ class CreateScheduleActivity : ComponentActivity() {
                                         ) {
 
 
-                                            var distance = 0f
+                                            distance = 0f
                                             if (index>0&&checkpointList[index-1]!=null){
                                                 distance = checkpointList[index-1]!!.getLocation().distanceTo(location)/1000
-
                                             }
+
                                             if (distance>0f){
                                                 Icon(
                                                     imageVector = Icons.Default.Place,
@@ -409,6 +418,8 @@ class CreateScheduleActivity : ComponentActivity() {
                                                 Spacer(modifier = Modifier.width(5.dp))
 
                                                 Text(text = "${roundDecimal(distance.toDouble(),2)} km")
+
+
                                             }
 
                                         }
