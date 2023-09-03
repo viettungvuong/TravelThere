@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -243,9 +244,12 @@ class CreateScheduleActivity : ComponentActivity() {
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                Box(modifier = Modifier
-                    .background(Color(0xff185241))
-                    .clickable { showDialog.value = true }){
+                Column(modifier = Modifier
+                    .size(32.dp)
+                    .background(Color(0xff185241), shape = RoundedCornerShape(4.dp))
+                    .clickable { showDialog.value = true },
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center){
                     Icon(
                         imageVector = Icons.Default.Search,
                         contentDescription = null,
