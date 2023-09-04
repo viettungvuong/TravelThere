@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MenuActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:id="@+id/layout_menu_title"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:weightSum="10"
+        android:layout_marginTop="10dp">
+
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:src="@drawable/travel"
+            android:tint="@color/blue"
+            android:layout_weight="1"/>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:text="Travel"
+            android:gravity="center"
+            android:layout_weight="1.5"/>
+        <EditText
+            android:layout_width="0dp"
+            android:layout_height="50sp"
+            android:hint="Search"
+            android:layout_gravity="center"
+            android:layout_marginLeft="20dp"
+            android:layout_weight="5"/>
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_weight="2">
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:src="@drawable/password"
+                android:layout_gravity="center"
+                app:tint="@color/blue"
+                android:backgroundTint="@color/white"
+                />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="user name"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/layout_menu_title"
+        android:id="@+id/btn_search_weather"
+        android:layout_marginTop="30dp"
+        android:layout_centerHorizontal="true"
+        android:text="Search the weather condition"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/btn_search_weather"
+        android:layout_marginTop="30dp"
+        android:background="@color/quantum_grey">
+
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="50dp"
+            android:id="@+id/rec_menu_item"
+            android:background="@color/quantum_grey"
+            android:layout_marginTop="10dp"/>
+
+
+
+
+
+    </RelativeLayout>
+
+    <FrameLayout
+        android:id="@+id/container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    </FrameLayout>
+
+
+</RelativeLayout>
