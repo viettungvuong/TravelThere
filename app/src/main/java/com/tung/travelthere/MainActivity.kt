@@ -44,6 +44,7 @@ import java.util.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
 import com.tung.travelthere.controller.AppController.Companion.currentUser
 import java.io.Serializable
 
@@ -338,15 +339,24 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                modifier = Modifier.fillMaxSize(),
-                content = {
-                    items(listState) { location ->
-                        SneakViewPlace(context, location)
-                    }
+            if (listState.isNullOrEmpty()){
+                Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center){
+                    Text(text = "No places", fontStyle = FontStyle.Italic)
                 }
-            )
+            }
+            else{
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    modifier = Modifier.fillMaxSize(),
+                    content = {
+                        items(listState) { location ->
+                            SneakViewPlace(context, location)
+                        }
+                    }
+                )
+            }
+
 
         }
     }
@@ -373,15 +383,24 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                modifier = Modifier.fillMaxSize(),
-                content = {
-                    items(listState) { location ->
-                        SneakViewPlace(context, location)
-                    }
+            if (listState.isNullOrEmpty()){
+                Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center){
+                    Text(text = "No places", fontStyle = FontStyle.Italic)
                 }
-            )
+            }
+            else{
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    modifier = Modifier.fillMaxSize(),
+                    content = {
+                        items(listState) { location ->
+                            SneakViewPlace(context, location)
+                        }
+                    }
+                )
+            }
+
 
         }
 
@@ -414,15 +433,23 @@ class MainActivity : ComponentActivity() {
                     , textAlign = TextAlign.Center, modifier = Modifier)
             }
 
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                modifier = Modifier.fillMaxSize(),
-                content = {
-                    items(listState) { location ->
-                        SneakViewPlace(context, location)
-                    }
+            if (listState.isNullOrEmpty()){
+                Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center){
+                    Text(text = "No places", fontStyle = FontStyle.Italic)
                 }
-            )
+            }
+            else{
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    modifier = Modifier.fillMaxSize(),
+                    content = {
+                        items(listState) { location ->
+                            SneakViewPlace(context, location)
+                        }
+                    }
+                )
+            }
 
         }
     }

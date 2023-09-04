@@ -195,7 +195,7 @@ class PlaceView : ComponentActivity() {
 
             Spacer(modifier = Modifier.width(20.dp))
 
-            Text(text = "18 đường số 7")
+            Text(text = "Địa chỉ")
         }
 
 
