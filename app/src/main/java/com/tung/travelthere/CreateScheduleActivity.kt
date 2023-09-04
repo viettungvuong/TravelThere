@@ -35,6 +35,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -130,6 +131,278 @@ class CreateScheduleActivity : ComponentActivity() {
     @OptIn(ExperimentalComposeUiApi::class)
     @Composable
     private fun CreateSchedule() {
+        @Composable
+        fun SearchDialog(
+            index: Int,
+            schedule: Schedule,
+            showDialog: Boolean,
+            searchViewModel: SearchViewModel,
+            setShowDialog: (Boolean) -> Unit,
+            setLocation: (PlaceLocation) -> Unit
+        ) {
+            var distance by remember { mutableStateOf(0f) }
+            var indexState = remember { mutableStateOf(index) }
+            var chosenState = remember { mutableStateOf(mutableSetOf<Category>()) }
+
+            fun clear() {
+                distance = 0f
+                indexState.value = 0
+                searchViewModel.matchedQuery.clear()
+            }
+
+            if (showDialog) {
+                Dialog(onDismissRequest = {
+                    clear()
+                    setShowDialog(false)
+                }) {
+                    Surface(
+                        shape = RoundedCornerShape(16.dp),
+                        color = Color.White,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        ConstraintLayout {
+                            val (categories, searchBar, autocomplete) = createRefs()
+
+                            //join các địa điểm của thành phố lại
+                            val joinList =
+                                City.getSingleton().locationsRepository.locations.map { it.value } + City.getSingleton().locationsRepository.recommends
+                            SearchBar(
+                                available = joinList.toSet(),
+                                searchViewModel = searchViewModel,
+                                modifier = Modifier.constrainAs(searchBar) {
+                                    top.linkTo(parent.top)
+                                    start.linkTo(parent.start)
+                                    end.linkTo(parent.end)
+                                })
+
+                            LazyRow(modifier = Modifier.padding(15.dp).constrainAs(categories) {
+                                top.linkTo(searchBar.bottom)
+                                start.linkTo(parent.start)
+                                end.linkTo(parent.end)
+                            }) {
+                                itemsIndexed(Category.values()) { index, category ->
+                                    categoryView(category, colorBlue, true, searchViewModel, chosenState)
+                                }
+                            } //filter category
+
+                            //autocomplete result
+                            LazyColumn(modifier = Modifier.constrainAs(autocomplete) {
+                                top.linkTo(categories.bottom)
+                                start.linkTo(parent.start)
+                                end.linkTo(parent.end)
+                                height = Dimension.wrapContent
+                            }) {
+                                items(searchViewModel.matchedQuery) { location ->
+                                    Card(
+                                        modifier = Modifier
+                                            .padding(
+                                                5.dp
+                                            )
+                                            .clickable(onClick = {
+                                                setLocation(location)
+
+                                                //đặt ở index checkpoint
+                                                val checkpoint = Checkpoint(location)
+                                                schedule.setCheckpoint(
+                                                    checkpoint = checkpoint,
+                                                    index = indexState.value
+                                                )
+
+                                                clear()
+                                                setShowDialog(false)
+
+                                            }), elevation = 10.dp
+                                    ) {
+                                        Row {
+                                            //hiện icon tương ứng category đầu tiên của địa điểm
+                                            Icon(
+                                                painter = when (location.categories.first()) {
+                                                    Category.RESTAURANT -> painterResource(R.drawable.restaurant)
+                                                    Category.BAR -> painterResource(R.drawable.bar)
+                                                    Category.ATTRACTION -> painterResource(R.drawable.attraction)
+                                                    Category.NATURE -> painterResource(R.drawable.nature)
+                                                    Category.NECESSITY -> painterResource(R.drawable.hospital)
+                                                    Category.OTHERS -> painterResource(R.drawable.other)
+                                                    Category.SHOPPING -> painterResource(R.drawable.shopping)
+                                                },
+                                                tint = colorBlue,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(20.dp)
+                                            )
+
+                                            Box(modifier = Modifier.padding(horizontal = 15.dp)) {
+                                                Text(
+                                                    text = location.getName(), //hiện tên của địa điểm
+                                                    fontSize = 15.sp,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            }
+
+
+                                            Row(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                            ) {
+                                                //tính toán khoảng cách từ điểm này đến checkpoint trước
+                                                distance = 0f
+                                                if (index > 0 && schedule.getList()[index - 1] != null) {
+                                                    distance =
+                                                        schedule.getList()[index - 1]!!.getLocation()
+                                                            .distanceTo(location) / 1000
+                                                }
+
+                                                //nếu có distance
+                                                if (distance > 0f) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.Place,
+                                                        contentDescription = "City",
+                                                        tint = Color.Black,
+                                                        modifier = Modifier.scale(0.8f)
+                                                    )
+
+                                                    Spacer(modifier = Modifier.width(5.dp))
+
+                                                    Text(
+                                                        text = "${
+                                                            roundDecimal(
+                                                                distance.toDouble(),
+                                                                2
+                                                            )
+                                                        } km"
+                                                    )
+                                                }
+
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
+
+        @OptIn(ExperimentalComposeUiApi::class)
+        @Composable
+        fun Checkpoint(
+            index: Int, schedule: Schedule,
+            showDialog: MutableState<Boolean>
+        ) {
+            var location = remember { mutableStateOf<PlaceLocation?>(null) }
+
+
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Box(
+                    modifier = Modifier
+                        .padding(2.dp)
+                        .fillMaxSize()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(1.dp, 40.dp)
+                                .background(Color.Gray)
+                        )
+
+                        Spacer(modifier = Modifier.width(16.dp))
+
+                        if (location.value==null){
+                            Icon(
+                                imageVector = Icons.Default.LocationOn,
+                                tint = Color.Red,
+                                contentDescription = null
+                            )
+                        }
+                        else{
+                            Icon(
+                                painter = when (location.value!!.categories.first()) {
+                                    Category.RESTAURANT -> painterResource(R.drawable.restaurant)
+                                    Category.BAR -> painterResource(R.drawable.bar)
+                                    Category.ATTRACTION -> painterResource(R.drawable.attraction)
+                                    Category.NATURE -> painterResource(R.drawable.nature)
+                                    Category.NECESSITY -> painterResource(R.drawable.hospital)
+                                    Category.OTHERS -> painterResource(R.drawable.other)
+                                    Category.SHOPPING -> painterResource(R.drawable.shopping)
+                                },
+                                tint = Color.Red,
+                                contentDescription = null,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+
+
+                        Spacer(modifier = Modifier.width(10.dp))
+
+                        if (location.value != null) {
+                            Text(text = location.value!!.getName())
+                        } else {
+                            Text(text = "No location", fontStyle = FontStyle.Italic)
+                        }
+
+
+                        Spacer(modifier = Modifier.weight(1f))
+
+                        //nút tìm kiếm
+                        if (index == schedule.getList().lastIndex){
+                            Column(
+                                modifier = Modifier
+                                    .size(32.dp)
+                                    .background(Color(0xff185241), shape = RoundedCornerShape(4.dp))
+                                    .clickable { showDialog.value = true },
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Search,
+                                    contentDescription = null,
+                                    tint = Color.White
+                                )
+                            }
+                        }
+
+
+                        SearchDialog(
+                            index = index,
+                            schedule = schedule,
+                            showDialog = showDialog.value,
+                            searchViewModel = searchViewModel,
+                            setShowDialog = { showDialog.value = it },
+                            setLocation = {
+                                location.value = it
+                            })
+
+                    }
+
+
+                }
+
+                Row(modifier = Modifier.padding(vertical = 5.dp)) {
+                    var distance = schedule.distances[index]
+
+                    if (distance > 0f) {
+                        Icon(
+                            imageVector = Icons.Default.Place,
+                            contentDescription = "City",
+                            tint = Color.Black,
+                            modifier = Modifier.scale(0.8f)
+                        )
+
+                        Spacer(modifier = Modifier.width(5.dp))
+
+                        //phần distance
+                        Text(text = "${roundDecimal(distance.toDouble(), 2)} km", fontSize = 15.sp)
+                    }
+                }
+            }
+
+        }
+
         val showDialog = remember { mutableStateOf(false) } //có hiện dialog không
 
         var schedule by remember { mutableStateOf(Schedule()) }
@@ -155,8 +428,6 @@ class CreateScheduleActivity : ComponentActivity() {
                 .addOnFailureListener{
                     Toast.makeText(this,"Cannot update schedule",Toast.LENGTH_SHORT).show()
                 }
-
-
         }
 
 
@@ -235,241 +506,9 @@ class CreateScheduleActivity : ComponentActivity() {
 
     }
 
-    @OptIn(ExperimentalComposeUiApi::class)
-    @Composable
-    private fun Checkpoint(
-        index: Int, schedule: Schedule,
-        showDialog: MutableState<Boolean>
-    ) {
-        var location = remember { mutableStateOf<PlaceLocation?>(null) }
 
 
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Box(
-                modifier = Modifier
-                    .padding(2.dp)
-                    .fillMaxSize()
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(1.dp, 40.dp)
-                            .background(Color.Gray)
-                    )
 
-                    Spacer(modifier = Modifier.width(16.dp))
-
-                    Icon(
-                        imageVector = Icons.Default.LocationOn,
-                        tint = Color.Red,
-                        contentDescription = null
-                    )
-
-                    Spacer(modifier = Modifier.width(10.dp))
-
-                    if (location.value != null) {
-                        Text(text = location.value!!.getName())
-                    } else {
-                        Text(text = "No location", fontStyle = FontStyle.Italic)
-                    }
-
-
-                    Spacer(modifier = Modifier.weight(1f))
-
-                    //nút tìm kiếm
-                    if (index == schedule.getList().lastIndex){
-                        Column(
-                            modifier = Modifier
-                                .size(32.dp)
-                                .background(Color(0xff185241), shape = RoundedCornerShape(4.dp))
-                                .clickable { showDialog.value = true },
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Search,
-                                contentDescription = null,
-                                tint = Color.White
-                            )
-                        }
-                    }
-
-
-                    SearchDialog(
-                        index = index,
-                        schedule = schedule,
-                        showDialog = showDialog.value,
-                        searchViewModel = searchViewModel,
-                        setShowDialog = { showDialog.value = it },
-                        setLocation = {
-                            location.value = it
-                        })
-
-                }
-
-
-            }
-
-            Row(modifier = Modifier.padding(vertical = 5.dp)) {
-                var distance = schedule.distances[index]
-
-                if (distance > 0f) {
-                    Icon(
-                        imageVector = Icons.Default.Place,
-                        contentDescription = "City",
-                        tint = Color.Black,
-                        modifier = Modifier.scale(0.8f)
-                    )
-
-                    Spacer(modifier = Modifier.width(5.dp))
-
-                    //phần distance
-                    Text(text = "${roundDecimal(distance.toDouble(), 2)} km", fontSize = 15.sp)
-                }
-            }
-        }
-
-    }
-
-    @Composable
-    private fun SearchDialog(
-        index: Int,
-        schedule: Schedule,
-        showDialog: Boolean,
-        searchViewModel: SearchViewModel,
-        setShowDialog: (Boolean) -> Unit,
-        setLocation: (PlaceLocation) -> Unit
-    ) {
-        var distance by remember { mutableStateOf(0f) }
-        var indexState = remember { mutableStateOf(index) }
-
-        fun clear() {
-            distance = 0f
-            indexState.value = 0
-            searchViewModel.matchedQuery.clear()
-        }
-
-        if (showDialog) {
-            Dialog(onDismissRequest = {
-                clear()
-                setShowDialog(false)
-            }) {
-                Surface(
-                    shape = RoundedCornerShape(16.dp),
-                    color = Color.White,
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    ConstraintLayout {
-                        val (searchBar, autocomplete) = createRefs()
-
-                        //join các địa điểm của thành phố lại
-                        val joinList =
-                            City.getSingleton().locationsRepository.locations.map { it.value } + City.getSingleton().locationsRepository.recommends
-                        SearchBar(
-                            available = joinList.toSet(),
-                            searchViewModel = searchViewModel,
-                            modifier = Modifier.constrainAs(searchBar) {
-                                top.linkTo(parent.top)
-                                start.linkTo(parent.start)
-                                end.linkTo(parent.end)
-                            })
-
-                        LazyColumn(modifier = Modifier.constrainAs(autocomplete) {
-                            top.linkTo(searchBar.bottom)
-                            start.linkTo(parent.start)
-                            end.linkTo(parent.end)
-                            height = Dimension.wrapContent
-                        }) {
-                            items(searchViewModel.matchedQuery) { location ->
-                                Card(
-                                    modifier = Modifier
-                                        .padding(
-                                            5.dp
-                                        )
-                                        .clickable(onClick = {
-                                            setLocation(location)
-
-                                            //đặt ở index checkpoint
-                                            val checkpoint = Checkpoint(location)
-                                            schedule.setCheckpoint(
-                                                checkpoint = checkpoint,
-                                                index = indexState.value
-                                            )
-
-                                            clear()
-                                            setShowDialog(false)
-                                            Log.d("index", indexState.value.toString())
-                                            Log.d(
-                                                "checkpoint location",
-                                                schedule.getList()[0]
-                                                    ?.getLocation()!!
-                                                    .getName()
-                                            )
-
-                                        }), elevation = 10.dp
-                                ) {
-                                    Row {
-
-                                        Box(modifier = Modifier.padding(horizontal = 15.dp)) {
-                                            Text(
-                                                text = location.getName(),
-                                                fontSize = 15.sp,
-                                                fontWeight = FontWeight.Bold
-                                            )
-                                        }
-
-
-                                        Row(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                        ) {
-
-
-                                            distance = 0f
-                                            if (index > 0 && schedule.getList()[index - 1] != null) {
-                                                distance =
-                                                    schedule.getList()[index - 1]!!.getLocation()
-                                                        .distanceTo(location) / 1000
-                                            }
-
-                                            //nếu có distance
-                                            if (distance > 0f) {
-                                                Icon(
-                                                    imageVector = Icons.Default.Place,
-                                                    contentDescription = "City",
-                                                    tint = Color.Black,
-                                                    modifier = Modifier.scale(0.8f)
-                                                )
-
-                                                Spacer(modifier = Modifier.width(5.dp))
-
-                                                Text(
-                                                    text = "${
-                                                        roundDecimal(
-                                                            distance.toDouble(),
-                                                            2
-                                                        )
-                                                    } km"
-                                                )
-
-                                                schedule.calculateDistance(index)
-                                            }
-
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-    }
 
 
     @OptIn(ExperimentalLayoutApi::class)
