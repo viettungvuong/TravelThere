@@ -3,10 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    
 
     <meta-data
         android:name="com.google.android.geo.API_KEY"
@@ -22,10 +21,13 @@
         android:theme="@style/Theme.TravelThere"
         tools:targetApi="31">
         <activity
+            android:name=".WeatherActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AppCompat"/>
+        <activity
             android:name=".MenuActivity"
             android:exported="false"
-            android:theme="@style/Theme.AppCompat"
-            />
+            android:theme="@style/Theme.AppCompat" />
         <activity
             android:name=".SearchPlace"
             android:exported="false"
@@ -53,8 +55,7 @@
             android:name=".MainActivity"
             android:exported="false"
             android:label="@string/app_name"
-            android:theme="@style/Theme.TravelThere"
-        >
+            android:theme="@style/Theme.TravelThere">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -64,7 +65,7 @@
         <activity
             android:name=".RegisterLoginActivity"
             android:label="Register and Login"
-            android:theme="@style/Theme.AppCompat"></activity>
+            android:theme="@style/Theme.AppCompat" />
         <activity android:name=".PlaceView" />
     </application>
 

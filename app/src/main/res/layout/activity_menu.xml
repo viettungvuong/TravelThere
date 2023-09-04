@@ -59,17 +59,26 @@
 
     </LinearLayout>
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/layout_menu_title"
+        android:id="@+id/btn_search_weather"
+        android:layout_marginTop="30dp"
+        android:layout_centerHorizontal="true"
+        android:text="Search the weather condition"/>
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/layout_menu_title"
+        android:layout_below="@id/btn_search_weather"
         android:layout_marginTop="30dp"
         android:background="@color/quantum_grey">
 
 
         <androidx.recyclerview.widget.RecyclerView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginHorizontal="50dp"
             android:id="@+id/rec_menu_item"
             android:background="@color/quantum_grey"
@@ -77,8 +86,16 @@
 
 
 
+
+
     </RelativeLayout>
 
+    <FrameLayout
+        android:id="@+id/container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    </FrameLayout>
 
 
 </RelativeLayout>
