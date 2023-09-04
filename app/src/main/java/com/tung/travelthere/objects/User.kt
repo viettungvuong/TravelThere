@@ -2,7 +2,7 @@ package com.tung.travelthere.objects
 
 import java.io.Serializable
 
-class User() : Serializable{
+class User() {
     private var name: String?=null
     private var fromCity: City?=null
 
