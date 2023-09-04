@@ -129,6 +129,8 @@ class SuggestPlace : ComponentActivity() {
                     chosenPlaceCity
                 ) //đặt location đang được suggest
                 (currentLocation as TouristPlace).address = chosenPlaceAddress //địa chỉ
+                (currentLocation as TouristPlace).categories.clear()
+                (currentLocation as TouristPlace).categories.addAll(chosenPlaceCategories)
             } else {
                 currentLocation = null //trong trường hợp xoá mất địa điểm
             }
@@ -461,12 +463,16 @@ fun suggestPlace(
                                 }
                         } else {
                             //không tồn tại
+                            val categoriesStr = mutableListOf<String>()
+                            for (category in location.categories){
+                                categoriesStr.add(convertCategoryToStr(category))
+                            }
                             val locationData = hashMapOf(
                                 "location-name" to location.getName(),
                                 "lat" to location.getPos().lat,
                                 "long" to location.getPos().long,
                                 "address" to location.address,
-                                "categories" to location.categories,
+                                "categories" to categoriesStr,
                                 "recommends" to 1,
                                 "recommend-ids" to listOf(AppController.auth.currentUser!!.uid)
                             )

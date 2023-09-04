@@ -56,6 +56,18 @@ fun convertStrToCategory(string: String): Category{
     })
 }
 
+fun convertCategoryToStr(category: Category): String{
+        return when (category) {
+            Category.RESTAURANT -> "RESTAURANT"
+            Category.BAR -> "BAR"
+            Category.ATTRACTION -> "ATTRACTION"
+            Category.NECESSITY -> "NECESSITY"
+            Category.NATURE -> "NATURE"
+            Category.SHOPPING -> "SHOPPING"
+            Category.OTHERS -> "OTHERS"
+        }
+}
+
 
 //không cho phép tạo object từ class PlaceLocation
 open class PlaceLocation protected constructor(private val name: String, private val pos: Position, val cityName: String): java.io.Serializable{
