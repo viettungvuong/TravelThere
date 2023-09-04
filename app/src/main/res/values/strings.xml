@@ -3,6 +3,9 @@
     <string name="title_activity_favorite_page">FavoritePage</string>
     <string name="title_activity_splash_screen">SplashScreen</string>
     <string name="title_activity_search_place">SearchPlace</string>
-    <!-- TODO: Remove or change this placeholder text -->
+
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="title_activity_create_schedule">CreateScheduleActivity</string>
+
 </resources>

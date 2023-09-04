@@ -22,10 +22,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,6 +42,11 @@ import kotlinx.coroutines.*
 import java.net.URL
 import java.util.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
+
+import java.io.Serializable
 
 
 class MainActivity : ComponentActivity() {
@@ -59,27 +61,16 @@ class MainActivity : ComponentActivity() {
         setContent {
             Home(this)
         }
-//        Log.d("Test Activity", "Activity 1 is running")
-        val intent = Intent(this@MainActivity, MenuActivity::class.java)
-        startActivity(intent)
-//        Log.d("Test Activity", "Activity 2 is running")
-//        // Start RegisterLoginActivity immediately
-//        val intent = Intent(this@MainActivity, RegisterLoginActivity::class.java)
-//        startActivity(intent)
     }
 
-    override fun onStart() {
-        super.onStart()
+    override fun onResume() {
+        super.onResume()
         runBlocking {
             City.getSingleton().locationsRepository.refreshLocations(true)
             City.getSingleton().fetchImageUrl()
         }
         City.getSingleton().locationsRepository.nearbyLocations() //lấy những địa điểm gần
 
-    }
-
-    override fun onRestart() {
-        super.onRestart()
     }
 
     @OptIn(ExperimentalFoundationApi::class)
@@ -120,6 +111,29 @@ class MainActivity : ComponentActivity() {
                             imageVector = Icons.Default.Add,
                             tint = Color.White,
                             contentDescription = "Add"
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(10.dp))
+                    IconButton(onClick = {
+                        val intent = Intent(context, CreateScheduleActivity::class.java)
+                        context.startActivity(intent)
+                    }) {
+                        Image(
+                            painter = painterResource(id = R.drawable.luggage),
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp),
+                            contentScale = ContentScale.Fit,
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(10.dp))
+                    IconButton(onClick = {
+                        val intent = Intent(context, ProfileActivity::class.java)
+                        context.startActivity(intent)
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            tint = Color.White,
+                            contentDescription = "User"
                         )
                     }
                 }
@@ -168,14 +182,17 @@ class MainActivity : ComponentActivity() {
 
                             when (page) {
                                 0 -> NearbyPlaces(
+                                    modifier = Modifier.padding(padding),
                                     context,
                                     city = City.getSingleton(),
                                 )
                                 1 -> LocalRecommended(
+                                    modifier = Modifier.padding(padding),
                                     context,
                                     city = City.getSingleton(),
                                 )
                                 2 -> TouristAttractions(
+                                    modifier = Modifier.padding(padding),
                                     context,
                                     city = City.getSingleton(),
                                 )
@@ -284,12 +301,6 @@ class MainActivity : ComponentActivity() {
                 )
             }
 
-            Button(onClick = {
-//                val intent = Intent(this,TestActivity::class.java)
-//                startActivity(intent)
-            }) {
-                Text("Test activity")
-            }
 
         }
     }
@@ -297,42 +308,91 @@ class MainActivity : ComponentActivity() {
 
     //trang local recommended
     @Composable
-    fun LocalRecommended(context: Context, city: City) {
-
-
-    }
-
-    @Composable
-    fun TouristAttractions(context: Context, city: City) {
-        var listState = remember { mutableStateOf(mutableSetOf<PlaceLocation>()) }
+    fun LocalRecommended(modifier: Modifier,context: Context, city: City) {
+        var listState = remember { mutableStateListOf<PlaceLocation>()  }
         var chosenState = remember { mutableStateOf(mutableSetOf<Category>()) }
-        var originalState = remember { mutableStateOf(mutableSetOf<PlaceLocation>()) }
+        var originalState = remember { mutableStateListOf<PlaceLocation>()  }
         val coroutineScope = rememberCoroutineScope()
 
         LaunchedEffect(originalState) {
             coroutineScope.launch {
-                originalState.value =
-                    city.locationsRepository.refreshLocations() as MutableSet<PlaceLocation>
-                listState.value = originalState.value
+                originalState.addAll( city.locationsRepository.recommends)
+                listState.addAll(originalState)
             }
         }
 
-        Column() {
+
+        Column(modifier = modifier) {
             LazyRow(modifier = Modifier.padding(15.dp)) {
                 itemsIndexed(Category.values()) { index, category -> //tương tự xuất ra location adapter
                     categoryView(category, colorBlue, true, listState, chosenState, originalState)
                 }
             }
 
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                modifier = Modifier.fillMaxSize(),
-                content = {
-                    items(listState.value.toTypedArray()) { location ->
-                        SneakViewPlace(context, location)
-                    }
+            if (listState.isNullOrEmpty()){
+                Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center){
+                    Text(text = "No places", fontStyle = FontStyle.Italic)
                 }
-            )
+            }
+            else{
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    modifier = Modifier.fillMaxSize(),
+                    content = {
+                        items(listState) { location ->
+                            SneakViewPlace(context, location)
+                        }
+                    }
+                )
+            }
+
+
+        }
+    }
+
+    @Composable
+    fun TouristAttractions(modifier: Modifier, context: Context, city: City) {
+        var listState = remember { mutableStateListOf<PlaceLocation>()  }
+        var chosenState = remember { mutableStateOf(mutableSetOf<Category>()) }
+        var originalState = remember { mutableStateListOf<PlaceLocation>()  }
+        val coroutineScope = rememberCoroutineScope()
+
+        LaunchedEffect(originalState) {
+            coroutineScope.launch {
+                originalState.addAll( city.locationsRepository.refreshLocations().map { it.value })
+                listState.addAll(originalState)
+            }
+        }
+
+
+        Column(modifier=modifier) {
+            LazyRow(modifier = Modifier.padding(15.dp)) {
+                itemsIndexed(Category.values()) { index, category -> //tương tự xuất ra location adapter
+                    categoryView(category, colorBlue, true, listState, chosenState, originalState)
+                }
+            }
+
+            if (listState.isNullOrEmpty()){
+                Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center){
+                    Text(text = "No places", fontStyle = FontStyle.Italic)
+                }
+            }
+            else{
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    modifier = Modifier.fillMaxSize(),
+                    content = {
+                        items(listState) { location ->
+                            if (!location.categories.contains(Category.NECESSITY)){
+                                SneakViewPlace(context, location)
+                            }
+                        }
+                    }
+                )
+            }
+
 
         }
 
@@ -340,21 +400,20 @@ class MainActivity : ComponentActivity() {
 
 
     @Composable
-    fun NearbyPlaces(context: Context, city: City) { //đề xuất địa điểm gần với nơi đang đứng
-        var listState = remember { mutableStateOf(mutableSetOf<PlaceLocation>()) }
+    fun NearbyPlaces(modifier: Modifier,context: Context, city: City) { //đề xuất địa điểm gần với nơi đang đứng
+        var listState = remember { mutableStateListOf<PlaceLocation>()  }
         var chosenState = remember { mutableStateOf(mutableSetOf<Category>()) }
-        var originalState = remember { mutableStateOf(mutableSetOf<PlaceLocation>()) }
+        var originalState = remember { mutableStateListOf<PlaceLocation>()  }
         val coroutineScope = rememberCoroutineScope()
 
         LaunchedEffect(originalState) {
             coroutineScope.launch {
-                originalState.value =
-                    city.locationsRepository.nearbyLocations() as MutableSet<PlaceLocation>
-                listState.value = originalState.value
+                originalState.addAll( city.locationsRepository.nearbyLocations())
+                listState.addAll(originalState)
             }
         }
 
-        Column() {
+        Column(modifier=modifier) {
             LazyRow(modifier = Modifier.padding(15.dp)) {
                 itemsIndexed(Category.values()) { index, category -> //tương tự xuất ra location adapter
                     categoryView(category, colorBlue, true, listState, chosenState, originalState)
@@ -366,15 +425,23 @@ class MainActivity : ComponentActivity() {
                     , textAlign = TextAlign.Center, modifier = Modifier)
             }
 
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                modifier = Modifier.fillMaxSize(),
-                content = {
-                    items(listState.value.toTypedArray()) { location ->
-                        SneakViewPlace(context, location)
-                    }
+            if (listState.isNullOrEmpty()){
+                Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center){
+                    Text(text = "No places", fontStyle = FontStyle.Italic)
                 }
-            )
+            }
+            else{
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    modifier = Modifier.fillMaxSize(),
+                    content = {
+                        items(listState) { location ->
+                            SneakViewPlace(context, location)
+                        }
+                    }
+                )
+            }
 
         }
     }

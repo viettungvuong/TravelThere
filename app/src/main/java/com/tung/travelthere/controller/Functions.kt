@@ -7,7 +7,9 @@ import android.graphics.Bitmap
 import android.location.Geocoder
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.palette.graphics.Palette
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.libraries.places.api.Places
@@ -20,15 +22,9 @@ import com.tung.travelthere.objects.PlaceLocation
 import com.tung.travelthere.objects.Position
 import kotlinx.coroutines.runBlocking
 import java.util.*
+import kotlin.math.pow
+import kotlin.math.roundToInt
 
-fun getDrawableNameFromName(resourceName: String): Int {
-    try {
-        val field = R.drawable::class.java.getField(resourceName)
-        return field.getInt(null)
-    } catch (e: Exception) {
-        return 0
-    }
-}
 
 fun colorFromImage(bitmap: Bitmap): Color {
     val palette = Palette.Builder(bitmap!!).generate()
@@ -70,86 +66,18 @@ fun getCurrentPosition(fusedLocationClient: FusedLocationProviderClient, context
     }
 }
 
-fun initialize(context: Context, callback: ()->Unit){
-
-
-}
-
-
 //tìm kiếm và hiện đề xuất tìm kiếm
 fun search(searchQuery: String){
 
 }
 
-//cho phép người dùng thêm địa điểm
-fun suggestPlace(context: Context, location: PlaceLocation) {
-    Log.d("location city name",location.cityName)
-    val cityRef = AppController.db.collection(collectionCities).document(location.cityName)
-    cityRef.get().addOnCompleteListener{
-        task ->
-        if (task.isSuccessful) {
-            val documentSnapshot = task.result
-            val cityExists = documentSnapshot?.exists() ?: false
 
-            if (!cityExists) {
-                //chưa có thành phố
-                val cityData = hashMapOf(
-                    "city-name" to location.cityName,
-                )
-                cityRef.set(cityData)
-            }
-
-            val locationRef = cityRef.collection(
-                "recommends").document(location.getPos().toString())
-            locationRef.get()
-                .addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        val documentSnapshot = task.result
-                        val documentExists = documentSnapshot?.exists() ?: false
-
-                        if (documentExists) {
-                            //có tồn tại
-                            val recommendedNum = documentSnapshot.getLong("recommends") ?: 0 //số lượng được recommends
-                            val updatedField = mapOf("recommends" to recommendedNum+1)
-
-                            locationRef.update(updatedField)
-                                .addOnSuccessListener {
-                                    Toast.makeText(context,"Thank you for your suggestion!", Toast.LENGTH_LONG).show()
-                                }
-                                .addOnFailureListener { e ->
-                                    // Handle the update failure
-                                    Toast.makeText(context,"There is an error when adding your suggestion, please try again", Toast.LENGTH_LONG).show()
-                                }
-                        } else {
-                            //không tồn tại
-                            val locationData = hashMapOf(
-                                "name" to location.getName(),
-                                "lat" to location.getPos().lat,
-                                "long" to location.getPos().long,
-                                "category" to "Recommended"
-                            )
-                            locationRef.set(locationData) // Create a new document with locationData
-                                .addOnSuccessListener {
-                                    Toast.makeText(context,"Thank you for your suggestion!", Toast.LENGTH_LONG).show()
-                                }
-                                .addOnFailureListener { e ->
-                                    Toast.makeText(context,"There is an error when adding your suggestion, please try again", Toast.LENGTH_LONG).show()
-                                }
-                        }
-                    } else {
-                        Log.d("error","fetching location unsuccessful")
-                    }
-                }
-        }
-        else{
-            Log.d("error","fetching city unsuccessful")
-        }
-    }
-
-
-}
 
 //tạo lịch trình đi chơi
 fun createSchedule(){
 
+}
+
+fun roundDecimal(value: Double, places: Int): Double{
+    return (value * 100.0).roundToInt() / 10.0.pow(places.toDouble())
 }

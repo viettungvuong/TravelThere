@@ -62,7 +62,7 @@ class SplashScreen : ComponentActivity() {
 
             if (hasLocationPermission()) {
                 getCurrentPosition(fusedLocationClient, this) {
-                    val intent = Intent(this, MainActivity::class.java)
+                    val intent = Intent(this, RegisterLoginActivity::class.java)
                     startActivity(intent)
                     finish()
                 }
@@ -93,6 +93,7 @@ fun Greeting() {
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.size(32.dp),
+                colorFilter = ColorFilter.tint(Color.White)
             )
         }
     }

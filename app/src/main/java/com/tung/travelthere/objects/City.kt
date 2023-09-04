@@ -83,10 +83,11 @@ class City private constructor() {
     inner class LocationsRepository : ViewModel() {
 
         //những nơi nên đi tới
-        var locations = mutableSetOf<PlaceLocation>()
+        var locations = mutableMapOf<String,PlaceLocation>()
         var nearby = mutableSetOf<PlaceLocation>()
+        var recommends = mutableSetOf<PlaceLocation>()
 
-        suspend fun refreshLocations(refresh: Boolean = false): Set<PlaceLocation> {
+        suspend fun refreshLocations(refresh: Boolean = false): Map<String,PlaceLocation> {
             if (locations.isNotEmpty()&&!refresh) {
                 return locations
             }
@@ -110,26 +111,48 @@ class City private constructor() {
                     val cityName = this@City.name ?: ""
                     val lat = location.getDouble("lat") ?: 0.0
                     val long = location.getDouble("long") ?: 0.0
-
-                    val t = TouristPlace(placeName, Position(lat, long), cityName)
+                    val address = location.getString("address")?:""
 
                     val categoriesStr = location.get("categories") as List<String>
+                    val categoriesArr: MutableList<Category> = mutableListOf()
+                    var isRestaurant = false
 
-                    for (categoryStr in categoriesStr){
-                        t.categories.add(convertStrToCategory(categoryStr)) //thêm category
+                    if (categoriesStr!=null){
+                        for (categoryStr in categoriesStr){
+                            categoriesArr.add(convertStrToCategory(categoryStr)) //thêm category
+
+                            if (categoryStr=="Restaurant"){
+                                isRestaurant=true
+                            }
+                        }
                     }
 
-                    this.locations.add(t)
+                    val t = if (!isRestaurant){
+                        TouristPlace(placeName, Position(lat, long), cityName)
+                    }
+                    else{
+                        Restaurant(placeName, Position(lat, long), cityName, mutableListOf()) //specialize dish để thêm sau
+                        //refresh restaurant riêng
+                    }
+
+                    t.categories.addAll(categoriesArr) //thêm category vào
+
+                    val recommendedNum = location.getLong("recommends") ?: 0
+                    t.recommendsCount=recommendedNum.toInt()
+
+                    t.address = address
+
+                    if (recommendedNum>=5) //có nhiều hơn 5 lượt recommend
+                    {
+                        this.recommends.add(t) //thì thêm vào recommends luôn
+                    }
+
+                    this.locations[t.getPos().toString()] = t //dùng map dễ quản lý hơn và truy xuất hơn
                 }
             }
 
             val currentPos = AppController.currentPosition.currentLocation
 
-            if (currentPos!=null){
-                locations.sortedBy {
-                    it.getPos().distanceTo(currentPos!!) //sắp xếp các địa điểm theo khoảng cách tới vị trí hiện tại
-                }
-            }
             return locations
         }
 
@@ -142,9 +165,17 @@ class City private constructor() {
             nearby.clear()
             val currentPos = AppController.currentPosition.currentLocation ?: return emptySet()
 
-            nearby = locations.filter {
+            var nearby: MutableSet<PlaceLocation> = locations
+                .filter { entry ->
+                    entry.value.getPos().distanceTo(currentPos!!) <= 5000
+                }
+                .map { it.value }
+                .toMutableSet()
+
+            nearby = (nearby + recommends.filter {
                 it.getPos().distanceTo(currentPos!!) <= 5000
-            }.toMutableSet()
+            }.toMutableSet()).toMutableSet() //gom thêm recommends lại
+
             return nearby
         }
 

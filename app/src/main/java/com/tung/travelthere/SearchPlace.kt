@@ -18,24 +18,21 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
+import com.tung.travelthere.controller.*
+import com.tung.travelthere.objects.*
 
-import com.tung.travelthere.controller.SneakViewPlaceLong
-import com.tung.travelthere.controller.categoryView
-import com.tung.travelthere.controller.colorBlue
-import com.tung.travelthere.objects.Category
-import com.tung.travelthere.objects.City
-import com.tung.travelthere.objects.PlaceLocation
-import com.tung.travelthere.objects.Restaurant
 import com.tung.travelthere.ui.theme.TravelThereTheme
 import kotlinx.coroutines.launch
 
-lateinit var searchViewModel: SearchViewModel
 
 class SearchPlace : ComponentActivity() {
+    lateinit var searchViewModel: SearchViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -54,116 +51,137 @@ class SearchPlace : ComponentActivity() {
             }
         }
     }
-}
 
-class SearchViewModel : ViewModel() {
-    var matchedQuery = mutableStateListOf<PlaceLocation>()
-    var originalMatchedQuery = mutableStateListOf<PlaceLocation>()
-}
+    //tìm kiếm nhà hàng theo tên món ăn mà nhà hàng bán
+    fun searchRestaurantByDish(
+        searchViewModel: SearchViewModel,
+        newString: String,
+        available: Set<PlaceLocation>
+    ) {
+        searchViewModel.matchedQuery.clear()
+        if (newString.isNotBlank()) {
+            searchViewModel.matchedQuery += available.filter {
+                val hasDish = (
+                        if (it is Restaurant) {
+                            //tìm trong các dish của nhà hàng có món nào có chứa cụm từ hiện tại hay kh
+                            val dishes = it.getSpecializedDish().sortedBy { dish ->
+                                dish.name //sắp xếp các dish theo tên
+                            }.filter { dish -> dish.name.contains(newString, ignoreCase = false) }
 
-//tìm kiếm nhà hàng theo tên món ăn mà nhà hàng bán
-fun searchRestaurantByDish(searchViewModel: SearchViewModel,newString: String,available: Set<PlaceLocation>){
-    searchViewModel.matchedQuery.clear()
-    if (newString.isNotBlank()){
-        searchViewModel.matchedQuery += available.filter {
-            val hasDish = (
-                    if (it is Restaurant){
-                        //tìm trong các dish của nhà hàng có món nào có chứa cụm từ hiện tại hay kh
-                        val dishes = it.getSpecializedDish().sortedBy {
-                            dish -> dish.name //sắp xếp các dish theo tên
-                        }.filter { dish -> dish.name.contains(newString) }
+                            dishes.isNotEmpty()
+                        } else
+                            false
+                        )
+                it.categories.contains(Category.RESTAURANT) &&
+                        hasDish
+            }
+        }
+        searchViewModel.originalMatchedQuery.clear()
+        searchViewModel.originalMatchedQuery += searchViewModel.matchedQuery //chuẩn bị cho cái categoryview
+    }
 
-                        dishes.isNotEmpty()
-                    }
-                    else
-                        false
+
+    @Composable
+    fun SearchPage(city: City, activity: Activity) {
+        var listState by remember { mutableStateOf(setOf<PlaceLocation>()) }
+        var chosenState = remember { mutableStateOf(mutableSetOf<Category>()) }
+        val coroutineScope = rememberCoroutineScope()
+
+        LaunchedEffect(listState) {
+            coroutineScope.launch {
+                listState = city.locationsRepository.refreshLocations().map { it.value }.toSet()
+            }
+        }
+
+
+        MaterialTheme() {
+            Column() {
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                ) {
+                    FloatingActionButton(
+                        onClick = { activity.finish() },
+                        backgroundColor = Color.White,
+                        content = {
+                            Icon(
+                                imageVector = Icons.Default.ArrowBack,
+                                contentDescription = "Back",
+                                tint = colorBlue
+                            )
+                        }
                     )
-            it.categories.contains(Category.RESTAURANT)&&
-                   hasDish
+                }
+
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 25.dp),
+                    text = "Search",
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Bold
+                )
+
+
+                SearchBar(
+                    available = listState,
+                    searchViewModel = searchViewModel,
+                    modifier = Modifier.padding(10.dp)
+                )
+
+                LazyRow(modifier = Modifier.padding(15.dp)) {
+                    itemsIndexed(Category.values()) { index, category -> //tương tự xuất ra location adapter
+                        categoryView(category, colorBlue, true, searchViewModel, chosenState)
+                    }
+                }
+
+                LazyColumn() {
+                    items(searchViewModel.matchedQuery) { location ->
+                        SneakViewPlaceLong(
+                            context = activity,
+                            location = location,
+                            hasImage = false
+                        )
+                    }
+                }
+            }
         }
     }
-    searchViewModel.originalMatchedQuery.clear()
-    searchViewModel.originalMatchedQuery+=searchViewModel.matchedQuery //chuẩn bị cho cái categoryview
+
 }
 
-fun search(searchViewModel: SearchViewModel,newString: String,available: Set<PlaceLocation>){
+fun search(
+    searchViewModel: SearchViewModel,
+    newString: String,
+    available: Set<PlaceLocation>,
+    checkpoint: Checkpoint? = null
+) {
     searchViewModel.matchedQuery.clear()
-    if (newString.isNotBlank()){
+    if (newString.isNotBlank()) {
         searchViewModel.matchedQuery += available.filter {
             it.getName().contains(newString, ignoreCase = true)
         }.sortedBy {
             val similarity = it.getName()
                 .commonPrefixWith(newString).length.toDouble() / newString.length
+
             similarity //sắp xếp theo độ tương đồng so với từ đang nhập
+
+            val distance = if (checkpoint!=null){
+                (it.distanceTo(checkpoint!!.getLocation()) / 1000).toDouble()
+            }
+            else{
+                (it.getPos().distanceTo(AppController.currentPosition.currentLocation?:Position(0.0,0.0)) / 1000).toDouble()
+            }
+
+
+            val criteria = similarity + distance
+            criteria
+
         }
     }
     searchViewModel.originalMatchedQuery.clear()
-    searchViewModel.originalMatchedQuery+=searchViewModel.matchedQuery //chuẩn bị cho cái categoryview
+    searchViewModel.originalMatchedQuery += searchViewModel.matchedQuery //chuẩn bị cho cái categoryview
 }
 
-//thanh tìm kiếm
-@Composable
-fun SearchBar(
-    available: Set<PlaceLocation>, searchViewModel: SearchViewModel
-) {
-    var searchQuery by remember { mutableStateOf(TextFieldValue()) }
 
-    Column {
-        TextField(
-            value = searchQuery,
-            onValueChange = { newString ->
-                searchQuery = newString
-
-                search(searchViewModel,newString.text,available)
-                //không dùng assignment operator vì nó là truyền reference
-            },
-            textStyle = TextStyle(fontSize = 17.sp),
-            leadingIcon = { Icon(Icons.Filled.Search, null, tint = Color.Gray) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 5.dp)
-                .background(Color(0xFFE7F1F1), RoundedCornerShape(16.dp)),
-            placeholder = { Text(text = "Search") },
-            colors = TextFieldDefaults.textFieldColors(
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                backgroundColor = Color.Transparent,
-                cursorColor = Color.DarkGray
-            )
-        )
-    }
-}
-
-@Composable
-fun SearchPage(city: City, activity: Activity) {
-    var listState by remember { mutableStateOf(setOf<PlaceLocation>()) }
-    var chosenState = remember { mutableStateOf(mutableSetOf<Category>()) }
-    val coroutineScope = rememberCoroutineScope()
-
-    LaunchedEffect(listState) {
-        coroutineScope.launch {
-            listState = city.locationsRepository.refreshLocations()
-            Log.d("list state add", listState.size.toString())
-        }
-    }
-
-
-    MaterialTheme() {
-        Column() {
-            SearchBar(available = listState, searchViewModel = searchViewModel)
-
-            LazyRow(modifier = Modifier.padding(15.dp)) {
-                itemsIndexed(Category.values()) { index, category -> //tương tự xuất ra location adapter
-                    categoryView(category, colorBlue, true, searchViewModel, chosenState)
-                }
-            }
-
-            LazyColumn() {
-                items(searchViewModel.matchedQuery) { location ->
-                    SneakViewPlaceLong(context = activity, location = location, hasImage = false)
-                }
-            }
-        }
-    }
-}
 
