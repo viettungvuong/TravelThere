@@ -3,6 +3,7 @@ package com.tung.travelthere
 import android.app.AlertDialog
 import android.content.ContentValues.TAG
 import android.content.DialogInterface
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.text.InputType
@@ -11,12 +12,15 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -28,8 +32,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -150,6 +156,61 @@ class ProfileActivity : ComponentActivity() {
         }
     }
 
+    fun logout(changePass: Boolean) {
+        AppController.auth.signOut()
+        val intent = Intent(this@ProfileActivity, RegisterLoginActivity::class.java)
+        if(!changePass) intent.putExtra("LogOut", true)
+        startActivity(intent)
+        finish()
+    }
+
+    @Composable
+    fun changePassword(currentUser: FirebaseUser) {
+        Button(
+            colors = ButtonDefaults.buttonColors(backgroundColor = colorResource(R.color.blue)),
+            modifier = Modifier.padding(vertical = 10.dp),
+            onClick = {
+            val builder: AlertDialog.Builder = AlertDialog.Builder(this@ProfileActivity)
+            builder.setTitle("Enter your new password")
+
+            val input = EditText(this@ProfileActivity)
+            input.inputType = InputType.TYPE_CLASS_TEXT
+            builder.setView(input)
+
+            builder.setPositiveButton("Save",
+                DialogInterface.OnClickListener { dialog, which ->
+                    val newPass = input.text.toString()
+                    if (!newPass.isEmpty()) {
+                        currentUser!!.updatePassword(newPass)
+                            .addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    Log.d(TAG, "User password updated.")
+                                    Toast.makeText(
+                                        this@ProfileActivity,
+                                        "Password changed! Please log in with new password!",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    logout(true)
+                                }
+                            }
+                    } else {
+                        Toast.makeText(
+                            this@ProfileActivity,
+                            "Please enter a valid password",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                })
+
+            builder.setNegativeButton("Cancel",
+                DialogInterface.OnClickListener { dialog, which -> dialog.cancel() })
+
+            builder.show()
+        }) {
+            Text(text = "Change password", color = Color.White)
+        }
+    }
+
     @Composable
     fun displayUserProfile(currentUser: FirebaseUser) {
         Column() {
@@ -183,6 +244,16 @@ class ProfileActivity : ComponentActivity() {
                 displayUserName(currentUser = currentUser)
                 displayUserEmail(currentUser = currentUser)
                 displayUserPhoneNumber(currentUser = currentUser)
+                changePassword(currentUser = currentUser)
+                //log out
+                Button(
+                    colors = ButtonDefaults.buttonColors(backgroundColor = colorResource(R.color.blue)),
+                    modifier = Modifier.padding(vertical = 10.dp),
+                    onClick = {
+                    logout(false)
+                }) {
+                    Text(text = "Log out", color = Color.White)
+                }
             }
         }
     }
