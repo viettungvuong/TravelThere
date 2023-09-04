@@ -40,6 +40,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.tung.travelthere.controller.AppController
@@ -79,7 +80,7 @@ class ProfileActivity : ComponentActivity() {
             var text by remember { mutableStateOf(currentUser.displayName.toString()) }
             Column() {
                 Text(text = "Name:",
-                    fontWeight = FontWeight.Bold)
+                    fontWeight = FontWeight.Bold, fontSize = 20.sp)
                 Text(text)
             }
 
@@ -136,25 +137,13 @@ class ProfileActivity : ComponentActivity() {
         ) {
             Column() {
                 Text(text = "Email:",
-                    fontWeight = FontWeight.Bold)
+                    fontWeight = FontWeight.Bold,
+                fontSize = 20.sp)
                 Text(text = currentUser.getEmail().toString())
             }
         }
     }
 
-    @Composable
-    fun displayUserPhoneNumber(currentUser: FirebaseUser) {
-        Row(
-            modifier = Modifier
-                .padding(vertical = 10.dp)
-        ) {
-            Column() {
-                Text(text = "Phone number:",
-                    fontWeight = FontWeight.Bold)
-                Text(text = currentUser.getPhoneNumber().toString())
-            }
-        }
-    }
 
     fun logout(changePass: Boolean) {
         AppController.auth.signOut()
@@ -243,7 +232,6 @@ class ProfileActivity : ComponentActivity() {
             ) {
                 displayUserName(currentUser = currentUser)
                 displayUserEmail(currentUser = currentUser)
-                displayUserPhoneNumber(currentUser = currentUser)
                 changePassword(currentUser = currentUser)
                 //log out
                 Button(

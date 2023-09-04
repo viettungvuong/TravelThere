@@ -301,12 +301,6 @@ class MainActivity : ComponentActivity() {
                 )
             }
 
-            Button(onClick = {
-//                val intent = Intent(this,TestActivity::class.java)
-//                startActivity(intent)
-            }) {
-                Text("Test activity")
-            }
 
         }
     }
