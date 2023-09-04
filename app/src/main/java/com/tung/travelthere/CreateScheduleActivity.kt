@@ -50,10 +50,7 @@ import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.net.FetchPlaceRequest
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.tung.travelthere.controller.*
-import com.tung.travelthere.objects.Checkpoint
-import com.tung.travelthere.objects.City
-import com.tung.travelthere.objects.PlaceLocation
-import com.tung.travelthere.objects.Position
+import com.tung.travelthere.objects.*
 import com.tung.travelthere.ui.theme.TravelThereTheme
 import java.util.*
 
@@ -129,62 +126,17 @@ class CreateScheduleActivity : ComponentActivity() {
     @OptIn(ExperimentalComposeUiApi::class)
     @Composable
     private fun CreateSchedule() {
-        val mYear: Int
-        val mMonth: Int
-        val mDay: Int
+        val showDialog = remember { mutableStateOf(false) } //có hiện dialog không
 
-        val mCalendar = Calendar.getInstance()
-
-        mYear = mCalendar.get(Calendar.YEAR)
-        mMonth = mCalendar.get(Calendar.MONTH)
-        mDay = mCalendar.get(Calendar.DAY_OF_MONTH)
-
-        mCalendar.time = Date()
-
-        val mDate = remember { mutableStateOf("$mDay/${mMonth + 1}/$mYear") } //lưu ngày hiện tại
-
-        val showDialog =  remember { mutableStateOf(false) } //có hiện dialog không
-
-        var checkpointList =
-            remember { mutableStateListOf<Checkpoint?>() } //danh sách các checkpoint
-
-        var totalDistance = remember { mutableStateOf(0.0) }
+        var schedule by remember { mutableStateOf(Schedule()) }
+        var lazyListState = rememberLazyListState()
 
         val keyboardController = LocalSoftwareKeyboardController.current
 
-        val mDatePickerDialog = DatePickerDialog(
-            LocalContext.current,
-            { datePicker: DatePicker, mYear: Int, mMonth: Int, mDayOfMonth: Int ->
-                val selectedDate = Calendar.getInstance()
-                selectedDate.set(Calendar.YEAR, mYear)
-                selectedDate.set(Calendar.MONTH, mMonth)
-                selectedDate.set(Calendar.DAY_OF_MONTH, mDayOfMonth)
-
-                val currentDate = Calendar.getInstance()
-
-                if (selectedDate.timeInMillis >= currentDate.timeInMillis) {
-                    mDate.value = "$mDayOfMonth/${mMonth + 1}/$mYear"
-                } else {
-                    Toast.makeText(
-                        applicationContext,
-                        "Please select a date later than today",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            },
-            mYear,
-            mMonth,
-            mDay
-        )
-
         Column() {
-            dateTimePicker(
-                modifier = Modifier.padding(20.dp), mDate
-            ) { mDatePickerDialog.show() }
-
-            LazyColumn {
-                itemsIndexed(checkpointList) { index, item ->
-                    Checkpoint(index, checkpointList, showDialog, totalDistance)
+            LazyColumn(state = lazyListState) {
+                itemsIndexed(schedule.getList()) { index, item ->
+                    Checkpoint(index, schedule, showDialog)
                 }
             }
 
@@ -200,14 +152,14 @@ class CreateScheduleActivity : ComponentActivity() {
                     modifier = Modifier
                         .height(40.dp)
                         .clickable {
-                            checkpointList.add(null)
+                            schedule.addNullCheckpoint()
                             keyboardController?.hide()
                         })
             }
 
             Button(
                 onClick = {
-                    /*TODO*/
+                    schedule.clear() //xoá hết lịch trình
                 },
                 colors = ButtonDefaults.buttonColors(backgroundColor = colorFirst),
                 modifier = Modifier
@@ -230,7 +182,7 @@ class CreateScheduleActivity : ComponentActivity() {
 
             Button(
                 onClick = {
-                          /*TODO*/
+                    /*TODO*/
                 },
                 colors = ButtonDefaults.buttonColors(backgroundColor = colorThird),
                 modifier = Modifier
@@ -257,15 +209,18 @@ class CreateScheduleActivity : ComponentActivity() {
     @OptIn(ExperimentalComposeUiApi::class)
     @Composable
     private fun Checkpoint(
-        index: Int, checkpointList: SnapshotStateList<Checkpoint?>,
-        showDialog: MutableState<Boolean>, totalDistance: MutableState<Double>
+        index: Int, schedule: Schedule,
+        showDialog: MutableState<Boolean>
     ) {
         var location = remember { mutableStateOf<PlaceLocation?>(null) }
 
+
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Box(modifier = Modifier
-                .padding(2.dp)
-                .fillMaxSize()){
+            Box(
+                modifier = Modifier
+                    .padding(2.dp)
+                    .fillMaxSize()
+            ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -280,52 +235,60 @@ class CreateScheduleActivity : ComponentActivity() {
                     Spacer(modifier = Modifier.width(16.dp))
 
                     Icon(
-                        imageVector = Icons.Default.LocationOn, tint = Color.Red, contentDescription = null
+                        imageVector = Icons.Default.LocationOn,
+                        tint = Color.Red,
+                        contentDescription = null
                     )
 
                     Spacer(modifier = Modifier.width(10.dp))
 
-                    if (location.value!=null){
-                        Text(text= location.value!!.getName())
-                    }
-                    else{
-                        Text(text= "No location", fontStyle = FontStyle.Italic)
+                    if (location.value != null) {
+                        Text(text = location.value!!.getName())
+                    } else {
+                        Text(text = "No location", fontStyle = FontStyle.Italic)
                     }
 
 
                     Spacer(modifier = Modifier.weight(1f))
 
-                    if (index==checkpointList.size-1){
-                        Column(modifier = Modifier
-                            .size(32.dp)
-                            .background(Color(0xff185241), shape = RoundedCornerShape(4.dp))
-                            .clickable { showDialog.value = true },
+                    //nút tìm kiếm
+                    if (index == schedule.getList().lastIndex){
+                        Column(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .background(Color(0xff185241), shape = RoundedCornerShape(4.dp))
+                                .clickable { showDialog.value = true },
                             horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center){
+                            verticalArrangement = Arrangement.Center
+                        ) {
                             Icon(
                                 imageVector = Icons.Default.Search,
                                 contentDescription = null,
                                 tint = Color.White
                             )
                         }
+                    }
 
-                        SearchDialog(index = index, checkpointList = checkpointList, totalDistance = totalDistance, showDialog = showDialog.value, searchViewModel = searchViewModel, setShowDialog = {showDialog.value=it}, setLocation = {
+
+                    SearchDialog(
+                        index = index,
+                        schedule = schedule,
+                        showDialog = showDialog.value,
+                        searchViewModel = searchViewModel,
+                        setShowDialog = { showDialog.value = it },
+                        setLocation = {
                             location.value = it
                         })
-                    }
 
                 }
 
 
             }
 
-            Row(modifier = Modifier.padding(vertical = 5.dp)){
-                var distance = 0f
-                if (index<checkpointList.size-1&&checkpointList[index]!=null&&checkpointList[index+1]!=null){
-                    distance = checkpointList[index]!!.distanceTo(checkpointList[index+1]!!)/1000
-                }
+            Row(modifier = Modifier.padding(vertical = 5.dp)) {
+                var distance = schedule.distances[index]
 
-                if (distance>0f){
+                if (distance > 0f) {
                     Icon(
                         imageVector = Icons.Default.Place,
                         contentDescription = "City",
@@ -335,7 +298,8 @@ class CreateScheduleActivity : ComponentActivity() {
 
                     Spacer(modifier = Modifier.width(5.dp))
 
-                    Text(text = "${roundDecimal(distance.toDouble(),2)} km", fontSize = 15.sp)
+                    //phần distance
+                    Text(text = "${roundDecimal(distance.toDouble(), 2)} km", fontSize = 15.sp)
                 }
             }
         }
@@ -343,35 +307,54 @@ class CreateScheduleActivity : ComponentActivity() {
     }
 
     @Composable
-    private fun SearchDialog(index: Int, checkpointList: SnapshotStateList<Checkpoint?>
-                             , totalDistance: MutableState<Double>
-                             , showDialog: Boolean, searchViewModel: SearchViewModel, setShowDialog: (Boolean) -> Unit
-                             , setLocation: (PlaceLocation)->Unit){
+    private fun SearchDialog(
+        index: Int,
+        schedule: Schedule,
+        showDialog: Boolean,
+        searchViewModel: SearchViewModel,
+        setShowDialog: (Boolean) -> Unit,
+        setLocation: (PlaceLocation) -> Unit
+    ) {
         var distance by remember { mutableStateOf(0f) }
-        if (showDialog){
-            Dialog(onDismissRequest = { setShowDialog(false) }) {
+        var indexState = remember { mutableStateOf(index) }
+
+        fun clear() {
+            distance = 0f
+            indexState.value = 0
+            searchViewModel.matchedQuery.clear()
+        }
+
+        if (showDialog) {
+            Dialog(onDismissRequest = {
+                clear()
+                setShowDialog(false)
+            }) {
                 Surface(
                     shape = RoundedCornerShape(16.dp),
                     color = Color.White,
                     modifier = Modifier.fillMaxSize()
-                ){
+                ) {
                     ConstraintLayout {
                         val (searchBar, autocomplete) = createRefs()
 
                         //join các địa điểm của thành phố lại
-                        val joinList = City.getSingleton().locationsRepository.locations + City.getSingleton().locationsRepository.recommends
-                        SearchBar(available = joinList, searchViewModel = searchViewModel, modifier = Modifier.constrainAs(searchBar){
-                            top.linkTo(parent.top)
-                            start.linkTo(parent.start)
-                            end.linkTo(parent.end)
-                        })
+                        val joinList =
+                            City.getSingleton().locationsRepository.locations + City.getSingleton().locationsRepository.recommends
+                        SearchBar(
+                            available = joinList,
+                            searchViewModel = searchViewModel,
+                            modifier = Modifier.constrainAs(searchBar) {
+                                top.linkTo(parent.top)
+                                start.linkTo(parent.start)
+                                end.linkTo(parent.end)
+                            })
 
-                        LazyColumn( modifier = Modifier.constrainAs(autocomplete){
+                        LazyColumn(modifier = Modifier.constrainAs(autocomplete) {
                             top.linkTo(searchBar.bottom)
                             start.linkTo(parent.start)
                             end.linkTo(parent.end)
                             height = Dimension.wrapContent
-                        } ) {
+                        }) {
                             items(searchViewModel.matchedQuery) { location ->
                                 Card(
                                     modifier = Modifier
@@ -380,18 +363,33 @@ class CreateScheduleActivity : ComponentActivity() {
                                         )
                                         .clickable(onClick = {
                                             setLocation(location)
-                                            checkpointList[index] = Checkpoint(location)
 
-                                            setShowDialog(false) //đóng cửa sổ lại
+                                            //đặt ở index checkpoint
+                                            val checkpoint = Checkpoint(location)
+                                            schedule.setCheckpoint(
+                                                checkpoint = checkpoint,
+                                                index = indexState.value
+                                            )
 
-                                            searchViewModel.matchedQuery.clear()
+                                            clear()
+                                            setShowDialog(false)
+                                            Log.d("index", indexState.value.toString())
+                                            Log.d(
+                                                "checkpoint location",
+                                                schedule.getList()[0]
+                                                    ?.getLocation()!!
+                                                    .getName()
+                                            )
+
                                         }), elevation = 10.dp
                                 ) {
                                     Row {
 
-                                        Box(modifier = Modifier.padding(horizontal = 15.dp)){
+                                        Box(modifier = Modifier.padding(horizontal = 15.dp)) {
                                             Text(
-                                                text = location.getName(), fontSize = 15.sp, fontWeight = FontWeight.Bold
+                                                text = location.getName(),
+                                                fontSize = 15.sp,
+                                                fontWeight = FontWeight.Bold
                                             )
                                         }
 
@@ -403,11 +401,14 @@ class CreateScheduleActivity : ComponentActivity() {
 
 
                                             distance = 0f
-                                            if (index>0&&checkpointList[index-1]!=null){
-                                                distance = checkpointList[index-1]!!.getLocation().distanceTo(location)/1000
+                                            if (index > 0 && schedule.getList()[index - 1] != null) {
+                                                distance =
+                                                    schedule.getList()[index - 1]!!.getLocation()
+                                                        .distanceTo(location) / 1000
                                             }
 
-                                            if (distance>0f){
+                                            //nếu có distance
+                                            if (distance > 0f) {
                                                 Icon(
                                                     imageVector = Icons.Default.Place,
                                                     contentDescription = "City",
@@ -417,9 +418,16 @@ class CreateScheduleActivity : ComponentActivity() {
 
                                                 Spacer(modifier = Modifier.width(5.dp))
 
-                                                Text(text = "${roundDecimal(distance.toDouble(),2)} km")
+                                                Text(
+                                                    text = "${
+                                                        roundDecimal(
+                                                            distance.toDouble(),
+                                                            2
+                                                        )
+                                                    } km"
+                                                )
 
-
+                                                schedule.calculateDistance(index)
                                             }
 
                                         }
@@ -433,7 +441,7 @@ class CreateScheduleActivity : ComponentActivity() {
         }
 
     }
-    
+
 
     @Composable
     private fun ViewSchedules() {
