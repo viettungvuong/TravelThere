@@ -156,6 +156,14 @@ class ProfileActivity : ComponentActivity() {
         }
     }
 
+    fun logout(changePass: Boolean) {
+        AppController.auth.signOut()
+        val intent = Intent(this@ProfileActivity, RegisterLoginActivity::class.java)
+        if(!changePass) intent.putExtra("LogOut", true)
+        startActivity(intent)
+        finish()
+    }
+
     @Composable
     fun changePassword(currentUser: FirebaseUser) {
         Button(
@@ -179,9 +187,10 @@ class ProfileActivity : ComponentActivity() {
                                     Log.d(TAG, "User password updated.")
                                     Toast.makeText(
                                         this@ProfileActivity,
-                                        "Password changed!",
+                                        "Password changed! Please log in with new password!",
                                         Toast.LENGTH_SHORT
                                     ).show()
+                                    logout(true)
                                 }
                             }
                     } else {
@@ -241,11 +250,7 @@ class ProfileActivity : ComponentActivity() {
                     colors = ButtonDefaults.buttonColors(backgroundColor = colorResource(R.color.blue)),
                     modifier = Modifier.padding(vertical = 10.dp),
                     onClick = {
-                    AppController.auth.signOut()
-                    val intent = Intent(this@ProfileActivity, RegisterLoginActivity::class.java)
-                    intent.putExtra("LogOut", true)
-                    startActivity(intent)
-                    finish()
+                    logout(false)
                 }) {
                     Text(text = "Log out", color = Color.White)
                 }
