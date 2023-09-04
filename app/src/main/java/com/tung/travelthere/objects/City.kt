@@ -83,11 +83,11 @@ class City private constructor() {
     inner class LocationsRepository : ViewModel() {
 
         //những nơi nên đi tới
-        var locations = mutableSetOf<PlaceLocation>()
+        var locations = mutableMapOf<String,PlaceLocation>()
         var nearby = mutableSetOf<PlaceLocation>()
         var recommends = mutableSetOf<PlaceLocation>()
 
-        suspend fun refreshLocations(refresh: Boolean = false): Set<PlaceLocation> {
+        suspend fun refreshLocations(refresh: Boolean = false): Map<String,PlaceLocation> {
             if (locations.isNotEmpty()&&!refresh) {
                 return locations
             }
@@ -147,17 +147,12 @@ class City private constructor() {
                         this.recommends.add(t) //thì thêm vào recommends luôn
                     }
 
-                    this.locations.add(t)
+                    this.locations[t.getPos().toString()] = t //dùng map dễ quản lý hơn và truy xuất hơn
                 }
             }
 
             val currentPos = AppController.currentPosition.currentLocation
 
-            if (currentPos!=null){
-                locations.sortedBy {
-                    it.getPos().distanceTo(currentPos!!) //sắp xếp các địa điểm theo khoảng cách tới vị trí hiện tại
-                }
-            }
             return locations
         }
 
@@ -170,13 +165,16 @@ class City private constructor() {
             nearby.clear()
             val currentPos = AppController.currentPosition.currentLocation ?: return emptySet()
 
-            nearby = locations.filter {
-                it.getPos().distanceTo(currentPos!!) <= 5000
-            }.toMutableSet()
+            var nearby: MutableSet<PlaceLocation> = locations
+                .filter { entry ->
+                    entry.value.getPos().distanceTo(currentPos!!) <= 5000
+                }
+                .map { it.value }
+                .toMutableSet()
 
             nearby = (nearby + recommends.filter {
                 it.getPos().distanceTo(currentPos!!) <= 5000
-            }.toMutableSet()).toMutableSet() //gom recommends lại
+            }.toMutableSet()).toMutableSet() //gom thêm recommends lại
 
             return nearby
         }

@@ -16,11 +16,20 @@ class Checkpoint(private val placeLocation: PlaceLocation) {
     fun getLocation(): PlaceLocation {
         return placeLocation
     }
+
+    override fun toString(): String {
+        return placeLocation.getPos().toString()
+    }
 }
 
 class Schedule() {
     private val checkpointList = mutableStateListOf<Checkpoint?>()
     val distances = mutableStateListOf<Float>()
+
+    constructor(other: Schedule): this(){
+        this.checkpointList.addAll(other.checkpointList)
+        this.distances.addAll(distances)
+    } //copy constructor
 
     fun getList(): SnapshotStateList<Checkpoint?> {
         return checkpointList

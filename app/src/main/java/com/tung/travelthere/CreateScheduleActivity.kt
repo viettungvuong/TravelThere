@@ -54,6 +54,8 @@ import com.tung.travelthere.objects.*
 import com.tung.travelthere.ui.theme.TravelThereTheme
 import java.util.*
 
+const val checkpointField = "checkpoints"
+
 class CreateScheduleActivity : ComponentActivity() {
     lateinit var searchViewModel: SearchViewModel
 
@@ -61,6 +63,8 @@ class CreateScheduleActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         searchViewModel = SearchViewModel()
+
+        fetchSchedules() //lấy danh sách schedule
 
         setContent {
             CreateScheduleView()
@@ -131,6 +135,31 @@ class CreateScheduleActivity : ComponentActivity() {
         var schedule by remember { mutableStateOf(Schedule()) }
         var lazyListState = rememberLazyListState()
 
+        fun updateSchedule(){ //update lên firebase
+            val checkpointStr = mutableListOf<String>()
+            for (checkpoint in schedule.getList()){
+                checkpointStr.add(checkpoint.toString())
+            }
+
+            val scheduleData = hashMapOf(
+                checkpointField to checkpointStr.toList()
+            )
+
+            AppController.db.collection("users").document(AppController.auth.currentUser!!.uid)
+                .collection("schedules").add(scheduleData) //update lên firebase
+                .addOnSuccessListener {
+                    AppController.schedules.add(Schedule(schedule)) //thêm vào danh sách các schedule
+                    schedule.clear()
+                    Toast.makeText(this,"Updated schedule successfully",Toast.LENGTH_SHORT).show()
+                }
+                .addOnFailureListener{
+                    Toast.makeText(this,"Cannot update schedule",Toast.LENGTH_SHORT).show()
+                }
+
+
+        }
+
+
         val keyboardController = LocalSoftwareKeyboardController.current
 
         Column() {
@@ -182,7 +211,7 @@ class CreateScheduleActivity : ComponentActivity() {
 
             Button(
                 onClick = {
-                    /*TODO*/
+                          updateSchedule()
                 },
                 colors = ButtonDefaults.buttonColors(backgroundColor = colorThird),
                 modifier = Modifier
@@ -339,9 +368,9 @@ class CreateScheduleActivity : ComponentActivity() {
 
                         //join các địa điểm của thành phố lại
                         val joinList =
-                            City.getSingleton().locationsRepository.locations + City.getSingleton().locationsRepository.recommends
+                            City.getSingleton().locationsRepository.locations.map { it.value } + City.getSingleton().locationsRepository.recommends
                         SearchBar(
-                            available = joinList,
+                            available = joinList.toSet(),
                             searchViewModel = searchViewModel,
                             modifier = Modifier.constrainAs(searchBar) {
                                 top.linkTo(parent.top)
@@ -443,12 +472,84 @@ class CreateScheduleActivity : ComponentActivity() {
     }
 
 
+    @OptIn(ExperimentalLayoutApi::class)
     @Composable
     private fun ViewSchedules() {
+        @Composable
+        fun scheduleView(schedule: Schedule){
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        vertical = 10.dp,
+                        horizontal = 10.dp
+                    )
+                    .clickable(onClick = {
+                    }), elevation = 10.dp
+            ) {
+                LazyRow {
+                    itemsIndexed(schedule.getList()){
+                            index, checkpoint ->
+                        if (checkpoint!=null){
+                            Row(){
+                                Icon(
+                                    imageVector = Icons.Default.Place,
+                                    contentDescription = "City",
+                                    tint = Color.Red,
+                                    modifier = Modifier.scale(0.8f)
+                                )
+
+                                Spacer(modifier = Modifier.width(10.dp))
+
+                                Text(
+                                    text = "${checkpoint.getLocation().getName()}"
+                                )
+
+                                if (index!=schedule.getList().lastIndex){
+                                    Text(
+                                        text = "→",
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 20.sp,
+                                        color = Color.Red
+                                    )
+                                }
+                            }
+                        }
+
+                    }
+                }
+            }
+        }
+        
+        FlowColumn() {
+            for (schedule in AppController.schedules){
+                scheduleView(schedule = schedule)
+            }
+        }
+
 
     }
 
 }
 
+fun fetchSchedules(){
+    AppController.db.collection("users").document(AppController.auth.currentUser!!.uid)
+        .collection("schedules").get().addOnSuccessListener {
+            documents ->
+            for (document in documents){
+                val posStrArr = document.get(checkpointField) as List<String>
 
+                val currentSchedule = Schedule()
+                for (str in posStrArr){
+                    val getPlaceLocation = City.getSingleton().locationsRepository.locations[str]
+
+                    if (getPlaceLocation!=null){
+                        currentSchedule.getList().add(Checkpoint(getPlaceLocation))
+                    }
+
+                }
+                AppController.schedules.add(currentSchedule) //thêm vào danh sách schedule
+            }
+        }
+}
 

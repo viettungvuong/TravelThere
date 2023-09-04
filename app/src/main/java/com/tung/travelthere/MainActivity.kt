@@ -45,7 +45,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
-import com.tung.travelthere.controller.AppController.Companion.currentUser
+
 import java.io.Serializable
 
 
@@ -366,7 +366,7 @@ class MainActivity : ComponentActivity() {
 
         LaunchedEffect(originalState) {
             coroutineScope.launch {
-                originalState.addAll( city.locationsRepository.refreshLocations())
+                originalState.addAll( city.locationsRepository.refreshLocations().map { it.value })
                 listState.addAll(originalState)
             }
         }

@@ -138,8 +138,6 @@ class AppController {
 
         lateinit var currentPosition: UserPlace //địa điểm hiện tại
 
-        @JvmField
-        val currentUser = User() //user hiện tại
 
         @JvmField
         val db = Firebase.firestore
@@ -149,6 +147,9 @@ class AppController {
 
         @JvmField
         val storage = FirebaseStorage.getInstance()
+
+        @JvmField
+        val schedules = mutableListOf<Schedule>() //danh sách schedule
     }
 }
 

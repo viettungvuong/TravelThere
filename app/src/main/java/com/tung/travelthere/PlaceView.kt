@@ -302,6 +302,262 @@ class PlaceView : ComponentActivity() {
     @Composable
     @OptIn(ExperimentalComposeUiApi::class, ExperimentalLayoutApi::class)
     private fun reviewsPlace(location: PlaceLocation) {
+        //giao diện điểm số review
+        @Composable
+        fun reviewScoreText(modifier: Modifier, score: Double) {
+            var color: Color? = null
+            if (score in 0.0..4.0) {
+                color = colorFirst
+            } else if (score in 5.0..8.0) {
+                color = colorSecond
+            } else {
+                color = colorThird
+            }
+            Box(modifier = modifier) {
+                Text(
+                    text = score.toString(),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp,
+                    color = color
+                )
+            }
+        }
+
+        //giao diện của mỗi review
+        @Composable
+        fun reviewLayout(review: Review) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        horizontal = 20.dp,
+                        vertical = 2.dp
+                    ),
+                elevation = 10.dp
+            ) {
+                Row() {
+                    //sẽ có mục cho biết người dùng này là local hay foreigner
+                    Column() {
+                        Row(modifier = Modifier.padding(10.dp)) {
+
+                            Text(text = review.name, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+
+                            Box(modifier = Modifier.padding(horizontal = 10.dp)) {
+                                Text(
+                                    text = formatter.format(review.time),
+                                    fontWeight = FontWeight.Light
+                                )
+                            }
+                        }
+
+                        Box(modifier = Modifier.padding(10.dp)) {
+                            Text(text = review.content, fontSize = 15.sp)
+                        }
+                    }
+
+                    reviewScoreText(
+                        score = review.score.toDouble(),
+                        modifier = Modifier.padding(horizontal = 10.dp)
+                    )
+
+                }
+            }
+        }
+
+
+        //phần lọc đánh giá
+        @Composable
+        fun filterReviewEach(
+            index: Int, reviewState: MutableState<MutableList<Review>>,
+            originalState: MutableState<MutableList<Review>>
+        ) {
+            var chosenIndex by remember { mutableStateOf(-1) }
+
+            LaunchedEffect(chosenState) {
+                chosenIndex = chosenState
+            }
+
+            Box(modifier = Modifier
+                .padding(5.dp)
+                .border(
+                    width = if (chosenIndex == index) 1.dp else 0.dp,
+                    color = if (chosenIndex == index) Color(0xff365875) else Color.Transparent,
+                    shape = RoundedCornerShape(4.dp),
+                )
+                .padding(10.dp)
+                .clickable {
+                    for (i in reviewFilters.indices) {
+                        if (i == index)
+                            continue
+                    }
+                    if (chosenState == index) {
+                        chosenState = -1 //bỏ chọn
+                        reviewState!!.value = originalState!!.value
+                    } else {
+                        chosenState = index //chọn
+                        reviewState!!.value = originalState!!.value.filter {
+                            val filterBool = (
+                                    when (index) {
+                                        0 -> it.score in 0..4
+                                        1 -> it.score in 5..8
+                                        else -> it.score in 9..10
+                                    })
+
+                            filterBool
+                        } as MutableList<Review>
+
+                    }
+
+
+                }) {
+                Row() {
+                    Text(
+                        text = reviewFilters[index],
+                        color = if (index == 0) {
+                            colorFirst
+                        } else if (index == 1) {
+                            colorSecond
+                        } else {
+                            colorThird
+                        }
+                    )
+                }
+            }
+        }
+
+        //dropdown menu chọn điểm số đang chọn
+        @OptIn(ExperimentalMaterialApi::class)
+        @Composable
+        fun DropDownMenu(
+            modifier: Modifier,
+            context: Context,
+            options: List<String>,
+            selectedItemViewModel: ChosenScoreViewModel
+        ) {
+            var expanded by remember { mutableStateOf(false) }
+
+            Box(
+                modifier = modifier
+            ) {
+                ExposedDropdownMenuBox(
+                    expanded = expanded,
+                    onExpandedChange = {
+                        expanded = !expanded
+                    }
+                ) {
+                    TextField(
+                        value = selectedItemViewModel.chosenScore.toString(),
+                        onValueChange = {},
+                        readOnly = true,
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                    )
+
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        options.forEach { item ->
+                            DropdownMenuItem(
+                                onClick = {
+                                    selectedItemViewModel.chosenScore = item.toInt()
+                                    expanded = false
+                                }
+                            ) {
+                                Text(text = item)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+
+        //nếu đã up review rồi thì hiện review của người dùng và cho chỉnh sửa
+        //nếu chưa thì cho phép tạo review
+        @OptIn(ExperimentalComposeUiApi::class)
+        @Composable
+        fun yourReview(
+            reviewTotalScoreViewModel: ReviewTotalScoreViewModel,
+            modifier: Modifier,
+            listState: MutableState<MutableList<Review>>
+        ) {
+            val textState = remember { mutableStateOf("") }
+
+            val keyboardController = LocalSoftwareKeyboardController.current
+
+            Row(modifier = modifier, horizontalArrangement = Arrangement.SpaceBetween) {
+                Column(
+                    modifier = Modifier
+                        .weight(0.55f)
+                        .padding(5.dp)
+                ) {
+                    TextField(
+                        value = textState.value,
+                        onValueChange = { textState.value = it },
+                        placeholder = { Text("Enter text") },
+                        modifier = Modifier
+                            .padding(vertical = 5.dp)
+                            .background(color = Color(0xffd5ede6)),
+                    )
+
+                    val options = mutableListOf<String>()
+                    for (i in 0..10) {
+                        options.add(i.toString())
+                    }
+
+                    DropDownMenu(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 5.dp),
+                        context = LocalContext.current,
+                        options = options,
+                        selectedItemViewModel = chosenScoreViewModel
+                    )
+                }
+
+
+                Button(
+                    onClick = {
+                        //ẩn bàn phím
+
+                        keyboardController!!.hide()
+
+                        val review =
+                            Review(
+                                AppController.auth.currentUser!!.uid,
+                                AppController.auth.currentUser!!.displayName ?: "",
+                                textState.value,
+                                Date(),
+                                chosenScoreViewModel.chosenScore
+                            )
+                        location.reviewRepository.submitReview(
+                            review,
+                            applicationContext
+                        ) //đăng review lên
+                        listState.value.add(review)
+                        reviewTotalScoreViewModel.totalScore =
+                            location.reviewRepository.calculateReviewScore() //tính lại tổng điểm
+                    },
+                    modifier = Modifier
+                        .weight(0.45f)
+                        .padding(15.dp),
+                    colors = ButtonDefaults.buttonColors(Color(0xff56a88b))
+                ) {
+                    Row {
+                        Box(modifier = Modifier.padding(horizontal = 10.dp)) {
+                            Icon(
+                                imageVector = Icons.Default.Send,
+                                contentDescription = "Send",
+                                tint = Color.White
+                            )
+                        }
+                        Text("Submit", color = Color.White)
+                    }
+
+                }
+            }
+        }
+
         var listState = remember { mutableStateOf(mutableListOf<Review>()) }
         var originalState = remember { mutableStateOf(mutableListOf<Review>()) }
         var totalScore by remember { mutableStateOf(0.0) }
@@ -385,265 +641,10 @@ class PlaceView : ComponentActivity() {
                 )
             }
 
-
-        }
-    }
-
-    //giao diện điểm số review
-    @Composable
-    private fun reviewScoreText(modifier: Modifier, score: Double) {
-        var color: Color? = null
-        if (score in 0.0..4.0) {
-            color = colorFirst
-        } else if (score in 5.0..8.0) {
-            color = colorSecond
-        } else {
-            color = colorThird
-        }
-        Box(modifier = modifier) {
-            Text(
-                text = score.toString(),
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp,
-                color = color
-            )
-        }
-    }
-
-    //giao diện của mỗi review
-    @Composable
-    private fun reviewLayout(review: Review) {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    horizontal = 20.dp,
-                    vertical = 2.dp
-                ),
-            elevation = 10.dp
-        ) {
-            Row() {
-                //sẽ có mục cho biết người dùng này là local hay foreigner
-                Column() {
-                    Row(modifier = Modifier.padding(10.dp)) {
-
-                        Text(text = review.name, fontWeight = FontWeight.Bold, fontSize = 15.sp)
-
-                        Box(modifier = Modifier.padding(horizontal = 10.dp)) {
-                            Text(
-                                text = formatter.format(review.time),
-                                fontWeight = FontWeight.Light
-                            )
-                        }
-                    }
-
-                    Box(modifier = Modifier.padding(10.dp)) {
-                        Text(text = review.content, fontSize = 15.sp)
-                    }
-                }
-
-                reviewScoreText(
-                    score = review.score.toDouble(),
-                    modifier = Modifier.padding(horizontal = 10.dp)
-                )
-
-            }
         }
     }
 
 
-    //phần lọc đánh giá
-    @Composable
-    private fun filterReviewEach(
-        index: Int, reviewState: MutableState<MutableList<Review>>,
-        originalState: MutableState<MutableList<Review>>
-    ) {
-        var chosenIndex by remember { mutableStateOf(-1) }
-
-        LaunchedEffect(chosenState) {
-            chosenIndex = chosenState
-        }
-
-        Box(modifier = Modifier
-            .padding(5.dp)
-            .border(
-                width = if (chosenIndex == index) 1.dp else 0.dp,
-                color = if (chosenIndex == index) Color(0xff365875) else Color.Transparent,
-                shape = RoundedCornerShape(4.dp),
-            )
-            .padding(10.dp)
-            .clickable {
-                for (i in reviewFilters.indices) {
-                    if (i == index)
-                        continue
-                }
-                if (chosenState == index) {
-                    chosenState = -1 //bỏ chọn
-                    reviewState!!.value = originalState!!.value
-                } else {
-                    chosenState = index //chọn
-                    reviewState!!.value = originalState!!.value.filter {
-                        val filterBool = (
-                                when (index) {
-                                    0 -> it.score in 0..4
-                                    1 -> it.score in 5..8
-                                    else -> it.score in 9..10
-                                })
-
-                        filterBool
-                    } as MutableList<Review>
-
-                }
-
-
-            }) {
-            Row() {
-                Text(
-                    text = reviewFilters[index],
-                    color = if (index == 0) {
-                        colorFirst
-                    } else if (index == 1) {
-                        colorSecond
-                    } else {
-                        colorThird
-                    }
-                )
-            }
-        }
-    }
-
-    //dropdown menu chọn điểm số đang chọn
-    @OptIn(ExperimentalMaterialApi::class)
-    @Composable
-    private fun DropDownMenu(
-        modifier: Modifier,
-        context: Context,
-        options: List<String>,
-        selectedItemViewModel: ChosenScoreViewModel
-    ) {
-        var expanded by remember { mutableStateOf(false) }
-
-        Box(
-            modifier = modifier
-        ) {
-            ExposedDropdownMenuBox(
-                expanded = expanded,
-                onExpandedChange = {
-                    expanded = !expanded
-                }
-            ) {
-                TextField(
-                    value = selectedItemViewModel.chosenScore.toString(),
-                    onValueChange = {},
-                    readOnly = true,
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                )
-
-                ExposedDropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false }
-                ) {
-                    options.forEach { item ->
-                        DropdownMenuItem(
-                            onClick = {
-                                selectedItemViewModel.chosenScore = item.toInt()
-                                expanded = false
-                            }
-                        ) {
-                            Text(text = item)
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-
-    //nếu đã up review rồi thì hiện review của người dùng và cho chỉnh sửa
-    //nếu chưa thì cho phép tạo review
-    @OptIn(ExperimentalComposeUiApi::class)
-    @Composable
-    private fun yourReview(
-        reviewTotalScoreViewModel: ReviewTotalScoreViewModel,
-        modifier: Modifier,
-        listState: MutableState<MutableList<Review>>
-    ) {
-        val textState = remember { mutableStateOf("") }
-
-        val keyboardController = LocalSoftwareKeyboardController.current
-
-        Row(modifier = modifier, horizontalArrangement = Arrangement.SpaceBetween) {
-            Column(
-                modifier = Modifier
-                    .weight(0.55f)
-                    .padding(5.dp)
-            ) {
-                TextField(
-                    value = textState.value,
-                    onValueChange = { textState.value = it },
-                    placeholder = { Text("Enter text") },
-                    modifier = Modifier
-                        .padding(vertical = 5.dp)
-                        .background(color = Color(0xffd5ede6)),
-                )
-
-                val options = mutableListOf<String>()
-                for (i in 0..10) {
-                    options.add(i.toString())
-                }
-
-                DropDownMenu(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 5.dp),
-                    context = LocalContext.current,
-                    options = options,
-                    selectedItemViewModel = chosenScoreViewModel
-                )
-            }
-
-
-            Button(
-                onClick = {
-                    //ẩn bàn phím
-
-                    keyboardController!!.hide()
-
-                    val review =
-                        Review(
-                            AppController.auth.currentUser!!.uid,
-                            AppController.auth.currentUser!!.displayName ?: "",
-                            textState.value,
-                            Date(),
-                            chosenScoreViewModel.chosenScore
-                        )
-                    location.reviewRepository.submitReview(
-                        review,
-                        applicationContext
-                    ) //đăng review lên
-                    listState.value.add(review)
-                    reviewTotalScoreViewModel.totalScore =
-                        location.reviewRepository.calculateReviewScore() //tính lại tổng điểm
-                },
-                modifier = Modifier
-                    .weight(0.45f)
-                    .padding(15.dp),
-                colors = ButtonDefaults.buttonColors(Color(0xff56a88b))
-            ) {
-                Row {
-                    Box(modifier = Modifier.padding(horizontal = 10.dp)) {
-                        Icon(
-                            imageVector = Icons.Default.Send,
-                            contentDescription = "Send",
-                            tint = Color.White
-                        )
-                    }
-                    Text("Submit", color = Color.White)
-                }
-
-            }
-        }
-    }
 
 
     //phần suggestions (hiện điểm số và hình ảnh)

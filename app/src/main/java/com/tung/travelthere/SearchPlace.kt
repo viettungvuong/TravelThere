@@ -89,7 +89,7 @@ class SearchPlace : ComponentActivity() {
 
         LaunchedEffect(listState) {
             coroutineScope.launch {
-                listState = city.locationsRepository.refreshLocations()
+                listState = city.locationsRepository.refreshLocations().map { it.value }.toSet()
             }
         }
 
