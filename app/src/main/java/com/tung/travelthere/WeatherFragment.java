@@ -128,15 +128,13 @@ public class WeatherFragment extends Fragment {
         String url = "https://api.weatherapi.com/v1/forecast.json?key=50224d22b9804f92a1b94202230309&q="+cityName+"&days=1&aqi=yes&alerts=yes";
         textCityName.setText(cityName);
         RequestQueue requestQueue = Volley.newRequestQueue(this.getContext());
-        Log.d("TAG weather", "Run to weather");
-        Log.d("TAG weather", cityName);
+
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 try {
                     String temperature = response.getJSONObject("current").getString("temp_c");
                     textTemperature.setText(temperature + "°C");
-                    Log.d("TAG weather", temperature);
                     //int isDay = response.getJSONObject("current").getInt("is_day");
                     String condition = response.getJSONObject("current").getJSONObject("condition").getString("text");
                     String conditionImg = response.getJSONObject("current").getJSONObject("condition").getString("icon");
@@ -146,8 +144,6 @@ public class WeatherFragment extends Fragment {
                 catch (JSONException e)
                 {
                     e.printStackTrace();
-                    Log.e("error json", e.getMessage());
-                    Log.d("TAG", "Error message");
                 }
             }
         }, new Response.ErrorListener() {

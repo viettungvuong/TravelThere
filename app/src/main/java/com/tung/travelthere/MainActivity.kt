@@ -43,20 +43,86 @@ import java.net.URL
 import java.util.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
+import androidx.lifecycle.ViewModel
+import coil.compose.AsyncImage
+import com.android.volley.Request
+import com.android.volley.VolleyError
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
+import org.json.JSONException
+import org.json.JSONObject
 
 import java.io.Serializable
+import java.io.UnsupportedEncodingException
+
+val colorCold = Color(0xff447cbd)
+val colorMedium = Color(0xffbd9544)
+val colorHot = Color(0xffbd4444)
+
+class WeatherViewModel(context: Context, city: City) : ViewModel() {
+    var temperature by mutableStateOf(0f)
+    var condition by mutableStateOf("")
+    var conditionImgUrl by mutableStateOf("")
+
+    init {
+        val url =
+            "https://api.weatherapi.com/v1/forecast.json?key=50224d22b9804f92a1b94202230309&q=${city.getName()}&days=1&aqi=yes&alerts=yes"
+
+        val requestQueue = Volley.newRequestQueue(context)
+
+        val jsonObjectRequest = JsonObjectRequest(
+            Request.Method.GET, url, null,
+            { response ->
+                try {
+                    temperature = response.getJSONObject("current").getString("temp_c")
+                        .toFloat() //nhiệt độ
+                    condition =
+                        response.getJSONObject("current").getJSONObject("condition")
+                            .getString("text")
+                    conditionImgUrl =
+                        response.getJSONObject("current").getJSONObject("condition")
+                            .getString("icon") //hình đại diện cho điều kiện thời tiết
+                    Log.d("str weather", "$temperature,$condition,$conditionImgUrl")
+                } catch (e: JSONException) {
+                    e.printStackTrace()
+                }
+            }) { error ->
+            parseVolleyError(error)
+            Log.d("TAG weather", error.message!!)
+        }
+
+        requestQueue.add(jsonObjectRequest)
+    }
+
+    private fun parseVolleyError(error: VolleyError) {
+        try {
+            val responseBody = String(error.networkResponse.data)
+            val data = JSONObject(responseBody)
+            val errors = data.getJSONArray("errors")
+            val jsonMessage = errors.getJSONObject(0)
+            val message = jsonMessage.getString("message")
+            Log.d("json error", message)
+        } catch (e: JSONException) {
+        } catch (error: UnsupportedEncodingException) {
+        }
+    }
+}
 
 
 class MainActivity : ComponentActivity() {
 
     //để biết chọn category nào
+    lateinit var weatherViewModel: WeatherViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         Places.initialize(this, "AIzaSyCytvnlz93VlDAMs2RsndMo-HVgd0fl-lQ")
+
+        weatherViewModel = WeatherViewModel(this, City.getSingleton())
 
         setContent {
             Home(this)
@@ -76,6 +142,41 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
     fun Home(context: Context) {
+        @OptIn(ExperimentalFoundationApi::class)
+        @Composable
+        fun tabLayout(
+            pagerState: PagerState,
+            tabTitles: List<String>,
+            coroutineScope: CoroutineScope
+        ) {
+            TabRow(
+                selectedTabIndex = pagerState.currentPage,
+                backgroundColor = colorBlue,
+                contentColor = Color.White,
+                modifier = Modifier
+                    .padding(vertical = 4.dp, horizontal = 8.dp)
+                    .clip(RoundedCornerShape(50))
+                    .shadow(AppBarDefaults.TopAppBarElevation)
+                    .zIndex(10f),
+            ) {
+                tabTitles.forEachIndexed { index, title ->
+                    Tab(
+                        selected = (pagerState.currentPage == index), //current index có phải là index
+                        onClick = {
+                            run {
+                                coroutineScope.launch {
+                                    pagerState.animateScrollToPage(
+                                        index
+                                    )
+                                }
+                            }
+                        },
+                        text = { Text(text = title) }
+                    )
+                }
+            }
+        }
+
         val tabTitles = listOf("Nearby", "Local recommends", "Tourist attractions")
         val pagerState = rememberPagerState(initialPage = 0)
         val coroutineScope = rememberCoroutineScope()
@@ -205,37 +306,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    @OptIn(ExperimentalFoundationApi::class)
-    @Composable
-    fun tabLayout(pagerState: PagerState, tabTitles: List<String>, coroutineScope: CoroutineScope) {
-        TabRow(
-            selectedTabIndex = pagerState.currentPage,
-            backgroundColor = colorBlue,
-            contentColor = Color.White,
-            modifier = Modifier
-                .padding(vertical = 4.dp, horizontal = 8.dp)
-                .clip(RoundedCornerShape(50))
-                .shadow(AppBarDefaults.TopAppBarElevation)
-                .zIndex(10f),
-        ) {
-            tabTitles.forEachIndexed { index, title ->
-                Tab(
-                    selected = (pagerState.currentPage == index), //current index có phải là index
-                    onClick = {
-                        run {
-                            coroutineScope.launch {
-                                pagerState.animateScrollToPage(
-                                    index
-                                )
-                            }
-                        }
-                    },
-                    text = { Text(text = title) }
-                )
-            }
-        }
-    }
-
 
     @Composable
     fun CityIntroduction(city: City) {
@@ -247,6 +317,9 @@ class MainActivity : ComponentActivity() {
 
         //bitmap hình nền
         var bitmap: Bitmap? = null
+
+        var temperature by remember { mutableStateOf(0f) }
+        var conditionImgUrl by remember { mutableStateOf("") }
 
         val coroutineScope = rememberCoroutineScope()
 
@@ -268,30 +341,37 @@ class MainActivity : ComponentActivity() {
             }
         }
 
+        LaunchedEffect(weatherViewModel.temperature,weatherViewModel.conditionImgUrl){
+            temperature=weatherViewModel.temperature
+            conditionImgUrl=weatherViewModel.conditionImgUrl
+            conditionImgUrl= "https:$conditionImgUrl"
+            Log.d("condition img url",conditionImgUrl)
+        }
+
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
         ) {
             ImageFromUrl(url = imageUrl ?: "", contentDescription = null, 0.0) //hình ảnh
         }
-        Column(
+
+        Row(
             modifier = Modifier
                 .fillMaxSize(),
-            verticalArrangement = Arrangement.Bottom,
-
-            ) {
+            verticalAlignment = Alignment.Bottom,
+        ) {
             Box(
                 modifier = Modifier
                     .padding(
                         start = 16.dp,
                         top = 8.dp,
-                        end = 16.dp,
                         bottom = 8.dp,
                     )
                     .background(textBgColor)
             ) {
                 Text(
-                    text = "${city.getName()}",
+                    text = "${city.getName()}", //tên thành phố
                     color = Color.White,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
@@ -299,24 +379,58 @@ class MainActivity : ComponentActivity() {
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
+
             }
+            
+            Spacer(modifier = Modifier.weight(1f))
 
+            //phần thời tiết
+            Box(
+                modifier = Modifier
+                    .padding(
+                        top = 8.dp,
+                        end = 16.dp,
+                        bottom = 8.dp,
+                    )
+                    .background(if (temperature < 15.0) {
+                        colorCold
+                    } else if (temperature in 15.0..30.0) {
+                        colorMedium
+                    } else {
+                        colorHot
+                    })
+            ){
+                Row(verticalAlignment = Alignment.CenterVertically){
+                    Text(
+                        text = "$temperature °C",
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
+                    )
 
+                    Spacer(modifier = Modifier.width(5.dp))
+
+                    ImageFromUrl(url = conditionImgUrl, contentDescription = null, 24.0) //hình ảnh
+                }
+
+            }
         }
+
+
     }
 
 
     //trang local recommended
     @Composable
-    fun LocalRecommended(modifier: Modifier,context: Context, city: City) {
-        var listState = remember { mutableStateListOf<PlaceLocation>()  }
+    fun LocalRecommended(modifier: Modifier, context: Context, city: City) {
+        var listState = remember { mutableStateListOf<PlaceLocation>() }
         var chosenState = remember { mutableStateOf(mutableSetOf<Category>()) }
-        var originalState = remember { mutableStateListOf<PlaceLocation>()  }
+        var originalState = remember { mutableStateListOf<PlaceLocation>() }
         val coroutineScope = rememberCoroutineScope()
 
         LaunchedEffect(originalState) {
             coroutineScope.launch {
-                originalState.addAll( city.locationsRepository.recommends)
+                originalState.addAll(city.locationsRepository.recommends)
                 listState.addAll(originalState)
             }
         }
@@ -329,13 +443,15 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            if (listState.isNullOrEmpty()){
-                Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center){
+            if (listState.isNullOrEmpty()) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
                     Text(text = "No places", fontStyle = FontStyle.Italic)
                 }
-            }
-            else{
+            } else {
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
                     modifier = Modifier.fillMaxSize(),
@@ -353,39 +469,41 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun TouristAttractions(modifier: Modifier, context: Context, city: City) {
-        var listState = remember { mutableStateListOf<PlaceLocation>()  }
+        var listState = remember { mutableStateListOf<PlaceLocation>() }
         var chosenState = remember { mutableStateOf(mutableSetOf<Category>()) }
-        var originalState = remember { mutableStateListOf<PlaceLocation>()  }
+        var originalState = remember { mutableStateListOf<PlaceLocation>() }
         val coroutineScope = rememberCoroutineScope()
 
         LaunchedEffect(originalState) {
             coroutineScope.launch {
-                originalState.addAll( city.locationsRepository.refreshLocations().map { it.value })
+                originalState.addAll(city.locationsRepository.refreshLocations().map { it.value })
                 listState.addAll(originalState)
             }
         }
 
 
-        Column(modifier=modifier) {
+        Column(modifier = modifier) {
             LazyRow(modifier = Modifier.padding(15.dp)) {
                 itemsIndexed(Category.values()) { index, category -> //tương tự xuất ra location adapter
                     categoryView(category, colorBlue, true, listState, chosenState, originalState)
                 }
             }
 
-            if (listState.isNullOrEmpty()){
-                Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center){
+            if (listState.isNullOrEmpty()) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
                     Text(text = "No places", fontStyle = FontStyle.Italic)
                 }
-            }
-            else{
+            } else {
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
                     modifier = Modifier.fillMaxSize(),
                     content = {
                         items(listState) { location ->
-                            if (!location.categories.contains(Category.NECESSITY)){
+                            if (!location.categories.contains(Category.NECESSITY)) {
                                 SneakViewPlace(context, location)
                             }
                         }
@@ -400,38 +518,52 @@ class MainActivity : ComponentActivity() {
 
 
     @Composable
-    fun NearbyPlaces(modifier: Modifier,context: Context, city: City) { //đề xuất địa điểm gần với nơi đang đứng
-        var listState = remember { mutableStateListOf<PlaceLocation>()  }
+    fun NearbyPlaces(
+        modifier: Modifier,
+        context: Context,
+        city: City
+    ) { //đề xuất địa điểm gần với nơi đang đứng
+        var listState = remember { mutableStateListOf<PlaceLocation>() }
         var chosenState = remember { mutableStateOf(mutableSetOf<Category>()) }
-        var originalState = remember { mutableStateListOf<PlaceLocation>()  }
+        var originalState = remember { mutableStateListOf<PlaceLocation>() }
         val coroutineScope = rememberCoroutineScope()
 
         LaunchedEffect(originalState) {
             coroutineScope.launch {
-                originalState.addAll( city.locationsRepository.nearbyLocations())
+                originalState.addAll(city.locationsRepository.nearbyLocations())
                 listState.addAll(originalState)
             }
         }
 
-        Column(modifier=modifier) {
+        Column(modifier = modifier) {
             LazyRow(modifier = Modifier.padding(15.dp)) {
                 itemsIndexed(Category.values()) { index, category -> //tương tự xuất ra location adapter
                     categoryView(category, colorBlue, true, listState, chosenState, originalState)
                 }
             }
 
-            Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp)){
-                Text(text = "Places that are 5 km from your current position", fontWeight = FontWeight.Bold
-                    , textAlign = TextAlign.Center, modifier = Modifier)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
+            ) {
+                Text(
+                    text = "Places that are 5 km from your current position",
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                )
             }
 
-            if (listState.isNullOrEmpty()){
-                Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center){
+            if (listState.isNullOrEmpty()) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
                     Text(text = "No places", fontStyle = FontStyle.Italic)
                 }
-            }
-            else{
+            } else {
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
                     modifier = Modifier.fillMaxSize(),
@@ -446,16 +578,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    @Composable
-    fun Weather(city: City) {
 
-    }
-
-
-    @Composable
-    fun Transportation(city: City) {
-
-    }
 
 
 }
