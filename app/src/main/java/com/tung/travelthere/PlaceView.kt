@@ -182,21 +182,24 @@ class PlaceView : ComponentActivity() {
             fontSize = 25.sp
         )
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.Place,
-                contentDescription = "Address",
-                tint = Color.Black
-            )
+        if (location.address!=null){
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Place,
+                    contentDescription = "Address",
+                    tint = Color.Black
+                )
 
-            Spacer(modifier = Modifier.width(20.dp))
+                Spacer(modifier = Modifier.width(20.dp))
 
-            Text(text = "18 đường số 7")
+                Text(text = location.address!!)
+            }
         }
+
 
 
 
