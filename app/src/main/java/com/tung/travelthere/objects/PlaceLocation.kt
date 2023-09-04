@@ -63,6 +63,8 @@ open class PlaceLocation protected constructor(private val name: String, private
     var imageUrl: String?=null
     var recommendsCount = 0
 
+    var address: String?=null //địa chỉ
+
     fun getName(): String{
         return name
     }
@@ -213,7 +215,4 @@ class Restaurant(name: String, pos: Position, cityName: String, private val spec
 }
 
 class TouristPlace(name: String, pos: Position, cityName: String): PlaceLocation(name,pos,cityName){
-    init {
-        this.categories.add(Category.ATTRACTION)
-    }
 }

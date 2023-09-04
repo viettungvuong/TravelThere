@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
@@ -98,9 +99,12 @@ class SuggestPlace : ComponentActivity() {
     @Composable
     private fun suggestPlace(placeViewModel: PlaceAutocompleteViewModel) {
         var searchPlace = remember { mutableStateOf("") }
+
         var chosenPlaceName by remember { mutableStateOf("") }
         var chosenPlaceCity by remember { mutableStateOf("") }
         var chosenPlacePos by remember { mutableStateOf(Position(0.0, 0.0)) }
+        var chosenPlaceCategories = remember { placeViewModel.currentCategories }
+        var chosenPlaceAddress by remember { mutableStateOf("") }
 
         var currentLocation: PlaceLocation? =
             null //location hiện tại (location người dùng muốn suggest)
@@ -111,11 +115,12 @@ class SuggestPlace : ComponentActivity() {
         val keyboardController = LocalSoftwareKeyboardController.current
 
 
-
         LaunchedEffect(placeViewModel.currentName, placeViewModel.currentCity) {
             chosenPlaceName = placeViewModel.currentName
             chosenPlaceCity = placeViewModel.currentCity
             chosenPlacePos = placeViewModel.currentPos
+            chosenPlaceAddress = placeViewModel.currentAddress
+            chosenPlaceCategories = placeViewModel.currentCategories
 
             if (chosenPlaceName.isNotBlank()) {
                 currentLocation = TouristPlace(
@@ -123,6 +128,7 @@ class SuggestPlace : ComponentActivity() {
                     chosenPlacePos,
                     chosenPlaceCity
                 ) //đặt location đang được suggest
+                (currentLocation as TouristPlace).address = chosenPlaceAddress //địa chỉ
             } else {
                 currentLocation = null //trong trường hợp xoá mất địa điểm
             }
@@ -234,8 +240,19 @@ class SuggestPlace : ComponentActivity() {
                         )
 
                         Text(
+                            text = "Address: $chosenPlaceAddress",
+                            fontStyle = FontStyle.Italic
+                        )
+
+                        Text(
                             text = "City: $chosenPlaceCity",
                         )
+
+                        LazyRow {
+                            itemsIndexed(chosenPlaceCategories.toTypedArray()) { index, category -> //tương tự xuất ra location adapter
+                                categoryView(category, Color.Red, false)
+                            }
+                        }
                     }
 
                 }
@@ -294,6 +311,8 @@ class SuggestPlace : ComponentActivity() {
                 }
 
 
+
+
             }
         }
     }
@@ -318,9 +337,12 @@ class SuggestPlace : ComponentActivity() {
                             .fillMaxWidth()
                             .padding(16.dp)
                             .clickable(onClick = {
+                                //chọn địa điểm
+                                placeViewModel.currentCategories.clear()
                                 chooseLocation(placeViewModel, it)
 
                                 placeViewModel.placeSuggestions.clear()
+
                                 searchPlace.value = ""
                                 keyboardController?.hide()
                             }
@@ -443,7 +465,8 @@ fun suggestPlace(
                                 "location-name" to location.getName(),
                                 "lat" to location.getPos().lat,
                                 "long" to location.getPos().long,
-                                "categories" to listOf("Recommend"),
+                                "address" to location.address,
+                                "categories" to location.categories,
                                 "recommends" to 1,
                                 "recommend-ids" to listOf(AppController.auth.currentUser!!.uid)
                             )
@@ -486,7 +509,6 @@ private suspend fun uploadImages(
     listRef.listAll()
         .addOnSuccessListener { (items, prefixes) ->
             imageCount = items.size //tìm số hình ảnh
-            Log.d("image count", imageCount.toString())
 
             runBlocking {
                 withContext(Dispatchers.IO) {
