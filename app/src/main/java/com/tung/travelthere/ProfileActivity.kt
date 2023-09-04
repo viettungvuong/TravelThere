@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -34,6 +35,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -156,7 +158,10 @@ class ProfileActivity : ComponentActivity() {
 
     @Composable
     fun changePassword(currentUser: FirebaseUser) {
-        Button(onClick = {
+        Button(
+            colors = ButtonDefaults.buttonColors(backgroundColor = colorResource(R.color.blue)),
+            modifier = Modifier.padding(vertical = 10.dp),
+            onClick = {
             val builder: AlertDialog.Builder = AlertDialog.Builder(this@ProfileActivity)
             builder.setTitle("Enter your new password")
 
@@ -193,12 +198,7 @@ class ProfileActivity : ComponentActivity() {
 
             builder.show()
         }) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(text = "Change password")
-                Image(painter = painterResource(id = R.drawable.edit), contentDescription = "Edit password")
-            }
+            Text(text = "Change password", color = Color.White)
         }
     }
 
@@ -237,14 +237,17 @@ class ProfileActivity : ComponentActivity() {
                 displayUserPhoneNumber(currentUser = currentUser)
                 changePassword(currentUser = currentUser)
                 //log out
-                Button(onClick = {
+                Button(
+                    colors = ButtonDefaults.buttonColors(backgroundColor = colorResource(R.color.blue)),
+                    modifier = Modifier.padding(vertical = 10.dp),
+                    onClick = {
                     AppController.auth.signOut()
                     val intent = Intent(this@ProfileActivity, RegisterLoginActivity::class.java)
                     intent.putExtra("LogOut", true)
                     startActivity(intent)
                     finish()
                 }) {
-                    Text(text = "Log out")
+                    Text(text = "Log out", color = Color.White)
                 }
             }
         }
