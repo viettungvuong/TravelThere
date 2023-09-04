@@ -11,12 +11,14 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.Button
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -28,6 +30,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -151,6 +154,54 @@ class ProfileActivity : ComponentActivity() {
     }
 
     @Composable
+    fun changePassword(currentUser: FirebaseUser) {
+        Button(onClick = {
+            val builder: AlertDialog.Builder = AlertDialog.Builder(this@ProfileActivity)
+            builder.setTitle("Enter your new password")
+
+            val input = EditText(this@ProfileActivity)
+            input.inputType = InputType.TYPE_CLASS_TEXT
+            builder.setView(input)
+
+            builder.setPositiveButton("Save",
+                DialogInterface.OnClickListener { dialog, which ->
+                    val newPass = input.text.toString()
+                    if (!newPass.isEmpty()) {
+                        currentUser!!.updatePassword(newPass)
+                            .addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    Log.d(TAG, "User password updated.")
+                                    Toast.makeText(
+                                        this@ProfileActivity,
+                                        "Password changed!",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }
+                    } else {
+                        Toast.makeText(
+                            this@ProfileActivity,
+                            "Please enter a valid password",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                })
+
+            builder.setNegativeButton("Cancel",
+                DialogInterface.OnClickListener { dialog, which -> dialog.cancel() })
+
+            builder.show()
+        }) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text = "Change password")
+                Image(painter = painterResource(id = R.drawable.edit), contentDescription = "Edit password")
+            }
+        }
+    }
+
+    @Composable
     fun displayUserProfile(currentUser: FirebaseUser) {
         Column() {
             Box(
@@ -183,6 +234,7 @@ class ProfileActivity : ComponentActivity() {
                 displayUserName(currentUser = currentUser)
                 displayUserEmail(currentUser = currentUser)
                 displayUserPhoneNumber(currentUser = currentUser)
+                changePassword(currentUser = currentUser)
             }
         }
     }
