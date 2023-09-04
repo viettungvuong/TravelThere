@@ -45,6 +45,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.storage.ktx.component1
 import com.google.firebase.storage.ktx.component2
 import com.tung.travelthere.controller.*
@@ -393,7 +394,6 @@ fun suggestPlace(
                         if (imageViewModel!=null){
                             CoroutineScope(Dispatchers.Main).launch {
                                 uploadImages(context, imageViewModel, location)
-                                Log.d("upload image", "true")
                             }
                         } //nếu có hình ảnh
 
@@ -411,13 +411,15 @@ fun suggestPlace(
                                     "You have already recommended this place",
                                     Toast.LENGTH_LONG
                                 ).show()
-
-                                return@addOnCompleteListener
+                                return@addOnCompleteListener //không cho recommend
                             }
 
                             val recommendedNum = documentSnapshot.getLong("recommends")
                                 ?: 0 //số lượng được recommends
                             val updatedField = mapOf("recommends" to recommendedNum + 1)
+
+                            //thêm id vào danh sách đã recommend
+                            locationRef.update("recommend-ids", FieldValue.arrayUnion(AppController.auth.currentUser!!.uid))
 
                             locationRef.update(updatedField)
                                 .addOnSuccessListener {
@@ -442,7 +444,8 @@ fun suggestPlace(
                                 "lat" to location.getPos().lat,
                                 "long" to location.getPos().long,
                                 "categories" to listOf("Recommend"),
-                                "recommends" to 1
+                                "recommends" to 1,
+                                "recommend-ids" to listOf(AppController.auth.currentUser!!.uid)
                             )
                             locationRef.set(locationData) // Create a new document with locationData
                                 .addOnSuccessListener {
