@@ -3,6 +3,7 @@ package com.tung.travelthere
 import android.app.AlertDialog
 import android.content.ContentValues.TAG
 import android.content.DialogInterface
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.text.InputType
@@ -235,6 +236,16 @@ class ProfileActivity : ComponentActivity() {
                 displayUserEmail(currentUser = currentUser)
                 displayUserPhoneNumber(currentUser = currentUser)
                 changePassword(currentUser = currentUser)
+                //log out
+                Button(onClick = {
+                    AppController.auth.signOut()
+                    val intent = Intent(this@ProfileActivity, RegisterLoginActivity::class.java)
+                    intent.putExtra("LogOut", true)
+                    startActivity(intent)
+                    finish()
+                }) {
+                    Text(text = "Log out")
+                }
             }
         }
     }

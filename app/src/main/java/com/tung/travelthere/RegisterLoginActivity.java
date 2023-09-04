@@ -25,6 +25,11 @@ public class RegisterLoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login_activity);
 
+        Intent intent = getIntent();
+        if(intent.getBooleanExtra("LogOut", false)) {
+            Toast.makeText(RegisterLoginActivity.this, "Loged out!", Toast.LENGTH_SHORT).show();
+        }
+
         emailEditText = findViewById(R.id.emailEditText);
         passwordEditText = findViewById(R.id.passwordEditText);
 
