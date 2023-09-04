@@ -113,7 +113,7 @@ class City private constructor() {
                     val long = location.getDouble("long") ?: 0.0
                     val address = location.getString("address")?:""
 
-                    val categoriesStr = location.get("categories") as List<String>?
+                    val categoriesStr = location.get("categories") as List<String>
                     val categoriesArr: MutableList<Category> = mutableListOf()
                     var isRestaurant = false
 
@@ -132,8 +132,10 @@ class City private constructor() {
                     }
                     else{
                         Restaurant(placeName, Position(lat, long), cityName, mutableListOf()) //specialize dish để thêm sau
-                        //refresh restaurant
+                        //refresh restaurant riêng
                     }
+
+                    t.categories.addAll(categoriesArr) //thêm category vào
 
                     val recommendedNum = location.getLong("recommends") ?: 0
                     t.recommendsCount=recommendedNum.toInt()

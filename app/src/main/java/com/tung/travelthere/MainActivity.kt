@@ -63,18 +63,14 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    override fun onStart() {
-        super.onStart()
+    override fun onResume() {
+        super.onResume()
         runBlocking {
             City.getSingleton().locationsRepository.refreshLocations(true)
             City.getSingleton().fetchImageUrl()
         }
         City.getSingleton().locationsRepository.nearbyLocations() //lấy những địa điểm gần
 
-    }
-
-    override fun onRestart() {
-        super.onRestart()
     }
 
     @OptIn(ExperimentalFoundationApi::class)
@@ -395,7 +391,9 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     content = {
                         items(listState) { location ->
-                            SneakViewPlace(context, location)
+                            if (!location.categories.contains(Category.NECESSITY)){
+                                SneakViewPlace(context, location)
+                            }
                         }
                     }
                 )
