@@ -235,7 +235,7 @@ class ProfileActivity : ComponentActivity() {
                 changePassword(currentUser = currentUser)
                 //log out
                 Button(
-                    colors = ButtonDefaults.buttonColors(backgroundColor = colorResource(R.color.blue)),
+                    colors = ButtonDefaults.buttonColors(backgroundColor = Color.Red),
                     modifier = Modifier.padding(vertical = 10.dp),
                     onClick = {
                     logout(false)
