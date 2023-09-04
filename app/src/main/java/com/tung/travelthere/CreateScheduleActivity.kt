@@ -175,11 +175,13 @@ class CreateScheduleActivity : ComponentActivity() {
                                     end.linkTo(parent.end)
                                 })
 
-                            LazyRow(modifier = Modifier.padding(15.dp).constrainAs(categories) {
-                                top.linkTo(searchBar.bottom)
-                                start.linkTo(parent.start)
-                                end.linkTo(parent.end)
-                            }) {
+                            LazyRow(modifier = Modifier
+                                .padding(15.dp)
+                                .constrainAs(categories) {
+                                    top.linkTo(searchBar.bottom)
+                                    start.linkTo(parent.start)
+                                    end.linkTo(parent.end)
+                                }) {
                                 itemsIndexed(Category.values()) { index, category ->
                                     categoryView(category, colorBlue, true, searchViewModel, chosenState)
                                 }
@@ -293,7 +295,15 @@ class CreateScheduleActivity : ComponentActivity() {
             var location = remember { mutableStateOf<PlaceLocation?>(null) }
 
 
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.clickable {
+                if (location.value!=null){
+                    val intent = Intent(this, PlaceView::class.java)
+                    intent.putExtra("location", location.value)
+                    startActivity(intent)
+                }
+
+            }) {
                 Box(
                     modifier = Modifier
                         .padding(2.dp)
@@ -400,7 +410,39 @@ class CreateScheduleActivity : ComponentActivity() {
                     }
                 }
             }
+        }
 
+        @Composable
+        fun categoryCount(schedule: Schedule){
+
+            Row(modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center){
+                for (category in schedule.countMap.keys){
+                    if (schedule.countMap[category]!=0){
+                        Row(verticalAlignment = Alignment.CenterVertically){
+                            Icon(
+                                painter = when (category) {
+                                    Category.RESTAURANT -> painterResource(R.drawable.restaurant)
+                                    Category.BAR -> painterResource(R.drawable.bar)
+                                    Category.ATTRACTION -> painterResource(R.drawable.attraction)
+                                    Category.NATURE -> painterResource(R.drawable.nature)
+                                    Category.NECESSITY -> painterResource(R.drawable.hospital)
+                                    Category.OTHERS -> painterResource(R.drawable.other)
+                                    Category.SHOPPING -> painterResource(R.drawable.shopping)
+                                },
+                                tint = colorBlue,
+                                contentDescription = null,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            
+                            Spacer(modifier = Modifier.width(5.dp))
+
+                            Text(text = schedule.countMap[category].toString(), fontSize = 15.sp)
+                        }
+                    }
+
+                }
+            }
         }
 
         val showDialog = remember { mutableStateOf(false) } //có hiện dialog không
@@ -434,6 +476,7 @@ class CreateScheduleActivity : ComponentActivity() {
         val keyboardController = LocalSoftwareKeyboardController.current
 
         Column() {
+            //hiện từng checkpoint
             LazyColumn(state = lazyListState) {
                 itemsIndexed(schedule.getList()) { index, item ->
                     Checkpoint(index, schedule, showDialog)
@@ -456,6 +499,8 @@ class CreateScheduleActivity : ComponentActivity() {
                             keyboardController?.hide()
                         })
             }
+            
+            categoryCount(schedule = schedule)
 
             Button(
                 onClick = {

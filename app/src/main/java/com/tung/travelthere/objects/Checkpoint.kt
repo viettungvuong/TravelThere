@@ -2,6 +2,8 @@ package com.tung.travelthere.objects
 
 import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import com.google.type.DateTime
 import java.sql.Date
@@ -25,6 +27,7 @@ class Checkpoint(private val placeLocation: PlaceLocation) {
 class Schedule() {
     private val checkpointList = mutableStateListOf<Checkpoint?>()
     val distances = mutableStateListOf<Float>()
+    val countMap = mutableStateMapOf<Category,Int>()//map để đếm có bao nhiêu trong category
 
     constructor(other: Schedule): this(){
         this.checkpointList.addAll(other.checkpointList)
@@ -44,6 +47,11 @@ class Schedule() {
     fun setCheckpoint(checkpoint: Checkpoint, index: Int) {
         checkpointList[index]=checkpoint
         calculateDistance(checkpointList.lastIndex-1)
+
+        for (category in checkpoint.getLocation().categories){
+            countMap[category]=(countMap[category]?:0)+1 //đếm số category
+        }
+
     }
 
     fun removeCheckpointAt(index: Int) {
@@ -54,6 +62,7 @@ class Schedule() {
     fun clear(){
         checkpointList.clear()
         distances.clear()
+        countMap.clear()
     }
 
     //tính khoảng cách giữa các checkpoint
