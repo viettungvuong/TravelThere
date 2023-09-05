@@ -5,10 +5,12 @@ import android.location.Location
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import com.google.firebase.database.annotations.NotNull
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.component1
 import com.google.firebase.storage.ktx.component2
@@ -18,6 +20,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Serializer
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.Json
 
 class Position(var lat: Double, var long: Double): java.io.Serializable{
     override fun toString(): String {
@@ -73,24 +81,36 @@ fun convertCategoryToStr(category: Category): String{
 }
 
 
-//không cho phép tạo object từ class PlaceLocation
+//không cho phép tạo object từ class PlaceLocation nên dùng protected (inherit vẫn đc)
+@Serializable
 open class PlaceLocation protected constructor(private val name: String, private val pos: Position, val cityName: String): java.io.Serializable{
     var categories: MutableSet<Category> = mutableSetOf() //các category của địa điểm này
     var recommendsCount = 0
 
     var address: String?=null //địa chỉ
 
-    var imageUrl by mutableStateOf<String?>(null)
+    @Transient //để bỏ qua imageUrlState khi serialize
+    private var imageUrlState= mutableStateOf<String?>(null)
+    var imageUrl: String?
+        get() = imageUrlState?.value
+        set(value) {
+            imageUrlState?.value = value
+        }
+    //gán imageurl khi deserialize (do sau khi deserializae thì imageUrlState = null)
+    fun afterDeserialization(imageUrl: String?) {
+        this.imageUrlState =mutableStateOf(null)
+        this.imageUrlState.value = imageUrl
+    }
 
     var reviewRepository: ReviewRepository
     var imageViewModel: ImageViewModel
 
     init {
-        reviewRepository=ReviewRepository()
         imageViewModel=ImageViewModel()
         runBlocking {
             fetchImageUrl()
         }
+        reviewRepository=ReviewRepository()
     }
 
     fun getName(): String{
@@ -123,15 +143,9 @@ open class PlaceLocation protected constructor(private val name: String, private
 
 
     suspend fun fetchImageUrl() = withContext(Dispatchers.IO) {
-        if (imageUrl != null) {
-            return@withContext imageUrl
-        }
-
-        imageViewModel.fetchAllImageUrls(true)
-        imageUrl = imageViewModel.urls.first()
+        imageViewModel.fetchAllImageUrls(true) //lấy tất cả ảnh
+        imageUrl = imageViewModel.urls.first() //đặt image url là ảnh đầu tiên
     }
-
-
 
     inner class ReviewRepository : ViewModel(), java.io.Serializable {
         var reviews=mutableListOf<Review>()

@@ -300,6 +300,7 @@ class CreateScheduleActivity : ComponentActivity() {
                 if (location.value!=null){
                     val intent = Intent(this, PlaceView::class.java)
                     intent.putExtra("location", location.value)
+                    intent.putExtra("image url", location.value?.imageUrl)
                     startActivity(intent)
                 }
 

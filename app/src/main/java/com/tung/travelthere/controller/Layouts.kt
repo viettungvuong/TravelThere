@@ -317,6 +317,8 @@ fun SneakViewPlace(context: Context, location: PlaceLocation) {
             .clickable(onClick = {
                 val intent = Intent(context, PlaceView::class.java)
                 intent.putExtra("location", location)
+                val imageUrl = location.imageUrl
+                intent.putExtra("image url",imageUrl) //do image url là @transient nên phải truyền riêng
                 context.startActivity(intent)
             }), elevation = 10.dp
     ) {
@@ -332,6 +334,7 @@ fun SneakViewPlace(context: Context, location: PlaceLocation) {
                 text = location.getName()
             )
 
+
         }
     }
 }
@@ -342,7 +345,7 @@ fun SneakViewPlaceLong(context: Context, location: PlaceLocation, hasImage: Bool
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(location.imageUrl) {
-            imageUrl = location.imageUrl
+        imageUrl = location.imageUrl
     }
 
     Card(
@@ -353,6 +356,8 @@ fun SneakViewPlaceLong(context: Context, location: PlaceLocation, hasImage: Bool
             .clickable(onClick = {
                 val intent = Intent(context, PlaceView::class.java)
                 intent.putExtra("location", location)
+                val imageUrl = location.imageUrl
+                intent.putExtra("image url",imageUrl)
                 context.startActivity(intent)
             }), elevation = 10.dp
     ) {

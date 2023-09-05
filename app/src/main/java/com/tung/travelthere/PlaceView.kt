@@ -63,6 +63,11 @@ class PlaceView : ComponentActivity() {
 
         location = intent.getSerializableExtra("location") as PlaceLocation
 
+        val imageUrl = intent.getStringExtra("image url")
+        Log.d("location img url 1",imageUrl?:"")
+        location.afterDeserialization(imageUrl) //do imageurl không serializable nên ta đem nó qua riêng
+        Log.d("location img url 2",location.imageUrl?:"")
+
         setContent {
             viewPlace(location = location)
         }
@@ -86,14 +91,15 @@ class PlaceView : ComponentActivity() {
     @Composable
     fun viewPlace(location: PlaceLocation) {
         var imageUrl by remember { mutableStateOf<String?>(null) }
+
         val tabTitles = listOf("About", "Reviews", "Suggestions")
         val pagerState = rememberPagerState(initialPage = 0)
         val coroutineScope = rememberCoroutineScope()
 
         LaunchedEffect(location.imageUrl) {
-                imageUrl = location.imageUrl
+            imageUrl = location.imageUrl
+            Log.d("location img url",location.imageUrl?:"")
         }
-
 
         Scaffold { padding ->
             Column {
@@ -103,7 +109,9 @@ class PlaceView : ComponentActivity() {
                         .heightIn(max = 300.dp)
                         .fillMaxWidth()
                 ) {
-                    ImageFromUrl(url = imageUrl ?: "", contentDescription = null, 0.0)
+                    if (imageUrl!=null){
+                        ImageFromUrl(url = imageUrl!!, contentDescription = null, 0.0)
+                    }
 
                     FloatingActionButton(
                         modifier = Modifier
