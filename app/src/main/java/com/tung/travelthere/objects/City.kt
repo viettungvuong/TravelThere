@@ -151,7 +151,6 @@ class City private constructor() {
                 }
             }
 
-            val currentPos = AppController.currentPosition.currentLocation
 
             return locations
         }

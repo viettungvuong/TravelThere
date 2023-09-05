@@ -5,6 +5,9 @@ import android.location.Location
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.component1
@@ -12,6 +15,7 @@ import com.google.firebase.storage.ktx.component2
 import com.google.firebase.storage.ktx.storage
 import com.tung.travelthere.controller.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
@@ -72,10 +76,22 @@ fun convertCategoryToStr(category: Category): String{
 //không cho phép tạo object từ class PlaceLocation
 open class PlaceLocation protected constructor(private val name: String, private val pos: Position, val cityName: String): java.io.Serializable{
     var categories: MutableSet<Category> = mutableSetOf() //các category của địa điểm này
-    var imageUrl: String?=null
     var recommendsCount = 0
 
     var address: String?=null //địa chỉ
+
+    var imageUrl by mutableStateOf<String?>(null)
+
+    var reviewRepository: ReviewRepository
+    var imageViewModel: ImageViewModel
+
+    init {
+        reviewRepository=ReviewRepository()
+        imageViewModel=ImageViewModel()
+        runBlocking {
+            fetchImageUrl()
+        }
+    }
 
     fun getName(): String{
         return name
@@ -86,7 +102,7 @@ open class PlaceLocation protected constructor(private val name: String, private
     }
 
     override fun toString(): String {
-        return "$name,$cityName"
+        return "$name,$cityName,$imageUrl"
     }
 
     override fun equals(other: Any?): Boolean {
@@ -104,17 +120,18 @@ open class PlaceLocation protected constructor(private val name: String, private
         return this.pos.distanceTo(placeLocation.getPos())
     }
 
-    suspend fun fetchImageUrl(): String? = withContext(Dispatchers.IO) {
+
+
+    suspend fun fetchImageUrl() = withContext(Dispatchers.IO) {
         if (imageUrl != null) {
             return@withContext imageUrl
         }
 
         imageViewModel.fetchAllImageUrls(true)
-        return@withContext imageViewModel.urls.first()
+        imageUrl = imageViewModel.urls.first()
     }
 
-    val reviewRepository = ReviewRepository()
-    val imageViewModel = ImageViewModel()
+
 
     inner class ReviewRepository : ViewModel(), java.io.Serializable {
         var reviews=mutableListOf<Review>()

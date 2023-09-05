@@ -700,6 +700,7 @@ class MainActivity : ComponentActivity() {
     private fun filterSortList(
         chosenFilterViewModel: ChosenFilterViewModel, listState: SnapshotStateList<PlaceLocation>
     ) {
+        Log.d("list 1 img url prev",listState.first().imageUrl.toString())
         val copyList = mutableListOf<PlaceLocation>()
         copyList.addAll(listState)
         listState.clear()
@@ -730,8 +731,10 @@ class MainActivity : ComponentActivity() {
             else -> {
                 listState.addAll(copyList)
             }
-        }
 
+
+        }
+        Log.d("list 1 img url after",listState.first().imageUrl.toString())
     }
 
 }

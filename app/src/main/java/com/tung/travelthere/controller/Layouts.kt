@@ -305,10 +305,8 @@ fun SneakViewPlace(context: Context, location: PlaceLocation) {
     var imageUrl by remember { mutableStateOf<String?>(null) }
     val coroutineScope = rememberCoroutineScope()
 
-    LaunchedEffect(imageUrl) {
-        coroutineScope.launch {
-            imageUrl = location.fetchImageUrl()
-        }
+    LaunchedEffect(location.imageUrl) {
+            imageUrl = location.imageUrl
     }
 
     Card(
@@ -323,12 +321,12 @@ fun SneakViewPlace(context: Context, location: PlaceLocation) {
             }), elevation = 10.dp
     ) {
         Column(
+            modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             if (imageUrl!=null){
                 ImageFromUrl(url = imageUrl!!, contentDescription = null, 150.0)
             }
-
 
             Text(
                 text = location.getName()
@@ -343,10 +341,8 @@ fun SneakViewPlaceLong(context: Context, location: PlaceLocation, hasImage: Bool
     var imageUrl by remember { mutableStateOf<String?>(null) }
     val coroutineScope = rememberCoroutineScope()
 
-    LaunchedEffect(imageUrl) {
-        coroutineScope.launch {
-            imageUrl = location.fetchImageUrl()
-        }
+    LaunchedEffect(location.imageUrl) {
+            imageUrl = location.imageUrl
     }
 
     Card(

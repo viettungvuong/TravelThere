@@ -90,10 +90,8 @@ class PlaceView : ComponentActivity() {
         val pagerState = rememberPagerState(initialPage = 0)
         val coroutineScope = rememberCoroutineScope()
 
-        LaunchedEffect(imageUrl) {
-            coroutineScope.launch {
-                imageUrl = location.fetchImageUrl()
-            }
+        LaunchedEffect(location.imageUrl) {
+                imageUrl = location.imageUrl
         }
 
 
