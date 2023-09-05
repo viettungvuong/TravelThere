@@ -307,13 +307,35 @@ class PlaceView : ComponentActivity() {
         //giao diện điểm số review
         @Composable
         fun reviewScoreText(modifier: Modifier, score: Double) {
-            var color: Color? = null
-            if (score in 0.0..4.0) {
-                color = colorFirst
-            } else if (score in 4.0..8.0) {
-                color = colorSecond
+            var color= when (score) {
+                in 0.0..4.0 -> {
+                    colorFirst
+                }
+                in 4.0..8.0 -> {
+                    colorSecond
+                }
+                else -> {
+                    colorThird
+                }
+            }
+            Box(modifier = modifier) {
+                Text(
+                    text = score.toString(),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp,
+                    color = color
+                )
+            }
+        }
+
+        @Composable
+        fun reviewScoreText(modifier: Modifier, score: Int) {
+            var color = if (score in 0..4) {
+                colorFirst
+            } else if (score in 5..8) {
+                colorSecond
             } else {
-                color = colorThird
+                colorThird
             }
             Box(modifier = modifier) {
                 Text(
@@ -356,9 +378,11 @@ class PlaceView : ComponentActivity() {
                             Text(text = review.content, fontSize = 15.sp)
                         }
                     }
+                    
+                    Spacer(modifier = Modifier.weight(1f))
 
                     reviewScoreText(
-                        score = review.score.toDouble(),
+                        score = review.score,
                         modifier = Modifier.padding(horizontal = 10.dp)
                     )
 
@@ -537,10 +561,12 @@ class PlaceView : ComponentActivity() {
                         ) //đăng review lên
                         listState.add(review)
 
+
                         reviewTotalScoreViewModel.totalScore =
                             location.reviewRepository.calculateReviewScore() //tính lại tổng điểm
 
-                        textState.value=""
+
+                        textState.value = ""
                     },
                     modifier = Modifier
                         .weight(0.45f)
@@ -595,7 +621,10 @@ class PlaceView : ComponentActivity() {
                     .fillMaxWidth()
 
             ) {
-                reviewScoreText(score = roundDecimal(totalScore,2), modifier = Modifier.padding(2.dp))
+                reviewScoreText(
+                    score = roundDecimal(totalScore, 2),
+                    modifier = Modifier.padding(2.dp)
+                )
             }
 
 
@@ -628,21 +657,30 @@ class PlaceView : ComponentActivity() {
                     ), originalState
             )
 
-            if (listState.isNotEmpty()) {
+            if (chosenState == -1) { //không chọn filter gì hết
                 LazyColumn(
                 ) {
-                    items(listState){
-                        review -> reviewLayout(review = review)
+                    items(originalState) { review ->
+                        reviewLayout(review = review)
                     }
                 }
             } else {
-                Text(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 25.dp),
-                    text = "No reviews",
-                    textAlign = TextAlign.Center
-                )
+                if (listState.isNotEmpty()) {
+                    LazyColumn(
+                    ) {
+                        items(listState) { review ->
+                            reviewLayout(review = review)
+                        }
+                    }
+                } else {
+                    Text(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 25.dp),
+                        text = "No reviews",
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
 
         }

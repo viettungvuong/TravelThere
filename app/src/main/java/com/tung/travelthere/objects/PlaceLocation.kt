@@ -134,6 +134,8 @@ open class PlaceLocation protected constructor(private val name: String, private
 
         //đăng review lên firebase
         fun submitReview(review: Review, context: Context){
+            reviews.add(review)
+
             val reviewData= hashMapOf(
                 "sender" to review.userId,
                 "sender-name" to review.name,
