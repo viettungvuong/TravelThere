@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -287,9 +288,9 @@ class PlaceView : ComponentActivity() {
     }
 
     //phần review
-    var chosenState by mutableStateOf(-1)
-    val reviewTotalScoreViewModel = ReviewTotalScoreViewModel()
-    val chosenScoreViewModel = ChosenScoreViewModel()
+    private var chosenState by mutableStateOf(-1)
+    private val reviewTotalScoreViewModel = ReviewTotalScoreViewModel()
+    private val chosenScoreViewModel = ChosenScoreViewModel()
 
     class ReviewTotalScoreViewModel() : ViewModel() {
         var totalScore by mutableStateOf(0.0)
@@ -309,7 +310,7 @@ class PlaceView : ComponentActivity() {
             var color: Color? = null
             if (score in 0.0..4.0) {
                 color = colorFirst
-            } else if (score in 5.0..8.0) {
+            } else if (score in 4.0..8.0) {
                 color = colorSecond
             } else {
                 color = colorThird
@@ -535,6 +536,7 @@ class PlaceView : ComponentActivity() {
                             applicationContext
                         ) //đăng review lên
                         listState.add(review)
+
                         reviewTotalScoreViewModel.totalScore =
                             location.reviewRepository.calculateReviewScore() //tính lại tổng điểm
 
@@ -562,7 +564,7 @@ class PlaceView : ComponentActivity() {
 
         var listState = remember { mutableStateListOf<Review>() }
         var originalState = remember { mutableStateListOf<Review>() }
-        var totalScore = remember { mutableStateOf(0.0) }
+        var totalScore by remember { mutableStateOf(0.0) }
 
         val coroutineScope = rememberCoroutineScope()
 
@@ -575,12 +577,14 @@ class PlaceView : ComponentActivity() {
 
                 reviewTotalScoreViewModel.totalScore =
                     location.reviewRepository.calculateReviewScore()
-                totalScore.value = reviewTotalScoreViewModel.totalScore
+                totalScore = reviewTotalScoreViewModel.totalScore
             }
         }
 
-        SideEffect {
-            totalScore.value = reviewTotalScoreViewModel.totalScore
+        LaunchedEffect(reviewTotalScoreViewModel.totalScore) {
+            reviewTotalScoreViewModel.totalScore =
+                location.reviewRepository.calculateReviewScore()
+            totalScore = reviewTotalScoreViewModel.totalScore
         }
 
         Column(modifier = Modifier.fillMaxSize()) {
@@ -591,7 +595,7 @@ class PlaceView : ComponentActivity() {
                     .fillMaxWidth()
 
             ) {
-                reviewScoreText(score = roundDecimal(totalScore.value,2), modifier = Modifier.padding(2.dp))
+                reviewScoreText(score = roundDecimal(totalScore,2), modifier = Modifier.padding(2.dp))
             }
 
 
@@ -621,7 +625,7 @@ class PlaceView : ComponentActivity() {
                     .border(
                         width = 1.dp,
                         color = Color.Black
-                    ), listState
+                    ), originalState
             )
 
             if (listState.isNotEmpty()) {
