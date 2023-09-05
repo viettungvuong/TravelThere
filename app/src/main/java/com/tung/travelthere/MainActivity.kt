@@ -42,6 +42,7 @@ import kotlinx.coroutines.*
 import java.net.URL
 import java.util.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -114,15 +115,22 @@ class WeatherViewModel(context: Context, city: City) : ViewModel() {
 
 class MainActivity : ComponentActivity() {
 
+    val optionStr = mutableListOf<String>()
+
     //để biết chọn category nào
     lateinit var weatherViewModel: WeatherViewModel
+    lateinit var selectedItemViewModel: ChosenFilterViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         Places.initialize(this, "AIzaSyCytvnlz93VlDAMs2RsndMo-HVgd0fl-lQ")
 
+        for (filter in Filter.values()) {
+            optionStr.add(filterToStr(filter))
+        }
         weatherViewModel = WeatherViewModel(this, City.getSingleton())
+        selectedItemViewModel = ChosenFilterViewModel()
 
         setContent {
             Home(this)
@@ -341,11 +349,11 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        LaunchedEffect(weatherViewModel.temperature,weatherViewModel.conditionImgUrl){
-            temperature=weatherViewModel.temperature
-            conditionImgUrl=weatherViewModel.conditionImgUrl
-            conditionImgUrl= "https:$conditionImgUrl"
-            Log.d("condition img url",conditionImgUrl)
+        LaunchedEffect(weatherViewModel.temperature, weatherViewModel.conditionImgUrl) {
+            temperature = weatherViewModel.temperature
+            conditionImgUrl = weatherViewModel.conditionImgUrl
+            conditionImgUrl = "https:$conditionImgUrl"
+            Log.d("condition img url", conditionImgUrl)
         }
 
 
@@ -381,7 +389,7 @@ class MainActivity : ComponentActivity() {
                 )
 
             }
-            
+
             Spacer(modifier = Modifier.weight(1f))
 
             //phần thời tiết
@@ -392,15 +400,17 @@ class MainActivity : ComponentActivity() {
                         end = 16.dp,
                         bottom = 8.dp,
                     )
-                    .background(if (temperature < 15.0) {
-                        colorCold
-                    } else if (temperature in 15.0..30.0) {
-                        colorMedium
-                    } else {
-                        colorHot
-                    })
-            ){
-                Row(verticalAlignment = Alignment.CenterVertically){
+                    .background(
+                        if (temperature < 15.0) {
+                            colorCold
+                        } else if (temperature in 15.0..30.0) {
+                            colorMedium
+                        } else {
+                            colorHot
+                        }
+                    )
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = "$temperature °C",
                         color = Color.White,
@@ -437,52 +447,15 @@ class MainActivity : ComponentActivity() {
 
 
         Column(modifier = modifier) {
-            LazyRow(modifier = Modifier.padding(15.dp)) {
-                itemsIndexed(Category.values()) { index, category -> //tương tự xuất ra location adapter
-                    categoryView(category, colorBlue, true, listState, chosenState, originalState)
-                }
-            }
-
-            if (listState.isNullOrEmpty()) {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(text = "No places", fontStyle = FontStyle.Italic)
-                }
-            } else {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
-                    modifier = Modifier.fillMaxSize(),
-                    content = {
-                        items(listState) { location ->
-                            SneakViewPlace(context, location)
-                        }
-                    }
-                )
+            DropDownMenu(
+                modifier = Modifier
+                    .padding(10.dp),
+                options = optionStr, selectedItemViewModel = selectedItemViewModel
+            ) {
+                filterSortList(chosenFilterViewModel = selectedItemViewModel, listState = listState)
             }
 
 
-        }
-    }
-
-    @Composable
-    fun TouristAttractions(modifier: Modifier, context: Context, city: City) {
-        var listState = remember { mutableStateListOf<PlaceLocation>() }
-        var chosenState = remember { mutableStateOf(mutableSetOf<Category>()) }
-        var originalState = remember { mutableStateListOf<PlaceLocation>() }
-        val coroutineScope = rememberCoroutineScope()
-
-        LaunchedEffect(originalState) {
-            coroutineScope.launch {
-                originalState.addAll(city.locationsRepository.refreshLocations().map { it.value })
-                listState.addAll(originalState)
-            }
-        }
-
-
-        Column(modifier = modifier) {
             LazyRow(modifier = Modifier.padding(15.dp)) {
                 itemsIndexed(Category.values()) { index, category -> //tương tự xuất ra location adapter
                     categoryView(category, colorBlue, true, listState, chosenState, originalState)
@@ -510,8 +483,62 @@ class MainActivity : ComponentActivity() {
                     }
                 )
             }
+        }
+    }
 
 
+    @Composable
+    fun TouristAttractions(modifier: Modifier, context: Context, city: City) {
+        var listState = remember { mutableStateListOf<PlaceLocation>() }
+        var chosenState = remember { mutableStateOf(mutableSetOf<Category>()) }
+        var originalState = remember { mutableStateListOf<PlaceLocation>() }
+        val coroutineScope = rememberCoroutineScope()
+
+        LaunchedEffect(originalState) {
+            coroutineScope.launch {
+                originalState.addAll(city.locationsRepository.refreshLocations().map { it.value })
+                listState.addAll(originalState)
+            }
+        }
+
+
+        Column(modifier = modifier) {
+            DropDownMenu(
+                modifier = Modifier
+                    .padding(10.dp),
+                options = optionStr, selectedItemViewModel = selectedItemViewModel
+            ) {
+                filterSortList(chosenFilterViewModel = selectedItemViewModel, listState = listState)
+            }
+
+
+            LazyRow(modifier = Modifier.padding(15.dp)) {
+                itemsIndexed(Category.values()) { index, category -> //tương tự xuất ra location adapter
+                    categoryView(category, colorBlue, true, listState, chosenState, originalState)
+                }
+            }
+
+            if (listState.isNullOrEmpty()) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(text = "No places", fontStyle = FontStyle.Italic)
+                }
+            } else {
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    modifier = Modifier.fillMaxSize(),
+                    content = {
+                        items(listState) { location ->
+                            if (!location.categories.contains(Category.NECESSITY)) {
+                                SneakViewPlace(context, location)
+                            }
+                        }
+                    }
+                )
+            }
         }
 
     }
@@ -536,6 +563,16 @@ class MainActivity : ComponentActivity() {
         }
 
         Column(modifier = modifier) {
+
+            DropDownMenu(
+                modifier = Modifier
+                    .padding(10.dp),
+                options = optionStr, selectedItemViewModel = selectedItemViewModel
+            ) {
+                filterSortList(chosenFilterViewModel = selectedItemViewModel, listState = listState)
+            }
+
+
             LazyRow(modifier = Modifier.padding(15.dp)) {
                 itemsIndexed(Category.values()) { index, category -> //tương tự xuất ra location adapter
                     categoryView(category, colorBlue, true, listState, chosenState, originalState)
@@ -578,8 +615,124 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    @OptIn(ExperimentalMaterialApi::class)
+    @Composable
+    fun DropDownMenu(
+        modifier: Modifier,
+        options: List<String>,
+        selectedItemViewModel: ChosenFilterViewModel,
+        onSelect: () -> Unit
+    ) {
+        var expanded by remember { mutableStateOf(false) }
+
+        Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+            Box(
+                modifier = modifier
+            ) {
+                ExposedDropdownMenuBox(
+                    expanded = expanded,
+                    onExpandedChange = {
+                        expanded = !expanded
+                    }
+                ) {
+                    TextField(
+                        value = filterToStr(selectedItemViewModel.chosenFilter),
+                        onValueChange = {},
+                        readOnly = true,
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                    )
+
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        options.forEach { item ->
+                            DropdownMenuItem(
+                                onClick = {
+                                    selectedItemViewModel.chosenFilter = strToFilter(item)
+                                    expanded = false
+
+                                    onSelect()
+                                }
+                            ) {
+                                Text(text = item)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    enum class Filter {
+        NEAREST_FIRST,
+        FARTHEST_FIRST,
+        HIGHLY_REVIEWED,
+        MOST_RECOMMENDS,
+        DEFAULT
+    }
+
+    private fun filterToStr(filter: Filter): String {
+        return (when (filter) {
+            Filter.NEAREST_FIRST -> "Nearest first"
+            Filter.FARTHEST_FIRST -> "Farthest first"
+            Filter.HIGHLY_REVIEWED -> "Highly reviewed"
+            Filter.MOST_RECOMMENDS -> "Most recommends"
+            else -> "Default"
+        })
+    }
+
+    private fun strToFilter(string: String): Filter {
+        return (when (string.uppercase()) {
+            "NEAREST FIRST" -> Filter.NEAREST_FIRST
+            "FARTHEST FIRST" -> Filter.FARTHEST_FIRST
+            "HIGHLY REVIEWED" -> Filter.HIGHLY_REVIEWED
+            "MOST RECOMMENDS" -> Filter.MOST_RECOMMENDS
+            else -> Filter.DEFAULT
+        })
+    }
 
 
+    class ChosenFilterViewModel : ViewModel() {
+        var chosenFilter by mutableStateOf(Filter.DEFAULT)
+    }
+
+    private fun filterSortList(
+        chosenFilterViewModel: ChosenFilterViewModel, listState: SnapshotStateList<PlaceLocation>
+    ) {
+        val copyList = mutableListOf<PlaceLocation>()
+        copyList.addAll(listState)
+        listState.clear()
+
+        when (chosenFilterViewModel.chosenFilter) {
+            Filter.NEAREST_FIRST -> {
+                listState.addAll(copyList.sortedBy {
+                    it.getPos().distanceTo(AppController.currentPosition.currentLocation!!)
+                })
+
+            }
+            Filter.FARTHEST_FIRST -> {
+                listState.addAll(copyList.sortedByDescending {
+                    it.getPos().distanceTo(AppController.currentPosition.currentLocation!!)
+                })
+            }
+            Filter.HIGHLY_REVIEWED -> {
+                listState.addAll(copyList.sortedByDescending {
+                    it.reviewRepository.reviewScore
+                })
+            }
+            Filter.MOST_RECOMMENDS -> {
+                listState.addAll(copyList.sortedByDescending {
+                    it.recommendsCount
+                })
+            }
+
+            else -> {
+                listState.addAll(copyList)
+            }
+        }
+
+    }
 
 }
 

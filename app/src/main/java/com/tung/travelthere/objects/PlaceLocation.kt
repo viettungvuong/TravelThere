@@ -118,6 +118,7 @@ open class PlaceLocation protected constructor(private val name: String, private
 
     inner class ReviewRepository : ViewModel(), java.io.Serializable {
         var reviews=mutableListOf<Review>()
+        var reviewScore = 0.0
 
         //lấy tổng điểm
         fun calculateReviewScore(): Double{
@@ -129,12 +130,14 @@ open class PlaceLocation protected constructor(private val name: String, private
             for (review in reviews){
                 res+=review.score
             }
-            return res/reviews.size
+            reviewScore = res/reviews.size
+            return reviewScore
         }
 
         //đăng review lên firebase
         fun submitReview(review: Review, context: Context){
             reviews.add(review)
+            reviewScore+=review.score
 
             val reviewData= hashMapOf(
                 "sender" to review.userId,

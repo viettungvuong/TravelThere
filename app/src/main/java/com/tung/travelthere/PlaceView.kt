@@ -559,12 +559,8 @@ class PlaceView : ComponentActivity() {
                             review,
                             applicationContext
                         ) //đăng review lên
+
                         listState.add(review)
-
-
-                        reviewTotalScoreViewModel.totalScore =
-                            location.reviewRepository.calculateReviewScore() //tính lại tổng điểm
-
 
                         textState.value = ""
                     },
