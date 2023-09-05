@@ -410,7 +410,7 @@ class MainActivity : ComponentActivity() {
 
                     Spacer(modifier = Modifier.width(5.dp))
 
-                    ImageFromUrl(url = conditionImgUrl, contentDescription = null, 24.0) //hình ảnh
+                    ImageFromUrl(url = conditionImgUrl, contentDescription = null, 32.0) //hình ảnh
                 }
 
             }
