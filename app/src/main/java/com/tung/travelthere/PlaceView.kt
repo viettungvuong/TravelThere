@@ -9,11 +9,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -22,6 +24,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -93,7 +96,7 @@ class PlaceView : ComponentActivity() {
         }
 
 
-        MaterialTheme {
+        Scaffold { padding ->
             Column {
 
                 Box(
@@ -120,39 +123,37 @@ class PlaceView : ComponentActivity() {
                 }
 
 
-                Box(
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(
                             Color.White,
                             shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp)
                         )
-
                 ) {
-                    Column {
-                        tabLayout(
-                            pagerState = pagerState,
-                            tabTitles = tabTitles,
-                            coroutineScope = coroutineScope,
-                            contentColor = Color.Red
-                        )
+                    tabLayout(
+                        pagerState = pagerState,
+                        tabTitles = tabTitles,
+                        coroutineScope = coroutineScope,
+                        contentColor = Color.Red
+                    )
 
-                        HorizontalPager(state = pagerState, pageCount = tabTitles.size) { page ->
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(16.dp)
-                                    .weight(1f)
-                            ) {
-                                when (page) {
-                                    0 -> aboutPlace(location)
-                                    1 -> reviewsPlace(location)
-                                    2 -> suggestionsPlace(location)
-                                }
+                    HorizontalPager(state = pagerState, pageCount = tabTitles.size) { page ->
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(16.dp)
+                                .weight(1f)
+                        ) {
+                            when (page) {
+                                0 -> aboutPlace(location)
+                                1 -> reviewsPlace(location)
+                                2 -> suggestionsPlace(location)
                             }
                         }
                     }
                 }
+
 
             }
         }
@@ -182,7 +183,7 @@ class PlaceView : ComponentActivity() {
             fontSize = 25.sp
         )
 
-        if (location.address!=null){
+        if (location.address != null) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -368,8 +369,8 @@ class PlaceView : ComponentActivity() {
         //phần lọc đánh giá
         @Composable
         fun filterReviewEach(
-            index: Int, reviewState: MutableState<MutableList<Review>>,
-            originalState: MutableState<MutableList<Review>>
+            index: Int, reviewState: SnapshotStateList<Review>,
+            originalState: SnapshotStateList<Review>
         ) {
             var chosenIndex by remember { mutableStateOf(-1) }
 
@@ -390,12 +391,13 @@ class PlaceView : ComponentActivity() {
                         if (i == index)
                             continue
                     }
+                    reviewState.clear()
                     if (chosenState == index) {
                         chosenState = -1 //bỏ chọn
-                        reviewState!!.value = originalState!!.value
+                        reviewState.addAll(originalState)
                     } else {
                         chosenState = index //chọn
-                        reviewState!!.value = originalState!!.value.filter {
+                        reviewState.addAll(originalState.filter {
                             val filterBool = (
                                     when (index) {
                                         0 -> it.score in 0..4
@@ -404,7 +406,7 @@ class PlaceView : ComponentActivity() {
                                     })
 
                             filterBool
-                        } as MutableList<Review>
+                        })
 
                     }
 
@@ -430,7 +432,6 @@ class PlaceView : ComponentActivity() {
         @Composable
         fun DropDownMenu(
             modifier: Modifier,
-            context: Context,
             options: List<String>,
             selectedItemViewModel: ChosenScoreViewModel
         ) {
@@ -479,7 +480,7 @@ class PlaceView : ComponentActivity() {
         fun yourReview(
             reviewTotalScoreViewModel: ReviewTotalScoreViewModel,
             modifier: Modifier,
-            listState: MutableState<MutableList<Review>>
+            listState: SnapshotStateList<Review>
         ) {
             val textState = remember { mutableStateOf("") }
 
@@ -509,7 +510,6 @@ class PlaceView : ComponentActivity() {
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 5.dp),
-                        context = LocalContext.current,
                         options = options,
                         selectedItemViewModel = chosenScoreViewModel
                     )
@@ -534,9 +534,11 @@ class PlaceView : ComponentActivity() {
                             review,
                             applicationContext
                         ) //đăng review lên
-                        listState.value.add(review)
+                        listState.add(review)
                         reviewTotalScoreViewModel.totalScore =
                             location.reviewRepository.calculateReviewScore() //tính lại tổng điểm
+
+                        textState.value=""
                     },
                     modifier = Modifier
                         .weight(0.45f)
@@ -558,9 +560,9 @@ class PlaceView : ComponentActivity() {
             }
         }
 
-        var listState = remember { mutableStateOf(mutableListOf<Review>()) }
-        var originalState = remember { mutableStateOf(mutableListOf<Review>()) }
-        var totalScore by remember { mutableStateOf(0.0) }
+        var listState = remember { mutableStateListOf<Review>() }
+        var originalState = remember { mutableStateListOf<Review>() }
+        var totalScore = remember { mutableStateOf(0.0) }
 
         val coroutineScope = rememberCoroutineScope()
 
@@ -568,18 +570,17 @@ class PlaceView : ComponentActivity() {
 
         LaunchedEffect(originalState) {
             coroutineScope.launch {
-                originalState.value =
-                    location.reviewRepository.refreshReviews() as MutableList<Review>
-                listState.value = originalState.value
+                originalState.addAll(location.reviewRepository.refreshReviews())
+                listState.addAll(originalState)
 
                 reviewTotalScoreViewModel.totalScore =
                     location.reviewRepository.calculateReviewScore()
-                totalScore = reviewTotalScoreViewModel.totalScore
+                totalScore.value = reviewTotalScoreViewModel.totalScore
             }
         }
 
-        LaunchedEffect(totalScore) {
-            totalScore = reviewTotalScoreViewModel.totalScore
+        SideEffect {
+            totalScore.value = reviewTotalScoreViewModel.totalScore
         }
 
         Column(modifier = Modifier.fillMaxSize()) {
@@ -590,7 +591,7 @@ class PlaceView : ComponentActivity() {
                     .fillMaxWidth()
 
             ) {
-                reviewScoreText(score = totalScore, modifier = Modifier.padding(2.dp))
+                reviewScoreText(score = roundDecimal(totalScore.value,2), modifier = Modifier.padding(2.dp))
             }
 
 
@@ -623,12 +624,11 @@ class PlaceView : ComponentActivity() {
                     ), listState
             )
 
-            if (listState.value.isNotEmpty()) {
-                FlowColumn(
-                    modifier = Modifier.weight(1f)
+            if (listState.isNotEmpty()) {
+                LazyColumn(
                 ) {
-                    for (review in listState.value) {
-                        reviewLayout(review = review)
+                    items(listState){
+                        review -> reviewLayout(review = review)
                     }
                 }
             } else {
@@ -643,8 +643,6 @@ class PlaceView : ComponentActivity() {
 
         }
     }
-
-
 
 
     //phần suggestions (hiện điểm số và hình ảnh)
@@ -673,7 +671,7 @@ class PlaceView : ComponentActivity() {
 
             Button(
                 onClick = {
-                          //recommend địa điểm này
+                    //recommend địa điểm này
                     suggestPlace(this@PlaceView, location, null)
                 },
                 colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xffa39662)),
@@ -700,7 +698,7 @@ class PlaceView : ComponentActivity() {
                 modifier = Modifier.fillMaxSize(),
                 content = {
                     items(imageUrls) { imageUrl ->
-                        Box(modifier = Modifier.padding(horizontal = 5.dp)){
+                        Box(modifier = Modifier.padding(horizontal = 5.dp)) {
                             AsyncImage(
                                 model = imageUrl,
                                 contentDescription = null,
