@@ -147,6 +147,10 @@ class City private constructor() {
                         this.recommends.add(t) //thì thêm vào recommends luôn
                     }
 
+                    runBlocking {
+                        t.reviewRepository.refreshReviews(refreshNow = true) //lấy các review đánh giá
+                    }
+
                     this.locations[t.getPos().toString()] = t //dùng map dễ quản lý hơn và truy xuất hơn
                 }
             }

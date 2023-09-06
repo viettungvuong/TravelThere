@@ -34,6 +34,7 @@ fun colorFromImage(bitmap: Bitmap): Color {
     return colorExtracted
 }
 
+//lấy vị trí hiện tại
 @SuppressLint("MissingPermission")
 fun getCurrentPosition(fusedLocationClient: FusedLocationProviderClient, context: Context, callback: () -> Unit) {
     AppController.currentPosition= AppController.UserPlace()

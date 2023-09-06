@@ -25,6 +25,11 @@
         android:theme="@style/Theme.TravelThere"
         tools:targetApi="31">
         <activity
+            android:name=".ChooseCity"
+            android:exported="false"
+            android:label="@string/title_activity_choose_city"
+            android:theme="@style/Theme.TravelThere" />
+        <activity
             android:name=".ProfileActivity"
             android:exported="false"
             android:theme="@style/Theme.TravelThere" />

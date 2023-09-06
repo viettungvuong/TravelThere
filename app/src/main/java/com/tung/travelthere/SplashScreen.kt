@@ -117,11 +117,16 @@ class SplashScreen : ComponentActivity() {
         builder.setNegativeButton("Cancel") { dialog, _ ->
             dialog.dismiss()
 
-            Toast.makeText(activity,"Location service is required to use this app",Toast.LENGTH_LONG).show()
-            activity.finishAffinity()
-            System.exit(0) //thoát khỏi app luôn
+            val intent = Intent(this, ChooseCity::class.java)
+            startActivity(intent)
+            finish() //cho người dùng tự chọn thành phố
         }
         builder.show()
+    }
+
+    //cho phép dùng mà không bật location
+    private fun UseNoLocation(){
+
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -137,8 +142,9 @@ class SplashScreen : ComponentActivity() {
                 }
             } else {
                 Toast.makeText(this,"Location service is required to use this app",Toast.LENGTH_LONG).show()
-                finishAffinity()
-                System.exit(0) //thoát khỏi app luôn //thoát khỏi app
+                val intent = Intent(this, ChooseCity::class.java)
+                startActivity(intent)
+                finish()
             }
         }
     }
