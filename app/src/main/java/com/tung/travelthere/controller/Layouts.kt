@@ -561,7 +561,7 @@ fun shimmerBrush(showShimmer: Boolean = true,targetValue:Float = 1000f): Brush {
             initialValue = 0f,
             targetValue = targetValue,
             animationSpec = infiniteRepeatable(
-                animation = tween(800), repeatMode = RepeatMode.Reverse
+                animation = tween(1000), repeatMode = RepeatMode.Reverse
             )
         )
         Brush.linearGradient(
