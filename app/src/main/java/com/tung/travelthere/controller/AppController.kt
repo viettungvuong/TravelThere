@@ -20,6 +20,7 @@ import com.google.firebase.storage.FirebaseStorage
 import com.tung.travelthere.objects.*
 import kotlinx.coroutines.tasks.await
 import java.text.SimpleDateFormat
+import java.util.*
 
 const val collectionCities = "cities"
 const val collectionLocations = "locations"
@@ -82,12 +83,12 @@ class AppController {
                     .addOnSuccessListener { documentSnapshot ->
                         if (documentSnapshot.exists()) { //có favorite trên firebase r
                             documentReference.update("favorites",
-                                FieldValue.arrayUnion("${location.getPos()},${location.cityName}"))
+                                FieldValue.arrayUnion("${location.getPos()}"))
                         } else {
                             //chưa có thì phải tạo
 
                             val favoriteListStr = mutableListOf<String>()
-                            favoriteListStr.add("${location.getPos()},${location.cityName}")
+                            favoriteListStr.add("${location.getPos()}")
                             val favoriteData = hashMapOf(
                                 "favorites" to favoriteListStr
                             )
@@ -97,7 +98,7 @@ class AppController {
             }
             else{
                 db.collection("users").document(auth.currentUser!!.uid).update("favorites",
-                    FieldValue.arrayRemove("${location.getPos()},${location.cityName}"))
+                    FieldValue.arrayRemove("${location.getPos()}"))
             }
         }
 
@@ -113,28 +114,13 @@ class AppController {
                 if (favorites != null) {
                     val list = favorites as List<String>
 
+                    //từng str trong favorite
                     for (str in list){
-                        val splitStr = str.split(',')
-                        val cityName = splitStr[2]
-                        val pos = splitStr[0]+","+splitStr[1]
-                        db.collection(collectionCities).document(cityName).collection(
-                            collectionLocations).document(pos).get().addOnSuccessListener {
-                            location ->
-                            val placeName = location.getString(locationNameField) ?: ""
-                            val lat = location.getDouble("lat") ?: 0.0
-                            val long = location.getDouble("long") ?: 0.0
+                        val getPlaceLocation = City.getSingleton().locationsRepository.locations[str]
+                        //lấy từng địa điểm trong schedule
 
-                            val t = TouristPlace(placeName, Position(lat, long), cityName)
-
-                            val categoriesStr = location.get("categories") as List<String>?
-
-                            if (categoriesStr!=null){
-                                for (categoryStr in categoriesStr){
-                                    t.categories.add(convertStrToCategory(categoryStr)) //thêm category
-                                }
-                            }
-
-                            this.favoriteList.add(t) //thêm vào danh sách favorite
+                        if (getPlaceLocation!=null){
+                            this.favoriteList.add(getPlaceLocation)
                         }
                     }
                 }

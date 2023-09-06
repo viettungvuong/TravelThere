@@ -385,7 +385,7 @@ fun SneakViewPlaceLong(context: Context, location: PlaceLocation, hasImage: Bool
                     Icon(
                         imageVector = Icons.Default.Place,
                         contentDescription = "City",
-                        tint = Color.Black
+                        tint = Color.Red
                     )
 
                     Spacer(modifier = Modifier.width(20.dp))

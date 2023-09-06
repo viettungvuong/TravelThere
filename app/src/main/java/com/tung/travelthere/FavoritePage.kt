@@ -48,15 +48,7 @@ class FavoritePage : ComponentActivity() {
         searchViewModel= SearchViewModel()
 
         setContent {
-            TravelThereTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colors.background
-                ) {
-                    FavoriteList(this)
-                }
-            }
+            FavoriteList(this)
         }
     }
 
@@ -65,7 +57,6 @@ class FavoritePage : ComponentActivity() {
         runBlocking {
             AppController.Favorites.getSingleton().refreshFavorites()
         }
-
     }
 
     @OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
@@ -130,6 +121,7 @@ class FavoritePage : ComponentActivity() {
                                     if (it==DismissValue.DismissedToEnd||it==DismissValue.DismissedToStart) {
                                         listState.remove(currentItem)
                                         AppController.Favorites.getSingleton().removeFavorite(currentItem)
+                                        //xoá khỏi favorite
                                         true
                                     } else {
                                         false
