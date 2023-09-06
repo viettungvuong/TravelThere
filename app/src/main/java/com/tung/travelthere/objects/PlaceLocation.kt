@@ -264,3 +264,8 @@ class Restaurant(name: String, pos: Position, cityName: String, private val spec
 
 class TouristPlace(name: String, pos: Position, cityName: String): PlaceLocation(name,pos,cityName){
 }
+
+//đếm số lần đã đến địa điểm
+//fun PlaceLocation.visitTimes(): Int{
+///*TODO*/
+//}

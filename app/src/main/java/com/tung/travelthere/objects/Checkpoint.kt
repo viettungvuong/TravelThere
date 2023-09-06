@@ -6,8 +6,7 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import com.google.type.DateTime
-import java.sql.Date
-import java.sql.Time
+import java.util.Date
 import java.util.LinkedList
 
 class Checkpoint(private val placeLocation: PlaceLocation) {
@@ -29,10 +28,16 @@ class Schedule() {
     val distances = mutableStateListOf<Float>()
     val countMap = mutableStateMapOf<Category,Int>()//map để đếm có bao nhiêu trong category
 
+    var date = Date() //mặc định sẽ lấy ngày hôm nay
+
     constructor(other: Schedule): this(){
         this.checkpointList.addAll(other.checkpointList)
         this.distances.addAll(distances)
     } //copy constructor
+
+    constructor(date: Date): this(){
+        this.date = date
+    }
 
     fun getList(): SnapshotStateList<Checkpoint?> {
         return checkpointList
@@ -81,4 +86,6 @@ class Schedule() {
         }
         distances[index]=distances[index]/1000
     }
+
+
 }

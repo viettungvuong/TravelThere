@@ -20,6 +20,7 @@ const val locationNameField = "location-name"
 
 val colorBlue = Color(android.graphics.Color.parseColor("#5980b3"))
 val formatter = SimpleDateFormat("HH:mm:ss dd/MM/yyyy")
+val formatterDateOnly = SimpleDateFormat("dd/MM/yyyy")
 
 class AppController {
     class UserPlace{
@@ -138,7 +139,6 @@ class AppController {
 
         lateinit var currentPosition: UserPlace //địa điểm hiện tại
 
-
         @JvmField
         val db = Firebase.firestore
 
@@ -150,6 +150,9 @@ class AppController {
 
         @JvmField
         val schedules = mutableListOf<Schedule>() //danh sách schedule
+
+        @JvmField
+        val countVisit = mutableMapOf<PlaceLocation,Int>() //đếm số lần đã đến các điểm
     }
 }
 

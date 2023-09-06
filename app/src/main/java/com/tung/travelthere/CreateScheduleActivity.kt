@@ -56,6 +56,7 @@ import com.tung.travelthere.ui.theme.TravelThereTheme
 import java.util.*
 
 const val checkpointField = "checkpoints"
+const val dateField = "date"
 
 class CreateScheduleActivity : ComponentActivity() {
     lateinit var searchViewModel: SearchViewModel
@@ -458,7 +459,8 @@ class CreateScheduleActivity : ComponentActivity() {
             }
 
             val scheduleData = hashMapOf(
-                checkpointField to checkpointStr.toList()
+                checkpointField to checkpointStr.toList(),
+                dateField to formatterDateOnly.format(schedule.date)
             )
 
             AppController.db.collection("users").document(AppController.auth.currentUser!!.uid)
@@ -560,6 +562,7 @@ class CreateScheduleActivity : ComponentActivity() {
     @OptIn(ExperimentalLayoutApi::class)
     @Composable
     private fun ViewSchedules() {
+        //adapter schedule
         @Composable
         fun scheduleView(schedule: Schedule){
             Card(
@@ -572,37 +575,41 @@ class CreateScheduleActivity : ComponentActivity() {
                     .clickable(onClick = {
                     }), elevation = 10.dp
             ) {
-                LazyRow {
-                    itemsIndexed(schedule.getList()){
-                            index, checkpoint ->
-                        if (checkpoint!=null){
-                            Row(){
-                                Icon(
-                                    imageVector = Icons.Default.Place,
-                                    contentDescription = "City",
-                                    tint = Color.Red,
-                                    modifier = Modifier.scale(0.8f)
-                                )
-
-                                Spacer(modifier = Modifier.width(10.dp))
-
-                                Text(
-                                    text = "${checkpoint.getLocation().getName()}"
-                                )
-
-                                if (index!=schedule.getList().lastIndex){
-                                    Text(
-                                        text = "→",
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 20.sp,
-                                        color = Color.Red
+                Column {
+                    Text(modifier = Modifier.padding(5.dp), text = formatterDateOnly.format(schedule.date), fontWeight = FontWeight.Bold)
+                    LazyRow {
+                        itemsIndexed(schedule.getList()){
+                                index, checkpoint ->
+                            if (checkpoint!=null){
+                                Row(){
+                                    Icon(
+                                        imageVector = Icons.Default.Place,
+                                        contentDescription = null,
+                                        tint = Color.Red,
+                                        modifier = Modifier.scale(0.8f)
                                     )
+
+                                    Spacer(modifier = Modifier.width(10.dp))
+
+                                    Text(
+                                        text = "${checkpoint.getLocation().getName()}"
+                                    )
+
+                                    if (index!=schedule.getList().lastIndex){
+                                        Text(
+                                            text = "→",
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 20.sp,
+                                            color = Color.Red
+                                        )
+                                    }
                                 }
                             }
-                        }
 
+                        }
                     }
                 }
+
             }
         }
         
@@ -622,18 +629,24 @@ fun fetchSchedules(){
         .collection("schedules").get().addOnSuccessListener {
             documents ->
             for (document in documents){
+                val dateStr = document.getString(dateField)
+                val date = formatterDateOnly.parse(dateStr)
+
                 val posStrArr = document.get(checkpointField) as List<String>
 
-                val currentSchedule = Schedule()
+                val currentSchedule = Schedule(date)
+
                 for (str in posStrArr){
                     val getPlaceLocation = City.getSingleton().locationsRepository.locations[str]
+                    //lấy từng địa điểm trong schedule
 
                     if (getPlaceLocation!=null){
                         currentSchedule.getList().add(Checkpoint(getPlaceLocation))
                     }
 
                 }
-                AppController.schedules.add(currentSchedule) //thêm vào danh sách schedule
+
+                AppController.schedules.add(currentSchedule) //thêm schedule vào danh sách schedule
             }
         }
 }
