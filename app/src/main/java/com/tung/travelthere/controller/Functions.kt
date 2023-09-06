@@ -1,34 +1,20 @@
 package com.tung.travelthere.controller
 
 import android.annotation.SuppressLint
+import android.app.Activity
+import android.app.AlarmManager
+import android.app.PendingIntent
 import android.content.Context
-import android.content.SearchRecentSuggestionsProvider
+import android.content.Intent
 import android.graphics.Bitmap
 import android.location.Geocoder
-import android.util.Log
-import android.widget.Toast
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.unit.IntSize
 import androidx.palette.graphics.Palette
+import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.libraries.places.api.Places
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
-import com.tung.travelthere.PlaceAutocompleteViewModel
-import com.tung.travelthere.R
+import com.tung.travelthere.RegisterLoginActivity
 import com.tung.travelthere.objects.City
-import com.tung.travelthere.objects.PlaceLocation
 import com.tung.travelthere.objects.Position
-import kotlinx.coroutines.runBlocking
 import java.util.*
 import kotlin.math.pow
 import kotlin.math.roundToInt
@@ -78,4 +64,13 @@ fun getCurrentPosition(fusedLocationClient: FusedLocationProviderClient, context
 
 fun roundDecimal(value: Double, places: Int): Double{
     return (value * 100.0).roundToInt() / 10.0.pow(places.toDouble())
+}
+
+fun restartApp(activity: Activity){
+    val intent = Intent(
+        getApplicationContext(),
+        RegisterLoginActivity::class.java
+    )
+    activity.startActivity(intent)
+    activity.finish()
 }

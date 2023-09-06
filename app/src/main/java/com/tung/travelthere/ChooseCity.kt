@@ -29,6 +29,10 @@ import com.tung.travelthere.controller.colorBlue
 import com.tung.travelthere.objects.City
 import com.tung.travelthere.objects.Position
 import com.tung.travelthere.ui.theme.TravelThereTheme
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 class ChooseCity : ComponentActivity() {
 
@@ -62,10 +66,16 @@ class ChooseCity : ComponentActivity() {
         AppController.currentPosition.currentLocation = Position(10.7628356,106.6801006)
         //đặt vị trí giả định
 
-        val intent = Intent(this, RegisterLoginActivity::class.java)
-        startActivity(intent)
-
         Toast.makeText(this,"Please wait",Toast.LENGTH_LONG).show()
+
+        runBlocking { //chạy trong main thread luôn load xong rồi vào
+            City.getSingleton().locationsRepository.refreshLocations(true)
+        }
+        val intent = Intent(this@ChooseCity, MainActivity::class.java)
+        startActivity(intent)
+        finish()
+
+
 
         finish()
     }

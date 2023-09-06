@@ -89,7 +89,12 @@ class SplashScreen : ComponentActivity() {
                     //chưa bật location services thì yêu cầu người dùng bật
                     requestLocationEnable(this@SplashScreen)
                 } else {
+                    runOnUiThread{
+                        Toast.makeText(this@SplashScreen,"Please wait",Toast.LENGTH_LONG).show()
+                    }
+
                     getCurrentPosition(fusedLocationClient, this@SplashScreen) {
+
                         CoroutineScope(Dispatchers.Main).launch { //chạy trong main thread luôn load xong rồi vào
                             City.getSingleton().locationsRepository.refreshLocations(true)
 
@@ -146,15 +151,12 @@ class SplashScreen : ComponentActivity() {
         if (requestCode == LOCATION_ENABLE_REQUEST_CODE) {
             //nếu đã bật location services
             if (isLocationEnabled(this)) {
-                getCurrentPosition(fusedLocationClient, this@SplashScreen) {
-                    CoroutineScope(Dispatchers.Main).launch { //chạy trong main thread luôn load xong rồi vào
-                        City.getSingleton().locationsRepository.refreshLocations(true)
-
-                        val intent = Intent(this@SplashScreen, MainActivity::class.java)
-                        startActivity(intent)
-                        finish()
-                    }
-                }
+                Toast.makeText(
+                    this,
+                    "Application will be restarted to reinitialize",
+                    Toast.LENGTH_LONG
+                ).show()
+                restartApp(this) //restart vì khi bật location phải mất tgian để android để lấy địa điểm
             } else {
                 Toast.makeText(
                     this,
