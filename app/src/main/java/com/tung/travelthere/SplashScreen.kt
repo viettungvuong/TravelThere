@@ -53,7 +53,7 @@ class SplashScreen : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        Places.initialize(applicationContext, "AIzaSyCytvnlz93VlDAMs2RsndMo-HVgd0fl-lQ")
+        Places.initialize(applicationContext, apiKey)
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
