@@ -60,12 +60,6 @@ class SplashScreen : ComponentActivity() {
             if (!isGranted) { //không có permission
                 finishAffinity()
                 System.exit(0) //thoát khỏi app luôn //thoát khỏi app
-            } else {
-                getCurrentPosition(fusedLocationClient, this) {
-                    val intent = Intent(this, RegisterLoginActivity::class.java)
-                    startActivity(intent)
-                    finish()
-                }
             }
         }
 
@@ -123,8 +117,6 @@ class SplashScreen : ComponentActivity() {
     }
 
     //hộp thoại yêu cầu bật location services
-
-
     private fun requestLocationEnable(activity: Activity) {
         val builder = AlertDialog.Builder(activity)
         builder.setTitle("Location Services Required")
@@ -142,7 +134,10 @@ class SplashScreen : ComponentActivity() {
             startActivity(intent)
             finish() //cho người dùng tự chọn thành phố
         }
-        builder.show()
+        runOnUiThread {
+            builder.show()
+        }
+
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -151,10 +146,14 @@ class SplashScreen : ComponentActivity() {
         if (requestCode == LOCATION_ENABLE_REQUEST_CODE) {
             //nếu đã bật location services
             if (isLocationEnabled(this)) {
-                getCurrentPosition(fusedLocationClient, this) {
-                    val intent = Intent(this, MainActivity::class.java)
-                    startActivity(intent)
-                    finish()
+                getCurrentPosition(fusedLocationClient, this@SplashScreen) {
+                    CoroutineScope(Dispatchers.Main).launch { //chạy trong main thread luôn load xong rồi vào
+                        City.getSingleton().locationsRepository.refreshLocations(true)
+
+                        val intent = Intent(this@SplashScreen, MainActivity::class.java)
+                        startActivity(intent)
+                        finish()
+                    }
                 }
             } else {
                 Toast.makeText(
