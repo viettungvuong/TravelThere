@@ -55,7 +55,6 @@
         <activity
             android:name=".FavoritePage"
             android:exported="false"
-            android:label="@string/title_activity_favorite_page"
             android:theme="@style/Theme.TravelThere" />
         <activity
             android:name=".SuggestPlace"

@@ -47,6 +47,13 @@ class SplashScreen : ComponentActivity() {
             if (!isGranted) { //không có permission
                 finish() //thoát khỏi app
             }
+            else{
+                getCurrentPosition(fusedLocationClient, this) {
+                    val intent = Intent(this, RegisterLoginActivity::class.java)
+                    startActivity(intent)
+                    finish()
+                }
+            }
         }
 
     @SuppressLint("MissingPermission")

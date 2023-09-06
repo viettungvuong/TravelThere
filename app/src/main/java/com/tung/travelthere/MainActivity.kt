@@ -133,18 +133,19 @@ class MainActivity : ComponentActivity() {
         weatherViewModel = WeatherViewModel(this, City.getSingleton())
         selectedItemViewModel = ChosenFilterViewModel()
 
+        City.getSingleton().locationsRepository.nearbyLocations() //lấy những địa điểm gần
+
         setContent {
             Home(this)
         }
     }
 
-    override fun onResume() {
-        super.onResume()
+    override fun onStart() {
+        super.onStart()
         runBlocking {
             City.getSingleton().locationsRepository.refreshLocations(true)
-            City.getSingleton().fetchImageUrl()
+            City.getSingleton().locationsRepository.nearbyLocations() //lấy những địa điểm gần
         }
-        City.getSingleton().locationsRepository.nearbyLocations() //lấy những địa điểm gần
 
     }
 
@@ -201,7 +202,7 @@ class MainActivity : ComponentActivity() {
                             contentDescription = "Home"
                         )
                     }
-                    Spacer(modifier = Modifier.width(10.dp))
+                    Spacer(modifier = Modifier.width(3.dp))
                     IconButton(onClick = {
                         val intent = Intent(context, FavoritePage::class.java)
                         context.startActivity(intent)
@@ -212,7 +213,7 @@ class MainActivity : ComponentActivity() {
                             contentDescription = "Favorite"
                         )
                     }
-                    Spacer(modifier = Modifier.width(10.dp))
+                    Spacer(modifier = Modifier.width(3.dp))
                     IconButton(onClick = {
                         val intent = Intent(context, SuggestPlace::class.java)
                         context.startActivity(intent)
@@ -223,7 +224,7 @@ class MainActivity : ComponentActivity() {
                             contentDescription = "Add"
                         )
                     }
-                    Spacer(modifier = Modifier.width(10.dp))
+                    Spacer(modifier = Modifier.width(3.dp))
                     IconButton(onClick = {
                         val intent = Intent(context, CreateScheduleActivity::class.java)
                         context.startActivity(intent)
@@ -235,7 +236,7 @@ class MainActivity : ComponentActivity() {
                             contentScale = ContentScale.Fit,
                         )
                     }
-                    Spacer(modifier = Modifier.width(10.dp))
+                    Spacer(modifier = Modifier.width(3.dp))
                     IconButton(onClick = {
                         val intent = Intent(context, ProfileActivity::class.java)
                         context.startActivity(intent)

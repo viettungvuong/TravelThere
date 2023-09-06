@@ -127,14 +127,18 @@ class FavoritePage : ComponentActivity() {
                             val currentItem by rememberUpdatedState(newValue = location)
                             val dismissState = rememberDismissState(
                                 confirmStateChange = {
-                                    listState.remove(currentItem)
-                                    AppController.Favorites.getSingleton().removeFavorite(currentItem)
-                                    true
+                                    if (it==DismissValue.DismissedToEnd||it==DismissValue.DismissedToStart) {
+                                        listState.remove(currentItem)
+                                        AppController.Favorites.getSingleton().removeFavorite(currentItem)
+                                        true
+                                    } else {
+                                        false
+                                    }
                                 }
                             )
 
                             SwipeToDismiss(state = dismissState, background = {SwipeBackground(dismissState)}
-                                , dismissThresholds = { direction ->
+                                , dismissThresholds = {
                                     FractionalThreshold(0.4f)
                                 }
                                 , modifier = Modifier
@@ -172,7 +176,7 @@ fun SwipeBackground(dismissState: DismissState) {
     val alignment = Alignment.CenterEnd
     val icon = Icons.Default.Delete
     val scale by animateFloatAsState(
-        if (dismissState.targetValue == DismissValue.Default) 0.75f else 1f
+        if (dismissState.targetValue == DismissValue.Default) 0.5f else 1f
     )
 
     Box(

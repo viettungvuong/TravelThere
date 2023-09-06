@@ -144,7 +144,7 @@ open class PlaceLocation protected constructor(private val name: String, private
 
     suspend fun fetchImageUrl() = withContext(Dispatchers.IO) {
         imageViewModel.fetchAllImageUrls(true) //lấy tất cả ảnh
-        imageUrl = imageViewModel.urls.first() //đặt image url là ảnh đầu tiên
+        imageUrl = imageViewModel.urls.firstOrNull() //đặt image url là ảnh đầu tiên
     }
 
     inner class ReviewRepository : ViewModel(), java.io.Serializable {

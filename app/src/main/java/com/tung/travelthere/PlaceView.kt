@@ -64,9 +64,7 @@ class PlaceView : ComponentActivity() {
         location = intent.getSerializableExtra("location") as PlaceLocation
 
         val imageUrl = intent.getStringExtra("image url")
-        Log.d("location img url 1",imageUrl?:"")
         location.afterDeserialization(imageUrl) //do imageurl không serializable nên ta đem nó qua riêng
-        Log.d("location img url 2",location.imageUrl?:"")
 
         setContent {
             viewPlace(location = location)
