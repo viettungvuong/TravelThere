@@ -1,16 +1,10 @@
 package com.tung.travelthere
 
-import android.app.DatePickerDialog
 import android.content.Intent
-import android.location.Geocoder
-import android.net.Uri
 import android.os.Bundle
-import android.util.Log
-import android.widget.DatePicker
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -18,42 +12,36 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.libraries.places.api.model.Place
-import com.google.android.libraries.places.api.net.FetchPlaceRequest
-import com.google.android.material.datepicker.MaterialDatePicker
 import com.tung.travelthere.controller.*
 import com.tung.travelthere.objects.*
-import com.tung.travelthere.ui.theme.TravelThereTheme
+import java.time.Duration
 import java.util.*
+import java.util.concurrent.TimeUnit
+import kotlin.math.abs
 
 const val checkpointField = "checkpoints"
 const val dateField = "date"
@@ -139,7 +127,8 @@ class CreateScheduleActivity : ComponentActivity() {
             showDialog: Boolean,
             searchViewModel: SearchViewModel,
             setShowDialog: (Boolean) -> Unit,
-            setLocation: (PlaceLocation) -> Unit
+            setLocation: (PlaceLocation) -> Unit,
+            setTimesInWeek: (Int) -> Unit
         ) {
             var distance by remember { mutableStateOf(0f) }
             var indexState = remember { mutableStateOf(index) }
@@ -202,7 +191,10 @@ class CreateScheduleActivity : ComponentActivity() {
                                                 5.dp
                                             )
                                             .clickable(onClick = {
-                                                setLocation(location)
+                                                //nhấn vào địa điểm
+                                                setLocation(location) //callback đặt địa điểm cho checkpoint
+
+                                                setTimesInWeek(visitTimes(location)) //đếm số lần đến điểm này trong 1 tuần qua
 
                                                 //đặt ở index checkpoint
                                                 val checkpoint = Checkpoint(location)
@@ -212,7 +204,7 @@ class CreateScheduleActivity : ComponentActivity() {
                                                 )
 
                                                 clear()
-                                                setShowDialog(false)
+                                                setShowDialog(false) //đóng hộp thoại lại
 
                                             }), elevation = 10.dp
                                     ) {
@@ -294,7 +286,7 @@ class CreateScheduleActivity : ComponentActivity() {
             showDialog: MutableState<Boolean>
         ) {
             var location = remember { mutableStateOf<PlaceLocation?>(null) }
-
+            var timesInAWeek = remember { mutableStateOf(0) }
 
             Column(horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.clickable {
@@ -366,7 +358,7 @@ class CreateScheduleActivity : ComponentActivity() {
                                 modifier = Modifier
                                     .size(32.dp)
                                     .background(Color(0xff185241), shape = RoundedCornerShape(4.dp))
-                                    .clickable { showDialog.value = true },
+                                    .clickable { showDialog.value = true }, //mở hộp thoại tìm kiếm
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.Center
                             ) {
@@ -378,7 +370,6 @@ class CreateScheduleActivity : ComponentActivity() {
                             }
                         }
 
-
                         SearchDialog(
                             index = index,
                             schedule = schedule,
@@ -387,6 +378,9 @@ class CreateScheduleActivity : ComponentActivity() {
                             setShowDialog = { showDialog.value = it },
                             setLocation = {
                                 location.value = it
+                            },
+                            setTimesInWeek = {
+                                timesInAWeek.value = it
                             })
 
                     }
@@ -411,7 +405,24 @@ class CreateScheduleActivity : ComponentActivity() {
                         Text(text = "${roundDecimal(distance.toDouble(), 2)} km", fontSize = 15.sp)
                     }
                 }
+
+                if (timesInAWeek.value > 0) {
+                    val text = buildAnnotatedString {
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append("${timesInAWeek.value}")
+                        }
+                        append(" times within a week")
+                    }
+
+                    Text(
+                        text = text,
+                        fontSize = 16.sp,
+                        fontStyle = FontStyle.Italic
+                    )
+                }
             }
+
+
         }
 
         @Composable
@@ -421,7 +432,7 @@ class CreateScheduleActivity : ComponentActivity() {
             horizontalArrangement = Arrangement.Center){
                 for (category in schedule.countMap.keys){
                     if (schedule.countMap[category]!=0){
-                        Row(verticalAlignment = Alignment.CenterVertically){
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = 5.dp)){
                             Icon(
                                 painter = when (category) {
                                     Category.RESTAURANT -> painterResource(R.drawable.restaurant)
@@ -436,7 +447,7 @@ class CreateScheduleActivity : ComponentActivity() {
                                 contentDescription = null,
                                 modifier = Modifier.size(20.dp)
                             )
-                            
+
                             Spacer(modifier = Modifier.width(5.dp))
 
                             Text(text = schedule.countMap[category].toString(), fontSize = 15.sp)
@@ -502,7 +513,7 @@ class CreateScheduleActivity : ComponentActivity() {
                             keyboardController?.hide()
                         })
             }
-            
+
             categoryCount(schedule = schedule)
 
             Button(
@@ -612,7 +623,7 @@ class CreateScheduleActivity : ComponentActivity() {
 
             }
         }
-        
+
         FlowColumn() {
             for (schedule in AppController.schedules){
                 scheduleView(schedule = schedule)
@@ -625,6 +636,12 @@ class CreateScheduleActivity : ComponentActivity() {
 }
 
 fun fetchSchedules(){
+    fun diffDate(date1: Date, date2: Date): Long{
+        val diffInMillies = abs(date1.time - date2.getTime())
+        val diff = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS)
+        return diff
+    }
+
     AppController.db.collection("users").document(AppController.auth.currentUser!!.uid)
         .collection("schedules").get().addOnSuccessListener {
             documents ->
@@ -642,8 +659,13 @@ fun fetchSchedules(){
 
                     if (getPlaceLocation!=null){
                         currentSchedule.getList().add(Checkpoint(getPlaceLocation))
-                    }
 
+                        //đếm số lần đến địa điểm này trong 1 tuần
+                        if (diffDate(date,Date())<=7L){
+                            val inc = (AppController.countVisit[getPlaceLocation]?:0)+1
+                            AppController.countVisit[getPlaceLocation!!] = inc
+                        }
+                    }
                 }
 
                 AppController.schedules.add(currentSchedule) //thêm schedule vào danh sách schedule

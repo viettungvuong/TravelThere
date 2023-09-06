@@ -124,7 +124,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        Places.initialize(this, "AIzaSyCytvnlz93VlDAMs2RsndMo-HVgd0fl-lQ")
+        Places.initialize(this, apiKey)
+        //bảo mật apiKey (không up file storage.kt lên git)
 
         for (filter in Filter.values()) {
             optionStr.add(filterToStr(filter))
@@ -403,7 +404,7 @@ class MainActivity : ComponentActivity() {
                     .background(
                         if (temperature < 15.0) {
                             colorCold
-                        } else if (temperature in 15.0..30.0) {
+                        } else if (temperature>=15.0&&temperature<30.0) {
                             colorMedium
                         } else {
                             colorHot

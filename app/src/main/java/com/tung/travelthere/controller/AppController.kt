@@ -152,7 +152,7 @@ class AppController {
         val schedules = mutableListOf<Schedule>() //danh sách schedule
 
         @JvmField
-        val countVisit = mutableMapOf<PlaceLocation,Int>() //đếm số lần đã đến các điểm
+        val countVisit = mutableMapOf<PlaceLocation,Int>() //đếm số lần đã đến các điểm (trong 1 tuần trở lại đây)
     }
 }
 
