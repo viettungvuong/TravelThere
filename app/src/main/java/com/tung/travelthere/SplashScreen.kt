@@ -44,7 +44,7 @@ class SplashScreen : ComponentActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-            if (!isGranted) {
+            if (!isGranted) { //không có permission
                 finish() //thoát khỏi app
             }
         }
