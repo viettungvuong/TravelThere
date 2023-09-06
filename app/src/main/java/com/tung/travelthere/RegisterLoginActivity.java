@@ -27,7 +27,7 @@ public class RegisterLoginActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         if(intent.getBooleanExtra("LogOut", false)) {
-            Toast.makeText(RegisterLoginActivity.this, "Loged out!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(RegisterLoginActivity.this, "Logged out!", Toast.LENGTH_SHORT).show();
         }
 
         emailEditText = findViewById(R.id.emailEditText);
@@ -94,6 +94,7 @@ public class RegisterLoginActivity extends AppCompatActivity {
         super.onStart();
 
         if (AppController.auth.getCurrentUser()!=null){ //có đăng nhập rồi thì vào luôn
+            Toast.makeText(getApplicationContext(), "Login successful!", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(RegisterLoginActivity.this,MainActivity.class);
             startActivity(intent);
             finish();
