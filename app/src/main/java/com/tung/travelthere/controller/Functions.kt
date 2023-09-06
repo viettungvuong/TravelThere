@@ -7,9 +7,17 @@ import android.graphics.Bitmap
 import android.location.Geocoder
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.unit.IntSize
 import androidx.palette.graphics.Palette
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.libraries.places.api.Places
@@ -67,17 +75,6 @@ fun getCurrentPosition(fusedLocationClient: FusedLocationProviderClient, context
     }
 }
 
-//tìm kiếm và hiện đề xuất tìm kiếm
-fun search(searchQuery: String){
-
-}
-
-
-
-//tạo lịch trình đi chơi
-fun createSchedule(){
-
-}
 
 fun roundDecimal(value: Double, places: Int): Double{
     return (value * 100.0).roundToInt() / 10.0.pow(places.toDouble())

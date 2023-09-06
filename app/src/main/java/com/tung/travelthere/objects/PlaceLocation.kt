@@ -16,10 +16,9 @@ import com.google.firebase.storage.ktx.component1
 import com.google.firebase.storage.ktx.component2
 import com.google.firebase.storage.ktx.storage
 import com.tung.travelthere.controller.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.tasks.await
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Serializer
@@ -107,7 +106,7 @@ open class PlaceLocation protected constructor(private val name: String, private
 
     init {
         imageViewModel=ImageViewModel()
-        runBlocking {
+        CoroutineScope(Main).launch {
             fetchImageUrl()
         }
         reviewRepository=ReviewRepository()

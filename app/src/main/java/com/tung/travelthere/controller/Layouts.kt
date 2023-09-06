@@ -6,6 +6,7 @@ import android.util.Log
 import android.widget.CalendarView
 import android.widget.DatePicker
 import android.widget.Toast
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -13,6 +14,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -21,15 +23,18 @@ import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.Modifier
+import androidx.compose.ui.*
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
@@ -37,10 +42,11 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.compose.ui.zIndex
 import androidx.core.content.ContextCompat.startActivity
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
@@ -53,6 +59,7 @@ import com.tung.travelthere.objects.Category
 import com.tung.travelthere.objects.City
 import com.tung.travelthere.objects.PlaceLocation
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 //phần hiện ra danh sách các categories
@@ -303,10 +310,11 @@ fun categoryView(
 @Composable
 fun SneakViewPlace(context: Context, location: PlaceLocation) {
     var imageUrl by remember { mutableStateOf<String?>(null) }
+    var isLoading = remember { mutableStateOf(true) }
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(location.imageUrl) {
-            imageUrl = location.imageUrl
+        imageUrl = location.imageUrl
     }
 
     Card(
@@ -318,7 +326,10 @@ fun SneakViewPlace(context: Context, location: PlaceLocation) {
                 val intent = Intent(context, PlaceView::class.java)
                 intent.putExtra("location", location)
                 val imageUrl = location.imageUrl
-                intent.putExtra("image url",imageUrl) //do image url là @transient nên phải truyền riêng
+                intent.putExtra(
+                    "image url",
+                    imageUrl
+                ) //do image url là @transient nên phải truyền riêng
                 context.startActivity(intent)
             }), elevation = 10.dp
     ) {
@@ -327,13 +338,12 @@ fun SneakViewPlace(context: Context, location: PlaceLocation) {
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             if (imageUrl!=null){
-                ImageFromUrl(url = imageUrl!!, contentDescription = null, 150.0)
+                ImageFromUrl(url = imageUrl!!, contentDescription = null, 150.0, isLoading)
             }
 
             Text(
                 text = location.getName()
             )
-
 
         }
     }
@@ -357,14 +367,14 @@ fun SneakViewPlaceLong(context: Context, location: PlaceLocation, hasImage: Bool
                 val intent = Intent(context, PlaceView::class.java)
                 intent.putExtra("location", location)
                 val imageUrl = location.imageUrl
-                intent.putExtra("image url",imageUrl)
+                intent.putExtra("image url", imageUrl)
                 context.startActivity(intent)
             }), elevation = 10.dp
     ) {
         Row {
             if (hasImage) {
                 if (imageUrl!=null){
-                    ImageFromUrl(url = imageUrl!!, contentDescription = null, 150.0)
+                    ImageFromUrl(url = imageUrl!!, contentDescription = null, 150.0,)
                 }
             }
 
@@ -401,22 +411,23 @@ fun SneakViewPlaceLong(context: Context, location: PlaceLocation, hasImage: Bool
 
 
 @Composable
-fun ImageFromUrl(url: String, contentDescription: String?, size: Double) {
-    var modifier: Modifier? = null
-    modifier = if (size == 0.0) {
+fun ImageFromUrl(url: String, contentDescription: String?, size: Double, isLoading: MutableState<Boolean>?=null) {
+    var customModifier = Modifier.fillMaxWidth()
+    customModifier = customModifier.then (if (size == 0.0) {
         Modifier.fillMaxSize()
     } else {
         Modifier.size(size.dp)
+    })
+    if (isLoading!=null){ //cho phép hiện shimmer effect khi load hình
+        customModifier = customModifier.then(Modifier.background(shimmerBrush(targetValue = 1300f, showShimmer = isLoading.value)))
     }
 
-    AsyncImage(model = url, contentDescription = null, modifier = modifier, contentScale = ContentScale.Crop)
+    AsyncImage(model = url,
+        contentDescription = contentDescription,
+        modifier = customModifier,
+        contentScale = ContentScale.Crop,
+        onSuccess = { if (isLoading != null) isLoading.value = false })
 
-//    Image(
-//        painter = rememberAsyncImagePainter(url),
-//        contentDescription = contentDescription,
-//        modifier = modifier,
-//        contentScale = ContentScale.Crop,
-//    )
 }
 
 //thanh tìm kiếm (cho searchplace.kt)
@@ -535,3 +546,83 @@ fun dateTimePicker(modifier: Modifier, mDate: MutableState<String>, datePicker: 
 
 }
 
+//shimmer effect
+@Composable
+fun shimmerBrush(showShimmer: Boolean = true,targetValue:Float = 1000f): Brush {
+    return if (showShimmer) {
+        val shimmerColors = listOf(
+            Color.LightGray.copy(alpha = 0.6f),
+            Color.LightGray.copy(alpha = 0.2f),
+            Color.LightGray.copy(alpha = 0.6f),
+        )
+
+        val transition = rememberInfiniteTransition()
+        val translateAnimation = transition.animateFloat(
+            initialValue = 0f,
+            targetValue = targetValue,
+            animationSpec = infiniteRepeatable(
+                animation = tween(800), repeatMode = RepeatMode.Reverse
+            )
+        )
+        Brush.linearGradient(
+            colors = shimmerColors,
+            start = Offset.Zero,
+            end = Offset(x = translateAnimation.value, y = translateAnimation.value)
+        )
+    } else {
+        Brush.linearGradient(
+            colors = listOf(Color.Transparent,Color.Transparent),
+            start = Offset.Zero,
+            end = Offset.Zero
+        )
+    }
+}
+
+const val numberOfDots = 6
+const val delayUnit = 500
+const val duration = numberOfDots * delayUnit
+val spaceBetween = 2.dp
+@Composable
+fun LoadingAnimation(color: Color) {
+    @Composable
+    fun Dot(scale: Float) {
+        Spacer(
+            Modifier
+                .size(20.dp)
+                .scale(scale)
+                .background(
+                    color = Color.White,
+                    shape = CircleShape
+                )
+        )
+    }
+
+    val infiniteTransition = rememberInfiniteTransition()
+
+    @Composable
+    fun animateScaleWithDelay(delay: Int) = infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 0f,
+        animationSpec = infiniteRepeatable(animation = keyframes {
+            durationMillis = delayUnit * numberOfDots
+            0f at delay with LinearEasing
+            1f at delay + delayUnit with LinearEasing
+            0f at delay + duration
+        })
+    )
+
+    val scales = arrayListOf<State<Float>>()
+    for (i in 0 until numberOfDots) {
+        scales.add(animateScaleWithDelay(delay = i * delayUnit))
+    }
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+    ) {
+        scales.forEach {
+            Dot(it.value)
+            Spacer(Modifier.width(spaceBetween))
+        }
+    }
+}

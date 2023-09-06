@@ -52,6 +52,7 @@ import com.google.firebase.storage.ktx.component2
 import com.tung.travelthere.controller.*
 import com.tung.travelthere.objects.*
 import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.tasks.await
 
 class SuggestPlace : ComponentActivity() {
@@ -516,8 +517,8 @@ private suspend fun uploadImages(
         .addOnSuccessListener { (items, prefixes) ->
             imageCount = items.size //tìm số hình ảnh
 
-            runBlocking {
-                withContext(Dispatchers.IO) {
+
+                CoroutineScope(IO).launch {
                     for (uri in imageViewModel.chosenImagesUri) {
                         Log.d("uri", uri.toString())
                         val fileExtension = getFileExtension(context.contentResolver, uri)
@@ -551,7 +552,6 @@ private suspend fun uploadImages(
                     }
                 }
 
-            }
         }
         .addOnFailureListener { exception ->
             Log.d("error upload image", exception.message.toString())

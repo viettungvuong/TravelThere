@@ -6,6 +6,7 @@ import android.app.DownloadManager
 import android.media.Image
 import android.os.Debug
 import android.util.Log
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.ktx.firestore
@@ -147,7 +148,7 @@ class City private constructor() {
                         this.recommends.add(t) //thì thêm vào recommends luôn
                     }
 
-                    runBlocking {
+                    (Dispatchers.IO) {
                         t.reviewRepository.refreshReviews(refreshNow = true) //lấy các review đánh giá
                     }
 
@@ -155,9 +156,12 @@ class City private constructor() {
                 }
             }
 
+            nearbyLocations(refresh)
 
             return locations
         }
+
+
 
         //lấy những địa điểm trong phạm vi 5000km
         fun nearbyLocations(refresh: Boolean=false): Set<PlaceLocation> {

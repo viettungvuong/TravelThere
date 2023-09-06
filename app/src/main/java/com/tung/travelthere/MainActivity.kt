@@ -53,6 +53,7 @@ import com.android.volley.Request
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
+import kotlinx.coroutines.Dispatchers.Main
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -133,19 +134,18 @@ class MainActivity : ComponentActivity() {
         weatherViewModel = WeatherViewModel(this, City.getSingleton())
         selectedItemViewModel = ChosenFilterViewModel()
 
-        runBlocking {
-            City.getSingleton().locationsRepository.refreshLocations(true)
-            City.getSingleton().locationsRepository.nearbyLocations() //lấy những địa điểm gần
-        }
+
 
         setContent {
-            Home(this)
+            Home(this@MainActivity)
         }
+
+
     }
 
     override fun onStart() {
         super.onStart()
-        City.getSingleton().locationsRepository.nearbyLocations() //lấy những địa điểm gần
+//        City.getSingleton().locationsRepository.nearbyLocations() //lấy những địa điểm gần
     }
 
     @OptIn(ExperimentalFoundationApi::class)
@@ -330,6 +330,8 @@ class MainActivity : ComponentActivity() {
         var temperature by remember { mutableStateOf(0f) }
         var conditionImgUrl by remember { mutableStateOf("") }
 
+        var isLoading = remember { mutableStateOf(true) }
+
         val coroutineScope = rememberCoroutineScope()
 
         LaunchedEffect(imageUrl) {
@@ -354,7 +356,6 @@ class MainActivity : ComponentActivity() {
             temperature = weatherViewModel.temperature
             conditionImgUrl = weatherViewModel.conditionImgUrl
             conditionImgUrl = "https:$conditionImgUrl"
-            Log.d("condition img url", conditionImgUrl)
         }
 
 
@@ -362,7 +363,7 @@ class MainActivity : ComponentActivity() {
             modifier = Modifier
                 .fillMaxSize()
         ) {
-            ImageFromUrl(url = imageUrl ?: "", contentDescription = null, 0.0) //hình ảnh
+            ImageFromUrl(url = imageUrl ?: "", contentDescription = null, 0.0, isLoading) //hình ảnh
         }
 
         Row(
@@ -404,7 +405,7 @@ class MainActivity : ComponentActivity() {
                     .background(
                         if (temperature < 15.0) {
                             colorCold
-                        } else if (temperature>=15.0&&temperature<30.0) {
+                        } else if (temperature >= 15.0 && temperature < 30.0) {
                             colorMedium
                         } else {
                             colorHot
@@ -421,7 +422,7 @@ class MainActivity : ComponentActivity() {
 
                     Spacer(modifier = Modifier.width(5.dp))
 
-                    ImageFromUrl(url = conditionImgUrl, contentDescription = null, 32.0) //hình ảnh
+                    AsyncImage(model = conditionImgUrl, contentDescription = "Condition", modifier = Modifier.size(32.dp), contentScale = ContentScale.Fit)
                 }
 
             }

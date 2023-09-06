@@ -31,12 +31,21 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.location.LocationManagerCompat.getCurrentLocation
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.libraries.places.api.Places
 import com.tung.travelthere.controller.*
+import com.tung.travelthere.objects.City
 import com.tung.travelthere.ui.theme.TravelThereTheme
+import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+
 const val LOCATION_ENABLE_REQUEST_CODE = 123
+
 class SplashScreen : ComponentActivity() {
     private fun hasLocationPermission(): Boolean {
         return ContextCompat.checkSelfPermission(
@@ -51,8 +60,7 @@ class SplashScreen : ComponentActivity() {
             if (!isGranted) { //không có permission
                 finishAffinity()
                 System.exit(0) //thoát khỏi app luôn //thoát khỏi app
-            }
-            else{
+            } else {
                 getCurrentPosition(fusedLocationClient, this) {
                     val intent = Intent(this, RegisterLoginActivity::class.java)
                     startActivity(intent)
@@ -70,25 +78,37 @@ class SplashScreen : ComponentActivity() {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         setContent {
-            Greeting()
+            TravelThereTheme() {
+                Greeting()
+            }
+        }
 
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        val coroutineScope = CoroutineScope(Dispatchers.IO)
+        coroutineScope.launch {
             if (hasLocationPermission()) {
-                if (!isLocationEnabled(this)) {
+                if (!isLocationEnabled(this@SplashScreen)) {
                     //chưa bật location services thì yêu cầu người dùng bật
-                    requestLocationEnable(this)
-                }
-                else{
-                    getCurrentPosition(fusedLocationClient, this) {
-                        val intent = Intent(this, RegisterLoginActivity::class.java)
-                        startActivity(intent)
-                        finish()
+                    requestLocationEnable(this@SplashScreen)
+                } else {
+                    getCurrentPosition(fusedLocationClient, this@SplashScreen) {
+                        CoroutineScope(Dispatchers.Main).launch { //chạy trong main thread luôn load xong rồi vào
+                            City.getSingleton().locationsRepository.refreshLocations(true)
+
+                            val intent = Intent(this@SplashScreen, MainActivity::class.java)
+                            startActivity(intent)
+                            finish()
+                        }
                     }
                 }
 
             } else {
                 requestPermissionLauncher.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
             }
-
         }
     }
 
@@ -102,7 +122,7 @@ class SplashScreen : ComponentActivity() {
                 locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
     }
 
-   //hộp thoại yêu cầu bật location services
+    //hộp thoại yêu cầu bật location services
 
 
     private fun requestLocationEnable(activity: Activity) {
@@ -125,11 +145,6 @@ class SplashScreen : ComponentActivity() {
         builder.show()
     }
 
-    //cho phép dùng mà không bật location
-    private fun UseNoLocation(){
-
-    }
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -137,12 +152,16 @@ class SplashScreen : ComponentActivity() {
             //nếu đã bật location services
             if (isLocationEnabled(this)) {
                 getCurrentPosition(fusedLocationClient, this) {
-                    val intent = Intent(this, RegisterLoginActivity::class.java)
+                    val intent = Intent(this, MainActivity::class.java)
                     startActivity(intent)
                     finish()
                 }
             } else {
-                Toast.makeText(this,"Location service is required to use this app",Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    this,
+                    "Location service is required to use this app",
+                    Toast.LENGTH_LONG
+                ).show()
                 val intent = Intent(this, ChooseCity::class.java)
                 startActivity(intent)
                 finish()
@@ -171,14 +190,11 @@ fun Greeting() {
                 modifier = Modifier.size(32.dp),
                 colorFilter = ColorFilter.tint(Color.White)
             )
+            
+            LoadingAnimation(color = Color.White)
+
         }
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview3() {
-    TravelThereTheme {
-        Greeting()
-    }
-}
+

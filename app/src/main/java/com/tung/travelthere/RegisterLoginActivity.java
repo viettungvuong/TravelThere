@@ -75,7 +75,7 @@ public class RegisterLoginActivity extends AppCompatActivity {
                                 Toast.makeText(getApplicationContext(), "Login successful!", Toast.LENGTH_SHORT).show();
 
                                 // You can navigate to a new activity here if needed
-                                Intent intent = new Intent(RegisterLoginActivity.this,MainActivity.class);
+                                Intent intent = new Intent(RegisterLoginActivity.this,SplashScreen.class);
                                 startActivity(intent);
                                 finish();
 
@@ -95,7 +95,7 @@ public class RegisterLoginActivity extends AppCompatActivity {
 
         if (AppController.auth.getCurrentUser()!=null){ //có đăng nhập rồi thì vào luôn
             Toast.makeText(getApplicationContext(), "Login successful!", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(RegisterLoginActivity.this,MainActivity.class);
+            Intent intent = new Intent(RegisterLoginActivity.this,SplashScreen.class);
             startActivity(intent);
             finish();
         }
