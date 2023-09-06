@@ -67,7 +67,6 @@
             android:theme="@style/Theme.TravelThere" />
         <activity
             android:name=".RegisterLoginActivity"
-            android:theme="@style/Theme.AppCompat" />
             android:exported="false"
             android:theme="@style/AppFullScreenTheme" />
         <activity android:name=".PlaceView" />
