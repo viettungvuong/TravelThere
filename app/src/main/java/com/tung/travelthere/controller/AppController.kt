@@ -1,7 +1,16 @@
 package com.tung.travelthere.controller
 
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
+import android.location.LocationManager
+import android.provider.Settings
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
+import androidx.core.app.ActivityCompat.finishAffinity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
@@ -160,3 +169,4 @@ class SearchViewModel : ViewModel() {
     var matchedQuery = mutableStateListOf<PlaceLocation>()
     var originalMatchedQuery = mutableStateListOf<PlaceLocation>()
 }
+

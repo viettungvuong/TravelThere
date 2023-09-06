@@ -133,7 +133,10 @@ class MainActivity : ComponentActivity() {
         weatherViewModel = WeatherViewModel(this, City.getSingleton())
         selectedItemViewModel = ChosenFilterViewModel()
 
-        City.getSingleton().locationsRepository.nearbyLocations() //lấy những địa điểm gần
+        runBlocking {
+            City.getSingleton().locationsRepository.refreshLocations(true)
+            City.getSingleton().locationsRepository.nearbyLocations() //lấy những địa điểm gần
+        }
 
         setContent {
             Home(this)
@@ -142,11 +145,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onStart() {
         super.onStart()
-        runBlocking {
-            City.getSingleton().locationsRepository.refreshLocations(true)
-            City.getSingleton().locationsRepository.nearbyLocations() //lấy những địa điểm gần
-        }
-
+        City.getSingleton().locationsRepository.nearbyLocations() //lấy những địa điểm gần
     }
 
     @OptIn(ExperimentalFoundationApi::class)

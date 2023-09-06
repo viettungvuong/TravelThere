@@ -1,13 +1,17 @@
 package com.tung.travelthere
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.LocationManager
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -29,10 +33,9 @@ import androidx.core.location.LocationManagerCompat.getCurrentLocation
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.libraries.places.api.Places
-import com.tung.travelthere.controller.AppController
-import com.tung.travelthere.controller.getCurrentPosition
+import com.tung.travelthere.controller.*
 import com.tung.travelthere.ui.theme.TravelThereTheme
-
+const val LOCATION_ENABLE_REQUEST_CODE = 123
 class SplashScreen : ComponentActivity() {
     private fun hasLocationPermission(): Boolean {
         return ContextCompat.checkSelfPermission(
@@ -45,7 +48,8 @@ class SplashScreen : ComponentActivity() {
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
             if (!isGranted) { //không có permission
-                finish() //thoát khỏi app
+                finishAffinity()
+                System.exit(0) //thoát khỏi app luôn //thoát khỏi app
             }
             else{
                 getCurrentPosition(fusedLocationClient, this) {
@@ -68,16 +72,74 @@ class SplashScreen : ComponentActivity() {
             Greeting()
 
             if (hasLocationPermission()) {
-                getCurrentPosition(fusedLocationClient, this) {
-                    val intent = Intent(this, RegisterLoginActivity::class.java)
-                    startActivity(intent)
-                    finish()
+                if (!isLocationEnabled(this)) {
+                    //chưa bật location services thì yêu cầu người dùng bật
+                    requestLocationEnable(this)
+                }
+                else{
+                    getCurrentPosition(fusedLocationClient, this) {
+                        val intent = Intent(this, RegisterLoginActivity::class.java)
+                        startActivity(intent)
+                        finish()
+                    }
                 }
 
             } else {
                 requestPermissionLauncher.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
             }
 
+        }
+    }
+
+    //kiểm tra bật location service chưa
+    private fun isLocationEnabled(context: Context): Boolean {
+        val locationManager = ContextCompat.getSystemService(
+            context,
+            LocationManager::class.java
+        ) as LocationManager
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
+                locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+    }
+
+   //hộp thoại yêu cầu bật location services
+
+
+    private fun requestLocationEnable(activity: Activity) {
+        val builder = AlertDialog.Builder(activity)
+        builder.setTitle("Location Services Required")
+        builder.setMessage("Please enable location services to use this feature.")
+        builder.setPositiveButton("Go to Settings") { dialog, _ ->
+            //mở location settings
+            val intent = Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+            activity.startActivityForResult(intent, LOCATION_ENABLE_REQUEST_CODE)
+            dialog.dismiss()
+        }
+        builder.setNegativeButton("Cancel") { dialog, _ ->
+            dialog.dismiss()
+
+            Toast.makeText(activity,"Location service is required to use this app",Toast.LENGTH_LONG).show()
+            activity.finishAffinity()
+            System.exit(0) //thoát khỏi app luôn
+        }
+        builder.show()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == LOCATION_ENABLE_REQUEST_CODE) {
+            //nếu đã bật location services
+            if (isLocationEnabled(this)) {
+                getCurrentPosition(fusedLocationClient, this) {
+                    val intent = Intent(this, RegisterLoginActivity::class.java)
+                    startActivity(intent)
+                    finish()
+                }
+            } else {
+                Toast.makeText(this,"Location service is required to use this app",Toast.LENGTH_LONG).show()
+                finishAffinity()
+                System.exit(0) //thoát khỏi app luôn //thoát khỏi app
+            }
         }
     }
 }
