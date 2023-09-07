@@ -145,7 +145,7 @@ class City private constructor() {
 
                     t.address = address
 
-                    if (recommendedNum>=5) //có nhiều hơn 5 lượt recommend
+                    if (recommendedNum>=10) //có nhiều hơn 10 lượt recommend
                     {
                         this.recommends.add(t) //thì thêm vào recommends luôn
                     }

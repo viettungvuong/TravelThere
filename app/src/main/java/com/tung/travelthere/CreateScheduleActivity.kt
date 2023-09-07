@@ -639,6 +639,8 @@ fun fetchSchedules(){
         return diff
     }
 
+    AppController.schedules.clear()
+
     AppController.db.collection("users").document(AppController.auth.currentUser!!.uid)
         .collection("schedules").get().addOnSuccessListener {
             documents ->
