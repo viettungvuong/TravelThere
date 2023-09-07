@@ -120,7 +120,9 @@ class MainActivity : ComponentActivity() {
 
     //để biết chọn category nào
     lateinit var weatherViewModel: WeatherViewModel
-    lateinit var selectedItemViewModel: ChosenFilterViewModel
+    lateinit var selectedItemViewModel1: ChosenFilterViewModel
+    lateinit var selectedItemViewModel2: ChosenFilterViewModel
+    lateinit var selectedItemViewModel3: ChosenFilterViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -132,9 +134,9 @@ class MainActivity : ComponentActivity() {
             optionStr.add(filterToStr(filter))
         }
         weatherViewModel = WeatherViewModel(this, City.getSingleton())
-        selectedItemViewModel = ChosenFilterViewModel()
-
-
+        selectedItemViewModel1 = ChosenFilterViewModel()
+        selectedItemViewModel2 = ChosenFilterViewModel()
+        selectedItemViewModel3 = ChosenFilterViewModel()
 
         setContent {
             Home(this@MainActivity)
@@ -452,9 +454,9 @@ class MainActivity : ComponentActivity() {
             DropDownMenu(
                 modifier = Modifier
                     .padding(10.dp),
-                options = optionStr, selectedItemViewModel = selectedItemViewModel
+                options = optionStr, selectedItemViewModel = selectedItemViewModel2
             ) {
-                filterSortList(chosenFilterViewModel = selectedItemViewModel, listState = listState)
+                filterSortList(chosenFilterViewModel = selectedItemViewModel2, listState = listState)
             }
 
 
@@ -508,9 +510,9 @@ class MainActivity : ComponentActivity() {
             DropDownMenu(
                 modifier = Modifier
                     .padding(10.dp),
-                options = optionStr, selectedItemViewModel = selectedItemViewModel
+                options = optionStr, selectedItemViewModel = selectedItemViewModel3
             ) {
-                filterSortList(chosenFilterViewModel = selectedItemViewModel, listState = listState)
+                filterSortList(chosenFilterViewModel = selectedItemViewModel3, listState = listState)
             }
 
 
@@ -569,9 +571,9 @@ class MainActivity : ComponentActivity() {
             DropDownMenu(
                 modifier = Modifier
                     .padding(10.dp),
-                options = optionStr, selectedItemViewModel = selectedItemViewModel
+                options = optionStr, selectedItemViewModel = selectedItemViewModel1
             ) {
-                filterSortList(chosenFilterViewModel = selectedItemViewModel, listState = listState)
+                filterSortList(chosenFilterViewModel = selectedItemViewModel1, listState = listState)
             }
 
 

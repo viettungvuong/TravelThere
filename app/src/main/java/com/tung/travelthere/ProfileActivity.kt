@@ -169,7 +169,7 @@ class ProfileActivity : ComponentActivity() {
             builder.setPositiveButton("Save",
                 DialogInterface.OnClickListener { dialog, which ->
                     val newPass = input.text.toString()
-                    if (!newPass.isEmpty()) {
+                    if (newPass.isNotEmpty()) {
                         currentUser!!.updatePassword(newPass)
                             .addOnCompleteListener { task ->
                                 if (task.isSuccessful) {
