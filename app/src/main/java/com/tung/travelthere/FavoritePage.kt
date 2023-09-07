@@ -166,7 +166,9 @@ fun SwipeBackground(dismissState: DismissState) {
         }
     )
     val alignment = Alignment.CenterEnd
+
     val icon = Icons.Default.Delete
+
     val scale by animateFloatAsState(
         if (dismissState.targetValue == DismissValue.Default) 0.5f else 1f
     )
@@ -182,7 +184,12 @@ fun SwipeBackground(dismissState: DismissState) {
             contentDescription = null,
             modifier = Modifier
                 .scale(scale)
-                .size(50.dp)
+                .size(50.dp),
+            tint =  when (dismissState.targetValue) {
+                DismissValue.Default -> Color.Black
+                DismissValue.DismissedToEnd -> Color.White
+                DismissValue.DismissedToStart -> Color.White
+            }
         )
     }
 }
