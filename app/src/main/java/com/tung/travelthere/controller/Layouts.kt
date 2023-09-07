@@ -374,7 +374,7 @@ fun SneakViewPlaceLong(context: Context, location: PlaceLocation, hasImage: Bool
         Row {
             if (hasImage) {
                 if (imageUrl!=null){
-                    ImageFromUrl(url = imageUrl!!, contentDescription = null, 150.0,)
+                   AsyncImage(model = imageUrl, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.size(100.dp))
                 }
             }
 
