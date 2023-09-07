@@ -148,7 +148,7 @@ open class PlaceLocation protected constructor(private val name: String, private
 
     inner class ReviewRepository : ViewModel(), java.io.Serializable {
         var reviews=mutableListOf<Review>()
-        var reviewScore = 0.0
+        var reviewScore = -1.0
 
         //lấy tổng điểm
         fun calculateReviewScore(): Double{

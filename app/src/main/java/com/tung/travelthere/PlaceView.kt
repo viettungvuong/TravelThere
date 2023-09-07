@@ -312,6 +312,7 @@ class PlaceView : ComponentActivity() {
         @Composable
         fun reviewScoreText(modifier: Modifier, score: Double) {
             var color= when (score) {
+                -1.0 -> Color.Black //chưa có điểm số
                 in 0.0..4.0 -> {
                     colorFirst
                 }
@@ -324,7 +325,7 @@ class PlaceView : ComponentActivity() {
             }
             Box(modifier = modifier) {
                 Text(
-                    text = score.toString(),
+                    text = if (score!=-1.0) {score.toString()} else {"Score unavailable"},
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp,
                     color = color
@@ -364,7 +365,6 @@ class PlaceView : ComponentActivity() {
                 elevation = 10.dp
             ) {
                 Row() {
-                    //sẽ có mục cho biết người dùng này là local hay foreigner
                     Column() {
                         Row(modifier = Modifier.padding(10.dp)) {
 
@@ -376,6 +376,13 @@ class PlaceView : ComponentActivity() {
                                     fontWeight = FontWeight.Light
                                 )
                             }
+
+                            Spacer(modifier = Modifier.weight(0.5f))
+
+                            reviewScoreText(
+                                score = review.score,
+                                modifier = Modifier.padding(horizontal = 10.dp)
+                            )
                         }
 
                         Box(modifier = Modifier.padding(10.dp)) {
@@ -383,12 +390,7 @@ class PlaceView : ComponentActivity() {
                         }
                     }
                     
-                    Spacer(modifier = Modifier.weight(1f))
 
-                    reviewScoreText(
-                        score = review.score,
-                        modifier = Modifier.padding(horizontal = 10.dp)
-                    )
 
                 }
             }
