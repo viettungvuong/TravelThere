@@ -548,7 +548,7 @@ class PlaceView : ComponentActivity() {
 
 
                 Button(
-                    onClick = {
+                    onClick = { //bấm submit
                         //ẩn bàn phím
 
                         keyboardController!!.hide()
@@ -565,6 +565,9 @@ class PlaceView : ComponentActivity() {
                             review,
                             applicationContext
                         ) //đăng review lên
+
+                        reviewTotalScoreViewModel.totalScore = location.reviewRepository.calculateReviewScore()
+                        //tính điểm lại
 
                         listState.add(review)
 
@@ -592,11 +595,9 @@ class PlaceView : ComponentActivity() {
 
         var listState = remember { mutableStateListOf<Review>() }
         var originalState = remember { mutableStateListOf<Review>() }
-        var totalScore by remember { mutableStateOf(0.0) }
 
         val coroutineScope = rememberCoroutineScope()
 
-        val keyboardController = LocalSoftwareKeyboardController.current
 
         LaunchedEffect(originalState) {
             coroutineScope.launch {
@@ -605,14 +606,8 @@ class PlaceView : ComponentActivity() {
 
                 reviewTotalScoreViewModel.totalScore =
                     location.reviewRepository.calculateReviewScore()
-                totalScore = reviewTotalScoreViewModel.totalScore
-            }
-        }
 
-        LaunchedEffect(reviewTotalScoreViewModel.totalScore) {
-            reviewTotalScoreViewModel.totalScore =
-                location.reviewRepository.calculateReviewScore()
-            totalScore = reviewTotalScoreViewModel.totalScore
+            }
         }
 
         Column(modifier = Modifier.fillMaxSize()) {
@@ -624,7 +619,7 @@ class PlaceView : ComponentActivity() {
 
             ) {
                 reviewScoreText(
-                    score = roundDecimal(totalScore, 2),
+                    score = roundDecimal(reviewTotalScoreViewModel.totalScore, 2),
                     modifier = Modifier.padding(2.dp)
                 )
             }

@@ -94,6 +94,8 @@ class City private constructor() {
             }
 
             locations.clear()
+            recommends.clear()
+            nearby.clear()
             val query =
                 AppController.db.collection(collectionCities).document(name!!)
                     .get().await()

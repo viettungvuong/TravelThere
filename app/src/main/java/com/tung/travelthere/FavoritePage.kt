@@ -1,6 +1,7 @@
 package com.tung.travelthere
 
 import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -59,6 +60,12 @@ class FavoritePage : ComponentActivity() {
         }
     }
 
+    override fun onBackPressed() {
+        val intent = Intent(this,MainActivity::class.java)
+        startActivity(intent)
+        finish()
+    }
+
     @OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
     @Composable
     fun FavoriteList(activity: Activity) {
@@ -86,7 +93,9 @@ class FavoritePage : ComponentActivity() {
                         .size(32.dp)
                 ) {
                     FloatingActionButton(
-                        onClick = { activity.finish() },
+                        onClick = {   val intent = Intent(activity,MainActivity::class.java)
+                            startActivity(intent)
+                            finish() },
                         backgroundColor = Color.White,
                         content = {
                             Icon(
