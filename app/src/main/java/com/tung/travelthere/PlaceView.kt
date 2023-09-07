@@ -297,7 +297,7 @@ class PlaceView : ComponentActivity() {
     private val chosenScoreViewModel = ChosenScoreViewModel()
 
     class ReviewTotalScoreViewModel() : ViewModel() {
-        var totalScore by mutableStateOf(0.0)
+        var totalScore by mutableStateOf(-1.0)
     }
 
     class ChosenScoreViewModel() : ViewModel() {
