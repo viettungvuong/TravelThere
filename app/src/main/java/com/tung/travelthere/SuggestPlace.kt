@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
+import android.os.FileUtils
 import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
@@ -54,6 +55,10 @@ import com.tung.travelthere.objects.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.tasks.await
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.InputStream
 
 class SuggestPlace : ComponentActivity() {
 
@@ -64,16 +69,57 @@ class SuggestPlace : ComponentActivity() {
 
     lateinit var imageViewModel: ImageViewModel
 
+    //nếu để nguyên content uri mà up lên firebase sẽ lỗi security
+    //phải đổi qua file uri thì mới up lên được
+    private fun convertContentUriToFileUri(context: Context, contentUri: Uri): Uri? {
+        val contentResolver: ContentResolver = context.contentResolver
+
+        val tempFile: File
+        try {
+            tempFile = File.createTempFile("temp_file", ".png", context.cacheDir)
+        } catch (e: IOException) {
+            e.printStackTrace()
+            return null
+        }
+
+        try {
+            val inputStream: InputStream? = contentResolver.openInputStream(contentUri)
+            if (inputStream != null) {
+                val outputStream = FileOutputStream(tempFile)
+                val buffer = ByteArray(4 * 1024) // 4K buffer size
+                var bytesRead: Int
+                while (inputStream.read(buffer).also { bytesRead = it } != -1) {
+                    outputStream.write(buffer, 0, bytesRead)
+                }
+                outputStream.flush()
+                outputStream.close()
+                inputStream.close()
+
+                // Create a file Uri from the temporary file
+                return Uri.fromFile(tempFile)
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+
+        return null
+    }
+
     val pickMedia =
         registerForActivityResult(ActivityResultContracts.PickMultipleVisualMedia()) { uris ->
             if (uris != null) {
                 for (uri in uris) {
-                    imageViewModel.chosenImagesUri.add(uri)
+
+                    val fileUri = convertContentUriToFileUri(this,uri) ?: continue
+
+                    imageViewModel.chosenImagesUri.add(fileUri)
+
                     val bitmap =
                         MediaStore.Images.Media.getBitmap(
                             this.getContentResolver(),
                             Uri.parse(uri.toString())
-                        )
+                        ) //lấy ảnh
+
                     imageViewModel.chosenImages.add(bitmap)
                 }
 
@@ -521,9 +567,8 @@ private suspend fun uploadImages(
                 CoroutineScope(IO).launch {
                     for (uri in imageViewModel.chosenImagesUri) {
                         Log.d("uri", uri.toString())
-                        val fileExtension = getFileExtension(context.contentResolver, uri)
 
-                        val uploadTask = listRef.child("$imageCount$fileExtension").putFile(uri)
+                        val uploadTask = listRef.child("$imageCount.png").putFile(uri)
 
                         try {
                             uploadTask.await()
