@@ -86,7 +86,7 @@ class SuggestPlace : ComponentActivity() {
             val inputStream: InputStream? = contentResolver.openInputStream(contentUri)
             if (inputStream != null) {
                 val outputStream = FileOutputStream(tempFile)
-                val buffer = ByteArray(4 * 1024) // 4K buffer size
+                val buffer = ByteArray(4 * 1024)
                 var bytesRead: Int
                 while (inputStream.read(buffer).also { bytesRead = it } != -1) {
                     outputStream.write(buffer, 0, bytesRead)
@@ -95,7 +95,6 @@ class SuggestPlace : ComponentActivity() {
                 outputStream.close()
                 inputStream.close()
 
-                // Create a file Uri from the temporary file
                 return Uri.fromFile(tempFile)
             }
         } catch (e: IOException) {
