@@ -77,6 +77,11 @@ public class RegisterActivity extends AppCompatActivity {
         );
     }
 
+    @Override
+    public void onBackPressed() {
+        finish();
+    }
+
     private void register(String email, String password, String name){
         AppController.auth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(RegisterActivity.this, task -> {
@@ -92,7 +97,7 @@ public class RegisterActivity extends AppCompatActivity {
                                 .addOnCompleteListener(task1 -> {
                                     if (task1.isSuccessful()) {
                                         Toast.makeText(getApplicationContext(), "Registration successful!", Toast.LENGTH_SHORT).show();
-                                        Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
+                                        Intent intent = new Intent(this,SplashScreen.class);
                                         startActivity(intent);
                                         finish();
                                     } else {

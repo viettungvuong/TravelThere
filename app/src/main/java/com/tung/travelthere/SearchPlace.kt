@@ -140,7 +140,7 @@ class SearchPlace : ComponentActivity() {
                         SneakViewPlaceLong(
                             context = activity,
                             location = location,
-                            hasImage = false
+                            hasImage = true
                         )
                     }
                 }
