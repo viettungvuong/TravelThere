@@ -567,11 +567,6 @@ class CreateScheduleActivity : ComponentActivity() {
 
     }
 
-
-
-
-
-
     @OptIn(ExperimentalLayoutApi::class)
     @Composable
     private fun ViewSchedules() {
@@ -608,7 +603,7 @@ class CreateScheduleActivity : ComponentActivity() {
                                         text = "${checkpoint.getLocation().getName()}"
                                     )
 
-                                    if (index!=schedule.getList().lastIndex||schedule.getList()[index+1]==null){
+                                    if (index!=schedule.getList().lastIndex&&schedule.getList()[index+1]==null){
                                         Text(
                                             text = "→",
                                             fontWeight = FontWeight.Bold,

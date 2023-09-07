@@ -145,11 +145,6 @@ class MainActivity : ComponentActivity() {
 
     }
 
-    override fun onStart() {
-        super.onStart()
-//        City.getSingleton().locationsRepository.nearbyLocations() //lấy những địa điểm gần
-    }
-
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
     fun Home(context: Context) {
