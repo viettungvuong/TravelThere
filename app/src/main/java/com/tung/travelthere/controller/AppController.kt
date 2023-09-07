@@ -148,6 +148,9 @@ class AppController {
 
         @JvmField
         val countVisit = mutableMapOf<PlaceLocation,Int>() //đếm số lần đã đến các điểm (trong 1 tuần trở lại đây)
+
+        @JvmField
+        val currentSchedule = mutableStateOf(Schedule())
     }
 }
 

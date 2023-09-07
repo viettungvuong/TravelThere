@@ -13,7 +13,6 @@ import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicText
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -38,7 +37,6 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.tung.travelthere.controller.*
 import com.tung.travelthere.objects.*
-import java.time.Duration
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
@@ -73,7 +71,10 @@ class CreateScheduleActivity : ComponentActivity() {
                 Box(
                     modifier = Modifier.size(32.dp)
                 ) {
-                    FloatingActionButton(onClick = { finish() },
+                    FloatingActionButton(onClick = {
+                        val intent = Intent(this@CreateScheduleActivity, MainActivity::class.java)
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                        this@CreateScheduleActivity.startActivity(intent)},
                         backgroundColor = Color.White,
                         content = {
                             Icon(
@@ -464,25 +465,22 @@ class CreateScheduleActivity : ComponentActivity() {
 
         val showDialog = remember { mutableStateOf(false) } //có hiện dialog không
 
-        var schedule by remember { mutableStateOf(Schedule()) }
-        var lazyListState = rememberLazyListState()
-
         fun updateSchedule(){ //update lên firebase
             val checkpointStr = mutableListOf<String>()
-            for (checkpoint in schedule.getList()){
+            for (checkpoint in AppController.currentSchedule.value.getList()){
                 checkpointStr.add(checkpoint.toString())
             }
 
             val scheduleData = hashMapOf(
                 checkpointField to checkpointStr.toList(),
-                dateField to formatterDateOnly.format(schedule.date)
+                dateField to formatterDateOnly.format(AppController.currentSchedule.value.date)
             )
 
             AppController.db.collection("users").document(AppController.auth.currentUser!!.uid)
                 .collection("schedules").add(scheduleData) //update lên firebase
                 .addOnSuccessListener {
-                    AppController.schedules.add(Schedule(schedule)) //thêm vào danh sách các schedule
-                    schedule.clear()
+                    AppController.schedules.add(Schedule(AppController.currentSchedule.value)) //thêm vào danh sách các schedule
+                    AppController.currentSchedule.value.clear()
                     Toast.makeText(this,"Updated schedule successfully",Toast.LENGTH_SHORT).show()
                 }
                 .addOnFailureListener{
@@ -506,16 +504,16 @@ class CreateScheduleActivity : ComponentActivity() {
                     modifier = Modifier
                         .height(40.dp)
                         .clickable {
-                            schedule.addNullCheckpoint()
+                            AppController.currentSchedule.value.addNullCheckpoint()
                             keyboardController?.hide()
                         })
             }
 
-            categoryCount(schedule = schedule)
+            categoryCount(schedule = AppController.currentSchedule.value)
 
             Button(
                 onClick = {
-                    schedule.clear() //xoá hết lịch trình
+                    AppController.currentSchedule.value.clear() //xoá hết lịch trình
                 },
                 colors = ButtonDefaults.buttonColors(backgroundColor = colorFirst),
                 modifier = Modifier
@@ -538,7 +536,7 @@ class CreateScheduleActivity : ComponentActivity() {
 
             Button(
                 onClick = {
-                          updateSchedule()
+                    updateSchedule()
                 },
                 colors = ButtonDefaults.buttonColors(backgroundColor = colorThird),
                 modifier = Modifier
@@ -561,8 +559,8 @@ class CreateScheduleActivity : ComponentActivity() {
 
             //hiện từng checkpoint
             LazyColumn(modifier = Modifier.weight(0.5f)) {
-                itemsIndexed(schedule.getList()) { index, item ->
-                    Checkpoint(index, schedule, showDialog)
+                itemsIndexed(AppController.currentSchedule.value.getList()) { index, item ->
+                    Checkpoint(index, AppController.currentSchedule.value, showDialog)
                 }
             }
         }
