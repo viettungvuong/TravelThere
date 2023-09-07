@@ -2,29 +2,14 @@ package com.tung.travelthere.objects
 
 import android.content.Context
 import android.location.Location
-import android.net.Uri
-import android.util.Log
 import android.widget.Toast
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import com.google.firebase.database.annotations.NotNull
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.storage.ktx.component1
-import com.google.firebase.storage.ktx.component2
-import com.google.firebase.storage.ktx.storage
 import com.tung.travelthere.controller.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.tasks.await
-import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Serializer
-import kotlinx.serialization.encoding.Decoder
-import kotlinx.serialization.encoding.Encoder
-import kotlinx.serialization.json.Json
 
 class Position(var lat: Double, var long: Double): java.io.Serializable{
     override fun toString(): String {
@@ -138,8 +123,6 @@ open class PlaceLocation protected constructor(private val name: String, private
     fun distanceTo(placeLocation: PlaceLocation): Float{
         return this.pos.distanceTo(placeLocation.getPos())
     }
-
-
 
     suspend fun fetchImageUrl() = withContext(Dispatchers.IO) {
         imageViewModel.fetchAllImageUrls(true) //lấy tất cả ảnh

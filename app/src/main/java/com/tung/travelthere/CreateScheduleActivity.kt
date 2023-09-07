@@ -191,17 +191,17 @@ class CreateScheduleActivity : ComponentActivity() {
                                                 5.dp
                                             )
                                             .clickable(onClick = {
-                                                //nhấn vào địa điểm
-                                                setLocation(location) //callback đặt địa điểm cho checkpoint
-
-                                                setTimesInWeek(visitTimes(location)) //đếm số lần đến điểm này trong 1 tuần qua
-
-                                                //đặt ở index checkpoint
+                                                //đặt ở checkpoint[index]
                                                 val checkpoint = Checkpoint(location)
                                                 schedule.setCheckpoint(
                                                     checkpoint = checkpoint,
                                                     index = indexState.value
                                                 )
+
+                                                //nhấn vào địa điểm
+                                                setLocation(schedule.getList()[indexState.value]!!.getLocation()) //callback đặt địa điểm cho checkpoint
+
+                                                setTimesInWeek(visitTimes(location)) //đếm số lần đến điểm này trong 1 tuần qua
 
                                                 clear()
                                                 setShowDialog(false) //đóng hộp thoại lại
@@ -285,15 +285,19 @@ class CreateScheduleActivity : ComponentActivity() {
             index: Int, schedule: Schedule,
             showDialog: MutableState<Boolean>
         ) {
-            var location = remember { mutableStateOf<PlaceLocation?>(null) }
+            var location by remember { mutableStateOf<PlaceLocation?>(null) }
             var timesInAWeek = remember { mutableStateOf(0) }
+
+            LaunchedEffect(schedule.getList()[index]?.placeLocationState){
+                location = schedule.getList()[index]?.getLocation()
+            }
 
             Column(horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.clickable {
-                if (location.value!=null){
+                if (location!=null){
                     val intent = Intent(this, PlaceView::class.java)
-                    intent.putExtra("location", location.value)
-                    intent.putExtra("image url", location.value?.imageUrl)
+                    intent.putExtra("location", location)
+                    intent.putExtra("image url", location?.imageUrl)
                     startActivity(intent)
                 }
 
@@ -316,7 +320,7 @@ class CreateScheduleActivity : ComponentActivity() {
 
                         Spacer(modifier = Modifier.width(16.dp))
 
-                        if (location.value==null){
+                        if (location==null){
                             Icon(
                                 imageVector = Icons.Default.LocationOn,
                                 tint = Color.Red,
@@ -325,7 +329,7 @@ class CreateScheduleActivity : ComponentActivity() {
                         }
                         else{
                             Icon(
-                                painter = when (location.value!!.categories.first()) {
+                                painter = when (location!!.categories.first()) {
                                     Category.RESTAURANT -> painterResource(R.drawable.restaurant)
                                     Category.BAR -> painterResource(R.drawable.bar)
                                     Category.ATTRACTION -> painterResource(R.drawable.attraction)
@@ -343,8 +347,8 @@ class CreateScheduleActivity : ComponentActivity() {
 
                         Spacer(modifier = Modifier.width(10.dp))
 
-                        if (location.value != null) {
-                            Text(text = location.value!!.getName())
+                        if (location != null) {
+                            Text(text = location!!.getName())
                         } else {
                             Text(text = "No location", fontStyle = FontStyle.Italic)
                         }
@@ -377,7 +381,7 @@ class CreateScheduleActivity : ComponentActivity() {
                             searchViewModel = searchViewModel,
                             setShowDialog = { showDialog.value = it },
                             setLocation = {
-                                location.value = it
+                                location = it
                             },
                             setTimesInWeek = {
                                 timesInAWeek.value = it
@@ -490,13 +494,6 @@ class CreateScheduleActivity : ComponentActivity() {
         val keyboardController = LocalSoftwareKeyboardController.current
 
         Column() {
-            //hiện từng checkpoint
-            LazyColumn(state = lazyListState) {
-                itemsIndexed(schedule.getList()) { index, item ->
-                    Checkpoint(index, schedule, showDialog)
-                }
-            }
-
             //để căn giữa nút cộng
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -561,6 +558,13 @@ class CreateScheduleActivity : ComponentActivity() {
                     Text(text = "Save", color = Color.White)
                 }
             }
+
+            //hiện từng checkpoint
+            LazyColumn(modifier = Modifier.weight(0.5f)) {
+                itemsIndexed(schedule.getList()) { index, item ->
+                    Checkpoint(index, schedule, showDialog)
+                }
+            }
         }
 
     }
@@ -606,7 +610,7 @@ class CreateScheduleActivity : ComponentActivity() {
                                         text = "${checkpoint.getLocation().getName()}"
                                     )
 
-                                    if (index!=schedule.getList().lastIndex){
+                                    if (index!=schedule.getList().lastIndex||schedule.getList()[index+1]==null){
                                         Text(
                                             text = "→",
                                             fontWeight = FontWeight.Bold,

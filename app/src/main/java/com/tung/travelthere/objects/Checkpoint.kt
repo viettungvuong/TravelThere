@@ -3,23 +3,33 @@ package com.tung.travelthere.objects
 import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import com.google.type.DateTime
 import java.util.Date
 import java.util.LinkedList
 
-class Checkpoint(private val placeLocation: PlaceLocation) {
+class Checkpoint(placeLocation: PlaceLocation) {
+    var placeLocationState = mutableStateOf<PlaceLocation?>(null)
+
+    init {
+        placeLocationState.value = placeLocation
+    }
     fun distanceTo(other: Checkpoint): Float {
-        return placeLocation.distanceTo(other.placeLocation)
+        return placeLocationState.value!!.distanceTo(other.placeLocationState.value!!)
     }
 
     fun getLocation(): PlaceLocation {
-        return placeLocation
+        return placeLocationState.value!!
+    }
+
+    fun setLocation(placeLocation: PlaceLocation){
+        this.placeLocationState.value = placeLocation
     }
 
     override fun toString(): String {
-        return placeLocation.getPos().toString()
+        return placeLocationState.value!!.getPos().toString()
     }
 }
 
