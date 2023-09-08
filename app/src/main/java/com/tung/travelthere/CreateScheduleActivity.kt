@@ -621,9 +621,9 @@ class CreateScheduleActivity : ComponentActivity() {
             }
         }
 
-        FlowColumn() {
-            for (schedule in AppController.schedules){
-                scheduleView(schedule = schedule)
+        LazyColumn() {
+            items(AppController.schedules){
+                schedule ->  scheduleView(schedule = schedule)
             }
         }
 
