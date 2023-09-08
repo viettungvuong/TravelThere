@@ -5,6 +5,8 @@ import android.location.Location
 import android.widget.Toast
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import com.google.firebase.firestore.DocumentChange
+import com.google.firebase.firestore.ListenerRegistration
 import com.tung.travelthere.controller.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.Main
@@ -136,7 +138,7 @@ open class PlaceLocation protected constructor(private val name: String, private
         //lấy tổng điểm
         fun calculateReviewScore(): Double{
             if (reviews.isEmpty()){
-                return 0.0
+                return -1.0
             }
 
             var res = 0.0
@@ -203,6 +205,30 @@ open class PlaceLocation protected constructor(private val name: String, private
             }
 
             return reviews
+        }
+
+        fun getLiveReviews(): ListenerRegistration {
+            return AppController.db.collection(collectionCities).document(cityName)
+                    .collection(collectionLocations).document(pos.toString()).collection("reviews")
+                    .addSnapshotListener{
+                        snapshot, exception ->
+                        if (exception!=null){
+                            return@addSnapshotListener
+                        }
+
+                        for (documentChange in snapshot!!.documentChanges) {
+                            if (documentChange.type==DocumentChange.Type.ADDED) {
+                                val userId = documentChange.document.getString("sender")?:""
+                                val name = documentChange.document.getString("sender-name")?:""
+                                val content =  documentChange.document.getString("content")?:""
+                                val time = formatter.parse( documentChange.document.getString("time"))
+                                val score = ( documentChange.document.getLong("score")?:0L).toInt()
+
+                                val review = Review(userId,name,content,time,score)
+                                reviews.add(review) //cập nhật review mới
+                            }
+                        }
+                    }
         }
     }
 

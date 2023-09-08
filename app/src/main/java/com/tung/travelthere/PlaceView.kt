@@ -43,7 +43,9 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.ViewModel
 import coil.compose.AsyncImage
+import com.google.firebase.firestore.ListenerRegistration
 import com.tung.travelthere.controller.*
+import com.tung.travelthere.objects.City
 import com.tung.travelthere.objects.PlaceLocation
 import com.tung.travelthere.objects.Review
 import kotlinx.coroutines.launch
@@ -57,6 +59,7 @@ val colorThird = Color(0xff326e14)
 
 class PlaceView : ComponentActivity() {
     lateinit var location: PlaceLocation
+    lateinit var reviewListenerRegistration: ListenerRegistration
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,6 +68,8 @@ class PlaceView : ComponentActivity() {
 
         val imageUrl = intent.getStringExtra("image url")
         location.afterDeserialization(imageUrl) //do imageurl không serializable nên ta đem nó qua riêng
+
+        reviewListenerRegistration= location.reviewRepository.getLiveReviews()
 
         setContent {
             viewPlace(location = location)
@@ -75,8 +80,13 @@ class PlaceView : ComponentActivity() {
         super.onStart()
 
         runBlocking {
-            location.reviewRepository.refreshReviews(refreshNow = true) //lấy các review đánh giá
+            location.reviewRepository.refreshReviews(refreshNow = true) //lấy các review đánh giá lại
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        reviewListenerRegistration.remove() //xoá listener
     }
 
     override fun onBackPressed() {

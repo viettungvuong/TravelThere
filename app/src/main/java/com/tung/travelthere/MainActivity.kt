@@ -117,6 +117,8 @@ class WeatherViewModel(context: Context, city: City) : ViewModel() {
 class MainActivity : ComponentActivity() {
 
     val optionStr = mutableListOf<String>()
+    //bitmap hình nền thành phố
+    var bitmap: Bitmap? = null
 
     //để biết chọn category nào
     lateinit var weatherViewModel: WeatherViewModel
@@ -141,8 +143,11 @@ class MainActivity : ComponentActivity() {
         setContent {
             Home(this@MainActivity)
         }
+    }
 
-
+    override fun onDestroy() {
+        super.onDestroy()
+        bitmap?.recycle() //giải phóng bitmap
     }
 
     @OptIn(ExperimentalFoundationApi::class)
@@ -175,6 +180,7 @@ class MainActivity : ComponentActivity() {
                                         index
                                     )
                                 }
+                                coroutineScope.cancel()
                             }
                         },
                         text = { Text(text = title) }
@@ -321,8 +327,7 @@ class MainActivity : ComponentActivity() {
         //background color của text
         var textBgColor by remember { mutableStateOf(Color.Gray) }
 
-        //bitmap hình nền
-        var bitmap: Bitmap? = null
+
 
         var temperature by remember { mutableStateOf(0f) }
         var conditionImgUrl by remember { mutableStateOf("") }
