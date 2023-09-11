@@ -36,7 +36,7 @@ class AppController {
     class UserPlace{
         var cityName = ""
         var countryName = ""
-        var currentLocation: Position?=null
+        var currentLocation: Position?=null //nếu location này bằng null thì không có phần nearby
     }
 
     class Favorites{

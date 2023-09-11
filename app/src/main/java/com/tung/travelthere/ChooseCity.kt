@@ -63,7 +63,7 @@ class ChooseCity : ComponentActivity() {
         City.getSingleton().setName(city) //đặt tên cho thành phố hiện tại
         City.getSingleton().setCountry("Vietnam")
 
-        AppController.currentPosition.currentLocation = Position(10.7628356,106.6801006)
+        AppController.currentPosition.currentLocation = null
         //đặt vị trí giả định
 
         Toast.makeText(this,"Please wait",Toast.LENGTH_LONG).show()

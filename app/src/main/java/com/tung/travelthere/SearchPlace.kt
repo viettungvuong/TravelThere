@@ -168,9 +168,14 @@ fun search(
 
             val distance = if (checkpoint!=null){
                 (it.distanceTo(checkpoint!!.getLocation()) / 1000).toDouble()
-            }
+            } //sắp xếp theo khoảng cách
             else{
-                (it.getPos().distanceTo(AppController.currentPosition.currentLocation?:Position(0.0,0.0)) / 1000).toDouble()
+                if (AppController.currentPosition.currentLocation!=null){
+                    (it.getPos().distanceTo(AppController.currentPosition.currentLocation!!).toDouble())
+                }
+                else{
+                    0.0
+                }
             }
 
 

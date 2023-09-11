@@ -117,6 +117,7 @@ class WeatherViewModel(context: Context, city: City) : ViewModel() {
 class MainActivity : ComponentActivity() {
 
     val optionStr = mutableListOf<String>()
+
     //bitmap hình nền thành phố
     var bitmap: Bitmap? = null
 
@@ -135,7 +136,13 @@ class MainActivity : ComponentActivity() {
         for (filter in Filter.values()) {
             optionStr.add(filterToStr(filter))
         }
+        if (AppController.currentPosition.currentLocation == null) {
+            optionStr.remove("NEAREST FIRST") //nếu đang trong chế độ không có vị trí thì bỏ 2 filter này ra
+            optionStr.remove("FARTHEST FIRST")
+        }
+
         weatherViewModel = WeatherViewModel(this, City.getSingleton())
+
         selectedItemViewModel1 = ChosenFilterViewModel()
         selectedItemViewModel2 = ChosenFilterViewModel()
         selectedItemViewModel3 = ChosenFilterViewModel()
@@ -189,7 +196,11 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        val tabTitles = listOf("Nearby", "Local recommends", "Tourist attractions")
+        val tabTitles = mutableListOf("Local recommends", "Tourist attractions")
+        if (AppController.currentPosition.currentLocation!=null){
+            tabTitles.add("Nearby") //không vào từ pick city thì mới có nearby
+        }
+
         val pagerState = rememberPagerState(initialPage = 0)
         val coroutineScope = rememberCoroutineScope()
         val scaffoldState = rememberScaffoldState()
@@ -294,21 +305,24 @@ class MainActivity : ComponentActivity() {
                         HorizontalPager(state = pagerState, pageCount = tabTitles.size) { page ->
 
                             when (page) {
-                                0 -> NearbyPlaces(
-                                    modifier = Modifier.padding(padding),
-                                    context,
-                                    city = City.getSingleton(),
-                                )
-                                1 -> LocalRecommended(
-                                    modifier = Modifier.padding(padding),
-                                    context,
-                                    city = City.getSingleton(),
-                                )
-                                2 -> TouristAttractions(
-                                    modifier = Modifier.padding(padding),
-                                    context,
-                                    city = City.getSingleton(),
-                                )
+                                0 ->
+                                    LocalRecommended(
+                                        modifier = Modifier.padding(padding),
+                                        context,
+                                        city = City.getSingleton()
+                                    )
+                                1 ->
+                                    TouristAttractions(
+                                        modifier = Modifier.padding(padding),
+                                        context,
+                                        city = City.getSingleton()
+                                    )
+                                2 ->
+                                    NearbyPlaces(
+                                        modifier = Modifier.padding(padding),
+                                        context,
+                                        city = City.getSingleton(),
+                                    )
                             }
                         }
                     }
@@ -326,7 +340,6 @@ class MainActivity : ComponentActivity() {
 
         //background color của text
         var textBgColor by remember { mutableStateOf(Color.Gray) }
-
 
 
         var temperature by remember { mutableStateOf(0f) }
@@ -424,7 +437,12 @@ class MainActivity : ComponentActivity() {
 
                     Spacer(modifier = Modifier.width(5.dp))
 
-                    AsyncImage(model = conditionImgUrl, contentDescription = "Condition", modifier = Modifier.size(32.dp), contentScale = ContentScale.Fit)
+                    AsyncImage(
+                        model = conditionImgUrl,
+                        contentDescription = "Condition",
+                        modifier = Modifier.size(32.dp),
+                        contentScale = ContentScale.Fit
+                    )
                 }
 
             }
@@ -456,7 +474,10 @@ class MainActivity : ComponentActivity() {
                     .padding(10.dp),
                 options = optionStr, selectedItemViewModel = selectedItemViewModel2
             ) {
-                filterSortList(chosenFilterViewModel = selectedItemViewModel2, listState = listState)
+                filterSortList(
+                    chosenFilterViewModel = selectedItemViewModel2,
+                    listState = listState
+                )
             }
 
 
@@ -512,7 +533,10 @@ class MainActivity : ComponentActivity() {
                     .padding(10.dp),
                 options = optionStr, selectedItemViewModel = selectedItemViewModel3
             ) {
-                filterSortList(chosenFilterViewModel = selectedItemViewModel3, listState = listState)
+                filterSortList(
+                    chosenFilterViewModel = selectedItemViewModel3,
+                    listState = listState
+                )
             }
 
 
@@ -573,7 +597,10 @@ class MainActivity : ComponentActivity() {
                     .padding(10.dp),
                 options = optionStr, selectedItemViewModel = selectedItemViewModel1
             ) {
-                filterSortList(chosenFilterViewModel = selectedItemViewModel1, listState = listState)
+                filterSortList(
+                    chosenFilterViewModel = selectedItemViewModel1,
+                    listState = listState
+                )
             }
 
 
@@ -629,7 +656,10 @@ class MainActivity : ComponentActivity() {
     ) {
         var expanded by remember { mutableStateOf(false) }
 
-        Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Box(
                 modifier = modifier
             ) {
@@ -704,7 +734,6 @@ class MainActivity : ComponentActivity() {
     private fun filterSortList(
         chosenFilterViewModel: ChosenFilterViewModel, listState: SnapshotStateList<PlaceLocation>
     ) {
-        Log.d("list 1 img url prev",listState.first().imageUrl.toString())
         val copyList = mutableListOf<PlaceLocation>()
         copyList.addAll(listState)
         listState.clear()
@@ -738,7 +767,7 @@ class MainActivity : ComponentActivity() {
 
 
         }
-        Log.d("list 1 img url after",listState.first().imageUrl.toString())
+        Log.d("list 1 img url after", listState.first().imageUrl.toString())
     }
 
 }
