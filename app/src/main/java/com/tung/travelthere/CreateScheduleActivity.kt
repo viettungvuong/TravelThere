@@ -197,15 +197,15 @@ class CreateScheduleActivity : ComponentActivity() {
                                                 5.dp
                                             )
                                             .clickable(onClick = {
-                                                //đặt ở checkpoint[index]
+                                                //đặt ở checkpoint[index] trong list
                                                 val checkpoint = Checkpoint(location)
                                                 schedule.setCheckpoint(
                                                     checkpoint = checkpoint,
                                                     index = indexState.value
                                                 )
 
-                                                //nhấn vào địa điểm
-                                                setLocation(schedule.getList()[indexState.value]!!.getLocation()) //callback đặt địa điểm cho checkpoint
+                                                setLocation(schedule.getList()[indexState.value]!!.getLocation())
+                                                //callback đặt địa điểm cho checkpoint
 
                                                 setTimesInWeek(visitTimes(location)) //đếm số lần đến điểm này trong 1 tuần qua
 
@@ -228,51 +228,78 @@ class CreateScheduleActivity : ComponentActivity() {
                                                 },
                                                 tint = colorBlue,
                                                 contentDescription = null,
-                                                modifier = Modifier.size(20.dp)
+                                                modifier = Modifier.size(20.dp).padding(vertical = 2.dp, horizontal = 2.dp)
                                             )
 
-                                            Box(modifier = Modifier.padding(horizontal = 15.dp)) {
-                                                Text(
-                                                    text = location.getName(), //hiện tên của địa điểm
-                                                    fontSize = 15.sp,
-                                                    fontWeight = FontWeight.Bold
-                                                )
+                                            //tên địa điểm
+                                            Column() {
+                                                Box(modifier = Modifier.padding(horizontal = 15.dp, vertical = 2.dp)) {
+                                                    Text(
+                                                        text = location.getName(), //hiện tên của địa điểm
+                                                        fontSize = 15.sp,
+                                                        fontWeight = FontWeight.Bold
+                                                    )
+                                                }
+
+                                                //hiện khoảng cách đến chỗ hiện tại
+                                                Row(
+                                                    modifier = Modifier.padding(10.dp)
+                                                ) {
+                                                    //tính toán khoảng cách từ điểm này đến checkpoint trước
+                                                    distance = 0f
+                                                    if (index > 0 && schedule.getList()[index - 1] != null) {
+                                                        distance =
+                                                            schedule.getList()[index - 1]!!.getLocation()
+                                                                .distanceTo(location) / 1000
+                                                    }
+
+                                                    //nếu có distance
+                                                    if (distance > 0f) {
+                                                        Icon(
+                                                            imageVector = Icons.Default.Place,
+                                                            contentDescription = "City",
+                                                            tint = Color.Black,
+                                                            modifier = Modifier.scale(0.8f)
+                                                        )
+
+                                                        Spacer(modifier = Modifier.width(5.dp))
+
+                                                        Text(
+                                                            text = "${
+                                                                roundDecimal(
+                                                                    distance.toDouble(),
+                                                                    2
+                                                                )
+                                                            } km"
+                                                        )
+                                                    }
+                                                }
                                             }
 
 
-                                            Row(
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                            ) {
-                                                //tính toán khoảng cách từ điểm này đến checkpoint trước
-                                                distance = 0f
-                                                if (index > 0 && schedule.getList()[index - 1] != null) {
-                                                    distance =
-                                                        schedule.getList()[index - 1]!!.getLocation()
-                                                            .distanceTo(location) / 1000
-                                                }
+                                            Spacer(modifier = Modifier.weight(0.5f))
 
-                                                //nếu có distance
-                                                if (distance > 0f) {
+                                            Box(modifier = Modifier
+                                                .padding(10.dp)
+                                                .background(
+                                                    color = colorBlue
+                                                )
+                                                .clickable {
+                                                    val intent = Intent(
+                                                        this@CreateScheduleActivity,
+                                                        PlaceView::class.java
+                                                    )
+                                                    intent.putExtra("location", location)
+                                                    intent.putExtra("image url", location?.imageUrl)
+                                                    startActivity(intent)
+                                                }){
+                                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                                     Icon(
-                                                        imageVector = Icons.Default.Place,
-                                                        contentDescription = "City",
-                                                        tint = Color.Black,
-                                                        modifier = Modifier.scale(0.8f)
-                                                    )
-
-                                                    Spacer(modifier = Modifier.width(5.dp))
-
-                                                    Text(
-                                                        text = "${
-                                                            roundDecimal(
-                                                                distance.toDouble(),
-                                                                2
-                                                            )
-                                                        } km"
+                                                        imageVector = Icons.Default.Search,
+                                                        contentDescription = null,
+                                                        tint = Color.White
                                                     )
                                                 }
-
                                             }
                                         }
                                     }
@@ -509,7 +536,9 @@ class CreateScheduleActivity : ComponentActivity() {
             val checkpoints = AppController.currentSchedule.value.getList()
             if (checkpoints.isNotEmpty()&&checkpoints.first()!=null){
                 GoogleMap(
-                    modifier = Modifier.fillMaxWidth().height(150.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(150.dp),
                     cameraPositionState = cameraPositionState
                 ) {
                     val checkpoints = AppController.currentSchedule.value.getList()
@@ -541,9 +570,15 @@ class CreateScheduleActivity : ComponentActivity() {
                     modifier = Modifier
                         .height(40.dp)
                         .clickable {
-                            if (AppController.currentSchedule.value.getList().isEmpty()||
-                                AppController.currentSchedule.value.getList().last()!=null){
+                            if (AppController.currentSchedule.value
+                                    .getList()
+                                    .isEmpty() ||
+                                AppController.currentSchedule.value
+                                    .getList()
+                                    .last() != null
+                            ) {
                                 AppController.currentSchedule.value.addNullCheckpoint()
+                                //thêm null checkpoint
                                 keyboardController?.hide()
                             }
 
