@@ -82,6 +82,7 @@ open class PlaceLocation protected constructor(private val name: String, private
 
     var address: String?=null //địa chỉ
 
+
     @Transient //để bỏ qua imageUrlState khi serialize
     private var imageUrlState= mutableStateOf<String?>(null)
     var imageUrl: String?
@@ -104,6 +105,7 @@ open class PlaceLocation protected constructor(private val name: String, private
             fetchImageUrl()
         }
         reviewRepository=ReviewRepository()
+
     }
 
     fun getName(): String{

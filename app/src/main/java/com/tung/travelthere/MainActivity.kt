@@ -64,53 +64,6 @@ val colorCold = Color(0xff447cbd)
 val colorMedium = Color(0xffbd9544)
 val colorHot = Color(0xffbd4444)
 
-class WeatherViewModel(context: Context, city: City) : ViewModel() {
-    var temperature by mutableStateOf(0f)
-    var condition by mutableStateOf("")
-    var conditionImgUrl by mutableStateOf("")
-
-    init {
-        val url =
-            "https://api.weatherapi.com/v1/forecast.json?key=50224d22b9804f92a1b94202230309&q=${AppController.currentPosition.currentLocation}&days=1&aqi=yes&alerts=yes"
-
-        val requestQueue = Volley.newRequestQueue(context)
-
-        val jsonObjectRequest = JsonObjectRequest(
-            Request.Method.GET, url, null,
-            { response ->
-                try {
-                    temperature = response.getJSONObject("current").getString("temp_c")
-                        .toFloat() //nhiệt độ
-                    condition =
-                        response.getJSONObject("current").getJSONObject("condition")
-                            .getString("text")
-                    conditionImgUrl =
-                        response.getJSONObject("current").getJSONObject("condition")
-                            .getString("icon") //hình đại diện cho điều kiện thời tiết
-                } catch (e: JSONException) {
-                    e.printStackTrace()
-                }
-            }) { error ->
-            parseVolleyError(error)
-            Log.d("TAG weather", error.message!!)
-        }
-
-        requestQueue.add(jsonObjectRequest)
-    }
-
-    private fun parseVolleyError(error: VolleyError) {
-        try {
-            val responseBody = String(error.networkResponse.data)
-            val data = JSONObject(responseBody)
-            val errors = data.getJSONArray("errors")
-            val jsonMessage = errors.getJSONObject(0)
-            val message = jsonMessage.getString("message")
-            Log.d("json error", message)
-        } catch (e: JSONException) {
-        } catch (error: UnsupportedEncodingException) {
-        }
-    }
-}
 
 
 class MainActivity : ComponentActivity() {
@@ -366,10 +319,9 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        LaunchedEffect(weatherViewModel.temperature, weatherViewModel.conditionImgUrl) {
-            temperature = weatherViewModel.temperature
-            conditionImgUrl = weatherViewModel.conditionImgUrl
-            conditionImgUrl = "https:$conditionImgUrl"
+        LaunchedEffect(weatherViewModel.currentTemp, weatherViewModel.conditionImgUrl) {
+            temperature = weatherViewModel.currentTemp
+            conditionImgUrl = weatherViewModel.currentConditionImgUrl
         }
 
 

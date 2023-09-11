@@ -24,6 +24,7 @@ import java.util.*
 import kotlin.math.pow
 import kotlin.math.roundToInt
 import kotlinx.coroutines.*
+import java.text.SimpleDateFormat
 import kotlin.system.measureTimeMillis
 
 
@@ -102,4 +103,15 @@ fun restartApp(activity: Activity){
     )
     activity.startActivity(intent)
     activity.finish()
+}
+
+fun dateAfterDays(date: Date, days: Int): String {
+    val calendar = Calendar.getInstance()
+
+    calendar.time = date
+
+    calendar.add(Calendar.DAY_OF_MONTH, days)
+
+    return formatterDateOnlyNoYear
+        .format(calendar.time)
 }

@@ -29,6 +29,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
@@ -48,6 +49,7 @@ import com.tung.travelthere.controller.*
 import com.tung.travelthere.objects.City
 import com.tung.travelthere.objects.PlaceLocation
 import com.tung.travelthere.objects.Review
+import com.tung.travelthere.objects.WeatherViewModelPlace
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.util.*
@@ -60,6 +62,7 @@ val colorThird = Color(0xff326e14)
 class PlaceView : ComponentActivity() {
     lateinit var location: PlaceLocation
     lateinit var reviewListenerRegistration: ListenerRegistration
+    lateinit var weatherViewModelPlace: WeatherViewModelPlace
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,6 +71,8 @@ class PlaceView : ComponentActivity() {
 
         val imageUrl = intent.getStringExtra("image url")
         location.afterDeserialization(imageUrl) //do imageurl không serializable nên ta đem nó qua riêng
+
+        weatherViewModelPlace=WeatherViewModelPlace(this,location)
 
         reviewListenerRegistration= location.reviewRepository.getLiveReviews()
 
@@ -111,7 +116,6 @@ class PlaceView : ComponentActivity() {
 
         Scaffold { padding ->
             Column {
-
                 Box(
                     modifier = Modifier
                         .heightIn(max = 300.dp)
@@ -169,7 +173,6 @@ class PlaceView : ComponentActivity() {
                     }
                 }
 
-
             }
         }
     }
@@ -181,8 +184,15 @@ class PlaceView : ComponentActivity() {
             mutableStateOf(
                 AppController.Favorites.getSingleton().isFavorite(location)
             )
-        }
+        } //có phải là favorite hay không
         var iconVector by remember { mutableStateOf(Icons.Default.Favorite) }
+
+        var maxTemp = remember{mutableStateListOf<Float>()}
+        var minTemp = remember{mutableStateListOf<Float>()}
+        var conditionImgUrl = remember{mutableStateListOf<String>()}
+
+        var temperature by remember{mutableStateOf(0f)}
+        var currentConditionImgUrl by remember { mutableStateOf("") }
 
         LaunchedEffect(indexFav) {
             iconVector = if (!indexFav) {
@@ -190,6 +200,21 @@ class PlaceView : ComponentActivity() {
             } else {
                 Icons.Default.Delete
             }
+        }
+        
+        LaunchedEffect(weatherViewModelPlace.minTemp.size,weatherViewModelPlace.maxTemp.size,weatherViewModelPlace.conditionImgUrl.size){
+            maxTemp.clear()
+            minTemp.clear()
+            conditionImgUrl.clear()
+
+            maxTemp.addAll(weatherViewModelPlace.maxTemp)
+            minTemp.addAll(weatherViewModelPlace.minTemp)
+            conditionImgUrl.addAll(weatherViewModelPlace.conditionImgUrl)
+        }
+
+        LaunchedEffect(weatherViewModelPlace.currentTemp, weatherViewModelPlace.conditionImgUrl){
+            temperature = weatherViewModelPlace.currentTemp
+            currentConditionImgUrl = weatherViewModelPlace.currentConditionImgUrl
         }
 
         Text(
@@ -218,9 +243,8 @@ class PlaceView : ComponentActivity() {
 
 
 
-
         Column(
-            modifier = Modifier.padding(vertical = 20.dp)
+            modifier = Modifier.padding(vertical = 2.dp)
         ) {
             Text(
                 text = "Categories",
@@ -231,6 +255,46 @@ class PlaceView : ComponentActivity() {
                 itemsIndexed(location.categories.toTypedArray()) { index, category -> //tương tự xuất ra location adapter
                     categoryView(category, Color.Red, false)
                 }
+            }
+        }
+
+        Column(modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
+            horizontalAlignment = Alignment.CenterHorizontally) {
+            Row(verticalAlignment = Alignment.CenterVertically){
+                for (i in minTemp.indices){
+                    Column(modifier = Modifier.padding(horizontal = 10.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(text = "Min: ${minTemp[i]} °C")
+                        Text(text = "Max: ${maxTemp[i]} °C")
+                        Box(modifier = Modifier.padding(vertical = 2.dp)){
+                            AsyncImage(
+                                model = conditionImgUrl[i],
+                                contentDescription = "Condition",
+                                modifier = Modifier.size(32.dp),
+                                contentScale = ContentScale.Fit
+                            )
+                        }
+                        Box(modifier = Modifier.padding(vertical = 1.dp)){
+                            Text(text = dateAfterDays(Date(),i), fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+            }
+        }
+
+        Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally){
+            Row{
+                Text(text = "Current: ", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                Text(text = "$temperature °C",fontSize = 18.sp)
+
+                Spacer(modifier = Modifier.width(5.dp))
+
+                AsyncImage(
+                    model = currentConditionImgUrl,
+                    contentDescription = "Condition",
+                    modifier = Modifier.size(32.dp),
+                    contentScale = ContentScale.Fit
+                )
             }
         }
 
@@ -298,6 +362,8 @@ class PlaceView : ComponentActivity() {
                 Text(text = "Navigate", color = Color.White)
             }
         }
+
+
 
     }
 

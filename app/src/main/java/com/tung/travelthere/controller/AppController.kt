@@ -31,7 +31,7 @@ const val locationNameField = "location-name"
 val colorBlue = Color(android.graphics.Color.parseColor("#5980b3"))
 val formatter = SimpleDateFormat("HH:mm:ss dd/MM/yyyy")
 val formatterDateOnly = SimpleDateFormat("dd/MM/yyyy")
-
+val formatterDateOnlyNoYear = SimpleDateFormat("dd/MM")
 class AppController {
     class UserPlace{
         var cityName = ""

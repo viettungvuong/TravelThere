@@ -508,7 +508,8 @@ class CreateScheduleActivity : ComponentActivity() {
         var uiSettings by remember { mutableStateOf(MapUiSettings()) }
 
         Column() {
-            if (AppController.currentSchedule.value.getList().isNotEmpty()){
+            val checkpoints = AppController.currentSchedule.value.getList()
+            if (checkpoints.isNotEmpty()&&checkpoints.first()!=null){
                 GoogleMap(
                     modifier = Modifier.fillMaxWidth().height(150.dp),
                     cameraPositionState = cameraPositionState
