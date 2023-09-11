@@ -505,8 +505,6 @@ class CreateScheduleActivity : ComponentActivity() {
             position = CameraPosition.fromLatLngZoom(startPos, 8f)
         }
 
-        var uiSettings by remember { mutableStateOf(MapUiSettings()) }
-
         Column() {
             val checkpoints = AppController.currentSchedule.value.getList()
             if (checkpoints.isNotEmpty()&&checkpoints.first()!=null){
@@ -528,14 +526,6 @@ class CreateScheduleActivity : ComponentActivity() {
                         }
                     }
                 }
-
-
-                Switch(
-                    checked = uiSettings.zoomControlsEnabled,
-                    onCheckedChange = {
-                        uiSettings = uiSettings.copy(zoomControlsEnabled = it)
-                    }
-                )
             }
 
 
