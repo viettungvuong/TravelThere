@@ -94,12 +94,6 @@ class PlaceView : ComponentActivity() {
         reviewListenerRegistration.remove() //xoá listener
     }
 
-    override fun onBackPressed() {
-        val intent = Intent(this, MainActivity::class.java)
-        startActivity(intent)
-        finish()
-    }
-
     @OptIn(ExperimentalFoundationApi::class, ExperimentalLayoutApi::class)
     @Composable
     fun viewPlace(location: PlaceLocation) {
