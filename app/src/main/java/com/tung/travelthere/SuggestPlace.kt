@@ -175,10 +175,9 @@ class SuggestPlace : ComponentActivity() {
                     chosenPlaceName,
                     chosenPlacePos,
                     chosenPlaceCity
-                ) //đặt location đang được suggest
+                ) //đặt location đang được suggest (location này sẽ được up lên firebase)
                 (currentLocation as TouristPlace).address = chosenPlaceAddress //địa chỉ
-                (currentLocation as TouristPlace).categories.clear()
-                (currentLocation as TouristPlace).categories.addAll(chosenPlaceCategories)
+                (currentLocation as TouristPlace).addAllCategories(chosenPlaceCategories,filter = false)
             } else {
                 currentLocation = null //trong trường hợp xoá mất địa điểm
             }
@@ -512,7 +511,7 @@ fun suggestPlace(
                         } else {
                             //không tồn tại
                             val categoriesStr = mutableListOf<String>()
-                            for (category in location.categories){
+                            for (category in location.getCategoriesList()){
                                 categoriesStr.add(convertCategoryToStr(category))
                             }
                             val locationData = hashMapOf(

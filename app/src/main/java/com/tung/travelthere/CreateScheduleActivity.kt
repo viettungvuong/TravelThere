@@ -217,7 +217,7 @@ class CreateScheduleActivity : ComponentActivity() {
                                         Row {
                                             //hiện icon tương ứng category đầu tiên của địa điểm
                                             Icon(
-                                                painter = when (location.categories.first()) {
+                                                painter = when (location.getRepCategory()) {
                                                     Category.RESTAURANT -> painterResource(R.drawable.restaurant)
                                                     Category.BAR -> painterResource(R.drawable.bar)
                                                     Category.ATTRACTION -> painterResource(R.drawable.attraction)
@@ -362,7 +362,7 @@ class CreateScheduleActivity : ComponentActivity() {
                         }
                         else{
                             Icon(
-                                painter = when (location!!.categories.first()) {
+                                painter = when (location!!.getRepCategory()) {
                                     Category.RESTAURANT -> painterResource(R.drawable.restaurant)
                                     Category.BAR -> painterResource(R.drawable.bar)
                                     Category.ATTRACTION -> painterResource(R.drawable.attraction)

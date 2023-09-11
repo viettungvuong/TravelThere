@@ -452,7 +452,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     content = {
                         items(listState) { location ->
-                            if (!location.categories.contains(Category.NECESSITY)) {
+                            if (!location.containCategory(Category.NECESSITY)) {
                                 SneakViewPlace(context, location)
                             }
                         }
@@ -511,7 +511,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     content = {
                         items(listState) { location ->
-                            if (!location.categories.contains(Category.NECESSITY)) {
+                            if (!location.containCategory(Category.NECESSITY)) {
                                 SneakViewPlace(context, location)
                             }
                         }

@@ -119,7 +119,7 @@ fun categoryView(
                     locationState!!.value = originalState!!.value
                         .filter {
                             chosenState!!.value.all { category ->
-                                it.categories.contains(category)
+                                it.containCategory(category)
                             }
                         }
                         .toMutableSet()
@@ -201,7 +201,7 @@ fun categoryView(
                 if (chosenState!!.value.isNotEmpty()) { //nếu có chọn category rồi
                     locationState!!.addAll(originalState!!.filter {
                         chosenState!!.value.all { category ->
-                            it.categories.contains(category)
+                            it.containCategory(category)
                         }
                     })
                 } else { //nếu không chọn category nào hết
@@ -281,7 +281,7 @@ fun categoryView(
                 if (chosenState!!.value.isNotEmpty()) { //nếu có chọn category rồi
                     searchViewModel!!.matchedQuery += (searchViewModel!!.originalMatchedQuery.filter {
                         chosenState!!.value.all { category ->
-                            it.categories.contains(category)
+                            it.containCategory(category)
                         }
                     })
                 } else { //nếu không chọn category nào hết

@@ -120,16 +120,6 @@ class City private constructor() {
                     val categoriesArr: MutableList<Category> = mutableListOf()
                     var isRestaurant = false
 
-                    if (categoriesStr!=null){
-                        for (categoryStr in categoriesStr){
-                            categoriesArr.add(convertStrToCategory(categoryStr)) //thêm category
-
-                            if (categoryStr=="Restaurant"){
-                                isRestaurant=true
-                            }
-                        }
-                    }
-
                     val t = if (!isRestaurant){
                         TouristPlace(placeName, Position(lat, long), cityName)
                     }
@@ -138,7 +128,18 @@ class City private constructor() {
                         //refresh restaurant riêng
                     }
 
-                    t.categories.addAll(categoriesArr) //thêm category vào
+                    if (categoriesStr!=null){
+                        for (categoryStr in categoriesStr){
+                            val categoryConvert = convertStrToCategory(categoryStr)
+                            t.addCategory(categoryConvert)
+                            //thêm category vào
+
+                            if (categoryStr=="Restaurant"){
+                                isRestaurant=true
+                            }
+                        }
+                    }
+
 
                     val recommendedNum = location.getLong("recommends") ?: 0
                     t.recommendsCount=recommendedNum.toInt()

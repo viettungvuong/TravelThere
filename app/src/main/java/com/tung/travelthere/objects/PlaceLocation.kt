@@ -77,7 +77,9 @@ fun convertCategoryToStr(category: Category): String{
 //không cho phép tạo object từ class PlaceLocation nên dùng protected (inherit vẫn đc)
 @Serializable
 open class PlaceLocation protected constructor(private val name: String, private val pos: Position, val cityName: String): java.io.Serializable{
-    var categories: MutableSet<Category> = mutableSetOf() //các category của địa điểm này
+    private var categories: MutableMap<Category, Boolean> = mutableMapOf() //các category của địa điểm này (dùng map để việc filter theo category nhanh hơn)
+    private var categoriesSet: MutableSet<Category> = mutableSetOf() //dùng khi liệt kê
+    private lateinit var firstCategory: Category
     var recommendsCount = 0
 
     var address: String?=null //địa chỉ
@@ -116,6 +118,18 @@ open class PlaceLocation protected constructor(private val name: String, private
         return pos
     }
 
+    fun getRepCategory(): Category{
+        return firstCategory //category đại diện
+    }
+
+    fun getCategoriesList(): List<Category>{
+        return categoriesSet.toList()
+    }
+
+    fun containCategory(category: Category): Boolean{
+        return categories[category]==true
+    }
+
     override fun toString(): String {
         return "$name,$cityName,$imageUrl"
     }
@@ -133,6 +147,23 @@ open class PlaceLocation protected constructor(private val name: String, private
 
     fun distanceTo(placeLocation: PlaceLocation): Float{
         return this.pos.distanceTo(placeLocation.getPos())
+    }
+
+    fun addCategory(category: Category){
+        categoriesSet.add(category)
+        categories[category]=true
+    }
+
+    fun addAllCategories(categoriesList: List<Category>, filter: Boolean){
+        categoriesSet.clear()
+        categories.clear()
+
+        categoriesSet.addAll(categoriesList)
+        if (!filter){ //cái này là nếu gọi từ SuggestPlace
+            for (category in categoriesList){
+                categories[category]=true
+            }
+        }
     }
 
     suspend fun fetchImageUrl() = withContext(Dispatchers.IO) {
@@ -268,7 +299,7 @@ open class PlaceLocation protected constructor(private val name: String, private
 
 class Restaurant(name: String, pos: Position, cityName: String, private val specializeIn: MutableList<Dish>): PlaceLocation(name,pos,cityName){
     init {
-        this.categories.add(Category.RESTAURANT)
+        this.addCategory(Category.RESTAURANT)
     }
 
 

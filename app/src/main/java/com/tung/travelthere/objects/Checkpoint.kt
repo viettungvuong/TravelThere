@@ -63,7 +63,7 @@ class Schedule() {
         checkpointList[index]=checkpoint
         calculateDistance(checkpointList.lastIndex-1)
 
-        for (category in checkpoint.getLocation().categories){
+        for (category in checkpoint.getLocation().getCategoriesList()){
             countMap[category]=(countMap[category]?:0)+1 //đếm số category
         }
 
