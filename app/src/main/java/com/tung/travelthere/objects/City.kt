@@ -66,7 +66,7 @@ class City private constructor() {
         var res: String? = null
 
         val query =
-            AppController.db.collection(collectionCities).whereEqualTo(cityNameField, name)
+            Firebase.firestore.collection(collectionCities).whereEqualTo(cityNameField, name)
                 .limit(1).get().await()
         val document = query.documents.firstOrNull()
         if (document != null) {
@@ -97,7 +97,7 @@ class City private constructor() {
             recommends.clear()
             nearby.clear()
             val query =
-                AppController.db.collection(collectionCities).document(name!!)
+                Firebase.firestore.collection(collectionCities).document(name!!)
                     .get().await()
 
             val document = query.reference

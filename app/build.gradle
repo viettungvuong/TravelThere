@@ -98,6 +98,7 @@ dependencies {
     implementation "com.google.accompanist:accompanist-flowlayout:0.20.0"
     implementation "androidx.datastore:datastore-preferences:1.0.0"
     implementation "commons-io:commons-io:2.7"
+    implementation "com.google.maps:google-maps-services:0.15.0"
 }
 
 apply plugin: 'com.google.gms.google-services'

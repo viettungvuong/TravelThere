@@ -8,16 +8,23 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.location.Geocoder
+import android.widget.Toast
 import androidx.compose.ui.graphics.Color
+import androidx.core.content.ContextCompat.startActivity
 import androidx.palette.graphics.Palette
+import androidx.test.core.app.ActivityScenario.launch
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.tung.travelthere.ChooseCity
 import com.tung.travelthere.RegisterLoginActivity
 import com.tung.travelthere.objects.City
 import com.tung.travelthere.objects.Position
+import kotlinx.coroutines.withTimeoutOrNull
 import java.util.*
 import kotlin.math.pow
 import kotlin.math.roundToInt
+import kotlinx.coroutines.*
+import kotlin.system.measureTimeMillis
 
 
 fun colorFromImage(bitmap: Bitmap): Color {
@@ -31,34 +38,56 @@ fun colorFromImage(bitmap: Bitmap): Color {
 //lấy vị trí hiện tại
 @SuppressLint("MissingPermission")
 fun getCurrentPosition(fusedLocationClient: FusedLocationProviderClient, context: Context, callback: () -> Unit) {
-    AppController.currentPosition= AppController.UserPlace()
+    AppController.currentPosition= AppController.UserPlace() //initialize
 
-    fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-        if (location != null) {
-            AppController.currentPosition.currentLocation = Position(location.latitude,location.longitude)
+    runBlocking {
+        val job = launch {
+            val result = withTimeoutOrNull(5000) {
+                //chạy quá 20s thì thôi bỏ
+                val executionTime = measureTimeMillis {
+                    fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                        if (location != null) {
+                            AppController.currentPosition.currentLocation = Position(location.latitude,location.longitude)
 
-            val geocoder = Geocoder(context, Locale.getDefault())
-            val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
-            if (addresses!=null&&addresses.isNotEmpty()) {
-                var cityName = if (addresses[0].locality==null){
-                    addresses[0].adminArea //lấy tên thành phố theo tên tỉnh
-                } else{
-                    addresses[0].locality
+                            val geocoder = Geocoder(context, Locale.getDefault())
+                            val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
+                            if (addresses!=null&&addresses.isNotEmpty()) {
+                                var cityName = if (addresses[0].locality==null){
+                                    addresses[0].adminArea //lấy tên thành phố theo tên tỉnh
+                                } else{
+                                    addresses[0].locality
+                                }
+                                if (cityName == "Thành phố Hồ Chí Minh")
+                                    cityName="Ho Chi Minh City"
+                                val countryName = addresses[0].countryName
+
+                                AppController.currentPosition.cityName = cityName
+                                AppController.currentPosition.countryName = countryName
+
+                                City.getSingleton().setName(cityName) //đặt tên cho thành phố hiện tại
+                                City.getSingleton().setCountry(countryName)
+
+                                callback()
+                            }
+                        }
+                    }
                 }
-                if (cityName == "Thành phố Hồ Chí Minh")
-                    cityName="Ho Chi Minh City"
-                val countryName = addresses[0].countryName
+                "Get location in $executionTime ms"
+            }
 
-                AppController.currentPosition.cityName = cityName
-                AppController.currentPosition.countryName = countryName
-
-                City.getSingleton().setName(cityName) //đặt tên cho thành phố hiện tại
-                City.getSingleton().setCountry(countryName)
-
-                callback()
+            if (result==null){ //chạy quá 20s rồi
+                Toast.makeText(context,"Location Service takes too long to get location",Toast.LENGTH_SHORT).show()
+                val intent = Intent(context, ChooseCity::class.java)
+                context.startActivity(intent)
+              //cho người dùng tự chọn thành phố
             }
         }
+
+        job.join() //load địa điểm
     }
+
+
+
 }
 
 

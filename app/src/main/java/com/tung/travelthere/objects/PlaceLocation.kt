@@ -7,6 +7,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.ListenerRegistration
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import com.tung.travelthere.controller.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.Main
@@ -161,7 +163,7 @@ open class PlaceLocation protected constructor(private val name: String, private
                 "score" to review.score,
                 "time" to formatter.format(review.time)
             )
-            AppController.db.collection(collectionCities).document(cityName)
+            Firebase.firestore.collection(collectionCities).document(cityName)
                 .collection(collectionLocations).document(pos.toString()).collection("reviews").add(reviewData)
                 .addOnSuccessListener {
                     Toast.makeText(context, "Added your review, thank you for your feedback",Toast.LENGTH_LONG).show()
@@ -180,7 +182,7 @@ open class PlaceLocation protected constructor(private val name: String, private
 
             reviews.clear()
             val query =
-                AppController.db.collection(collectionCities).document(cityName)
+                Firebase.firestore.collection(collectionCities).document(cityName)
                     .collection(collectionLocations).document(pos.toString())
                     .get().await()
 
@@ -208,7 +210,7 @@ open class PlaceLocation protected constructor(private val name: String, private
         }
 
         fun getLiveReviews(): ListenerRegistration {
-            return AppController.db.collection(collectionCities).document(cityName)
+            return Firebase.firestore.collection(collectionCities).document(cityName)
                     .collection(collectionLocations).document(pos.toString()).collection("reviews")
                     .addSnapshotListener{
                         snapshot, exception ->

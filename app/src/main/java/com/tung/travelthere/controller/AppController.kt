@@ -77,7 +77,7 @@ class AppController {
 
         private fun updateFavoritesFirebase(location: PlaceLocation,add: Boolean){ //cập nhật trên firebase
             if (add){
-                val documentReference = db.collection("users").document(auth.currentUser!!.uid)
+                val documentReference = Firebase.firestore.collection("users").document(auth.currentUser!!.uid)
 
                 documentReference.get()
                     .addOnSuccessListener { documentSnapshot ->
@@ -92,12 +92,12 @@ class AppController {
                             val favoriteData = hashMapOf(
                                 "favorites" to favoriteListStr
                             )
-                            db.collection("users").document(auth.currentUser!!.uid).set(favoriteData)
+                            Firebase.firestore.collection("users").document(auth.currentUser!!.uid).set(favoriteData)
                         }
                     }
             }
             else{
-                db.collection("users").document(auth.currentUser!!.uid).update("favorites",
+                Firebase.firestore.collection("users").document(auth.currentUser!!.uid).update("favorites",
                     FieldValue.arrayRemove("${location.getPos()}"))
             }
         }
@@ -107,7 +107,7 @@ class AppController {
                 return favoriteList
             }
 
-            val documentSnapshot = db.collection("users").document(auth.currentUser!!.uid).get().await()
+            val documentSnapshot = Firebase.firestore.collection("users").document(auth.currentUser!!.uid).get().await()
 
             if (documentSnapshot.exists()) {
                 val favorites = documentSnapshot["favorites"]
@@ -133,10 +133,7 @@ class AppController {
     companion object{
 
         lateinit var currentPosition: UserPlace //địa điểm hiện tại
-
-        @JvmField
-        val db = Firebase.firestore
-
+        
         @JvmField
         val auth = FirebaseAuth.getInstance()
 

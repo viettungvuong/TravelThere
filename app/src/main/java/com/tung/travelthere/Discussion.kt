@@ -31,7 +31,7 @@ class Discussion(val name: String, private val location: PlaceLocation) : ViewMo
             return //id null nghĩa là chưa up lên firebase
         }
 
-        AppController.db.collection(collectionCities)
+        Firebase.firestore.collection(collectionCities)
             .whereEqualTo(cityNameField, location.cityName).limit(1)
             .get() //lấy document city tương ứng
             .addOnSuccessListener { querySnapshot ->
@@ -80,7 +80,7 @@ class Discussion(val name: String, private val location: PlaceLocation) : ViewMo
             return //id null nghĩa là chưa up lên firebase
         }
 
-        AppController.db.collection(collectionCities)
+        Firebase.firestore.collection(collectionCities)
             .whereEqualTo(cityNameField, location.cityName).limit(1)
             .get() //lấy document city tương ứng
             .addOnSuccessListener { querySnapshot ->
@@ -137,7 +137,7 @@ class Discussion(val name: String, private val location: PlaceLocation) : ViewMo
             "sender" to discussionContent.getSender(),
         )
 
-        val locationQuery = AppController.db.collection(collectionCities)
+        val locationQuery = Firebase.firestore.collection(collectionCities)
             .whereEqualTo(cityNameField, location.cityName).limit(1)
             .get() //lấy document city tương ứng
             .addOnSuccessListener { querySnapshot ->

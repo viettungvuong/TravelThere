@@ -48,6 +48,8 @@ import androidx.core.content.ContextCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.component1
 import com.google.firebase.storage.ktx.component2
 import com.tung.travelthere.controller.*
@@ -438,7 +440,7 @@ fun suggestPlace(
     location: PlaceLocation,
     imageViewModel: SuggestPlace.ImageViewModel?
 ) {
-    val cityRef = AppController.db.collection(collectionCities).document(location.cityName)
+    val cityRef = Firebase.firestore.collection(collectionCities).document(location.cityName)
     cityRef.get().addOnCompleteListener { task ->
         if (task.isSuccessful) {
             val documentSnapshot = task.result

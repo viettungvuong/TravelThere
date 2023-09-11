@@ -35,6 +35,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import com.tung.travelthere.controller.*
 import com.tung.travelthere.objects.*
 import java.util.*
@@ -476,7 +478,7 @@ class CreateScheduleActivity : ComponentActivity() {
                 dateField to formatterDateOnly.format(AppController.currentSchedule.value.date)
             )
 
-            AppController.db.collection("users").document(AppController.auth.currentUser!!.uid)
+            Firebase.firestore.collection("users").document(AppController.auth.currentUser!!.uid)
                 .collection("schedules").add(scheduleData) //update lên firebase
                 .addOnSuccessListener {
                     AppController.schedules.add(Schedule(AppController.currentSchedule.value)) //thêm vào danh sách các schedule
@@ -641,7 +643,7 @@ fun fetchSchedules(){
 
     AppController.schedules.clear()
 
-    AppController.db.collection("users").document(AppController.auth.currentUser!!.uid)
+    Firebase.firestore.collection("users").document(AppController.auth.currentUser!!.uid)
         .collection("schedules").get().addOnSuccessListener {
             documents ->
             for (document in documents){

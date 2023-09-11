@@ -125,7 +125,7 @@ class SplashScreen : ComponentActivity() {
     private fun requestLocationEnable(activity: Activity) {
         val builder = AlertDialog.Builder(activity)
         builder.setTitle("Location Services Required")
-        builder.setMessage("Please enable location services to use this feature.")
+        builder.setMessage("Please enable Location Services to use this feature.")
         builder.setPositiveButton("Go to Settings") { dialog, _ ->
             //mở location settings
             val intent = Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS)
