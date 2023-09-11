@@ -71,7 +71,7 @@ class WeatherViewModel(context: Context, city: City) : ViewModel() {
 
     init {
         val url =
-            "https://api.weatherapi.com/v1/forecast.json?key=50224d22b9804f92a1b94202230309&q=${city.getName()}&days=1&aqi=yes&alerts=yes"
+            "https://api.weatherapi.com/v1/forecast.json?key=50224d22b9804f92a1b94202230309&q=${AppController.currentPosition.currentLocation}&days=1&aqi=yes&alerts=yes"
 
         val requestQueue = Volley.newRequestQueue(context)
 
@@ -87,7 +87,6 @@ class WeatherViewModel(context: Context, city: City) : ViewModel() {
                     conditionImgUrl =
                         response.getJSONObject("current").getJSONObject("condition")
                             .getString("icon") //hình đại diện cho điều kiện thời tiết
-                    Log.d("str weather", "$temperature,$condition,$conditionImgUrl")
                 } catch (e: JSONException) {
                     e.printStackTrace()
                 }

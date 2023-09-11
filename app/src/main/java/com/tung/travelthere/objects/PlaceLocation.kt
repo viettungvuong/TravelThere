@@ -5,6 +5,7 @@ import android.location.Location
 import android.widget.Toast
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.ktx.firestore
@@ -29,6 +30,10 @@ class Position(var lat: Double, var long: Double): java.io.Serializable{
         locationB.longitude=other.long
 
         return locationA.distanceTo(locationB)
+    }
+
+    fun convertToLatLng(): LatLng{
+        return LatLng(lat,long)
     }
 }
 

@@ -35,8 +35,11 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.maps.android.compose.*
 import com.tung.travelthere.controller.*
 import com.tung.travelthere.objects.*
 import java.util.*
@@ -434,7 +437,6 @@ class CreateScheduleActivity : ComponentActivity() {
 
         @Composable
         fun categoryCount(schedule: Schedule){
-
             Row(modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center){
                 for (category in schedule.countMap.keys){
@@ -465,8 +467,6 @@ class CreateScheduleActivity : ComponentActivity() {
             }
         }
 
-        val showDialog = remember { mutableStateOf(false) } //có hiện dialog không
-
         fun updateSchedule(){ //update lên firebase
             val checkpointStr = mutableListOf<String>()
             for (checkpoint in AppController.currentSchedule.value.getList()){
@@ -490,10 +490,54 @@ class CreateScheduleActivity : ComponentActivity() {
                 }
         }
 
-
+        val showDialog = remember { mutableStateOf(false) } //có hiện dialog không
         val keyboardController = LocalSoftwareKeyboardController.current
 
+
+        val startPos = if (AppController.currentPosition.currentLocation!=null){
+            AppController.currentPosition.currentLocation!!.convertToLatLng()
+        }
+        else{
+            LatLng(10.7628409,106.6799075)
+        } //nơi xuất phát
+
+        val cameraPositionState = rememberCameraPositionState {
+            position = CameraPosition.fromLatLngZoom(startPos, 8f)
+        }
+
+        var uiSettings by remember { mutableStateOf(MapUiSettings()) }
+
         Column() {
+            if (AppController.currentSchedule.value.getList().isNotEmpty()){
+                GoogleMap(
+                    modifier = Modifier.fillMaxWidth().height(150.dp),
+                    cameraPositionState = cameraPositionState
+                ) {
+                    val checkpoints = AppController.currentSchedule.value.getList()
+                    for (i in checkpoints.indices){
+                        if (checkpoints[i]!=null){
+                            cameraPositionState.position = CameraPosition
+                                .fromLatLngZoom(checkpoints[i]!!.getLocation().getPos().convertToLatLng(), 15f)
+
+                            Marker(
+                                state = MarkerState(position = checkpoints[i]!!.getLocation().getPos().convertToLatLng()),
+                                title = "Checkpoint $i",
+                                snippet = "Checkpoint $i",
+                            )
+                        }
+                    }
+                }
+
+
+                Switch(
+                    checked = uiSettings.zoomControlsEnabled,
+                    onCheckedChange = {
+                        uiSettings = uiSettings.copy(zoomControlsEnabled = it)
+                    }
+                )
+            }
+
+
             //để căn giữa nút cộng
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -506,8 +550,12 @@ class CreateScheduleActivity : ComponentActivity() {
                     modifier = Modifier
                         .height(40.dp)
                         .clickable {
-                            AppController.currentSchedule.value.addNullCheckpoint()
-                            keyboardController?.hide()
+                            if (AppController.currentSchedule.value.getList().isEmpty()||
+                                AppController.currentSchedule.value.getList().last()!=null){
+                                AppController.currentSchedule.value.addNullCheckpoint()
+                                keyboardController?.hide()
+                            }
+
                         })
             }
 

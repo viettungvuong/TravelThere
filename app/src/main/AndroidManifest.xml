@@ -11,10 +11,6 @@
         android:name="android.permission.MANAGE_DOCUMENTS"
         tools:ignore="ProtectedPermissions" />
 
-    <meta-data
-        android:name="com.google.android.geo.API_KEY"
-        android:value="AIzaSyD5jFBmMOSm3-_Vgbkx2HsWFeIotYshOq0" />
-
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -24,6 +20,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.TravelThere"
         tools:targetApi="31">
+
+        <meta-data android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyCytvnlz93VlDAMs2RsndMo-HVgd0fl-lQ"/>
+
         <activity
             android:name=".ChooseCity"
             android:exported="false"
