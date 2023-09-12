@@ -168,6 +168,7 @@ fun shortestPathAlgo(schedule: Schedule): Pair<Float,Schedule>? {
     var current = extremePoints.first
     var totalDistance = 0f
     var travel = LinkedList<Checkpoint>()
+    travel.add(current)
 
     //a* algorithm visit all nodes
     while (current!=extremePoints.second){
