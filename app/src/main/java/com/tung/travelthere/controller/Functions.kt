@@ -169,25 +169,10 @@ fun shortestPathAlgo(schedule: Schedule): Pair<Float,Schedule>? {
     var totalDistance = 0f
     var travel = LinkedList<Checkpoint>()
 
-    //traveling salesman problem with greedy
-    for (i in schedule.getList().indices-1){
+    //a* algorithm visit all nodes
+    while (current!=extremePoints.second){
         visited[current]=true
 
-        var minDist = Float.POSITIVE_INFINITY
-        var nextCheckpoint = current
-
-        for (j in schedule.getList().indices){
-            val checkpoint = schedule.getList()[j]
-            if (checkpoint!=null&&current!=checkpoint){
-                val distance = current.distanceTo(checkpoint)
-                if (checkpoint!=null
-                    &&visited[checkpoint]==false
-                    &&current!=checkpoint&&distance<minDist){
-                    minDist = distance
-                    nextCheckpoint = checkpoint
-                }
-            }
-        }
 
         totalDistance+=minDist
         current = nextCheckpoint
