@@ -206,6 +206,7 @@ class CreateScheduleActivity : ComponentActivity() {
                                                 }
                                                 schedule.getList().add(checkpoint)
 
+                                                //thêm category
                                                 for (category in location.getCategoriesList()){
                                                     schedule.countMap[category]=(schedule.countMap[category]?:0)+1
                                                 }
@@ -525,9 +526,9 @@ class CreateScheduleActivity : ComponentActivity() {
             position = CameraPosition.fromLatLngZoom(startPos, 8f)
         }
 
-        LaunchedEffect(AppController.currentSchedule){
-            optimalSchedule.value = shortestPathAlgo(AppController.currentSchedule.value)
-        }
+//        LaunchedEffect(AppController.currentSchedule){
+//            optimalSchedule.value = shortestPathAlgo(AppController.currentSchedule.value)
+//        }
 
         Column() {
             val checkpoints = AppController.currentSchedule.value.getList()
@@ -554,22 +555,22 @@ class CreateScheduleActivity : ComponentActivity() {
                 }
             }
 
-            if (optimalSchedule.value!=null){
-                Box(modifier = Modifier
-                    .padding(vertical = 5.dp)
-                    .border(width = 2.dp, shape = RectangleShape, brush = Brush.linearGradient())
-                    .padding(5.dp)){
-                    Column {
-                        Text("Optimal schedule", fontWeight = FontWeight.Bold)
-
-                        Box(modifier = Modifier.padding(vertical = 2.dp)){
-                            Text("Distance ${optimalSchedule.value!!.first} km")
-                        }
-
-                        scheduleView(schedule = optimalSchedule.value!!.second)
-                    }
-                }
-            }
+//            if (optimalSchedule.value!=null){
+//                Box(modifier = Modifier
+//                    .padding(vertical = 5.dp)
+//                    .border(width = 2.dp, shape = RectangleShape, brush = Brush.linearGradient())
+//                    .padding(5.dp)){
+//                    Column {
+//                        Text("Optimal schedule", fontWeight = FontWeight.Bold)
+//
+//                        Box(modifier = Modifier.padding(vertical = 2.dp)){
+//                            Text("Distance ${optimalSchedule.value!!.first} km")
+//                        }
+//
+//                        scheduleView(schedule = optimalSchedule.value!!.second)
+//                    }
+//                }
+//            }
 
 
             //để căn giữa nút cộng

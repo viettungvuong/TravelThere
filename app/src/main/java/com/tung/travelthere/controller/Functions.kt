@@ -131,58 +131,58 @@ fun dateAfterDays(date: Date, days: Int): String {
 }
 
 //tìm khoảng cách xa nhất theo latitude và longitude
-private fun findExtremePoints(schedule: Schedule): Pair<Checkpoint, Checkpoint>? {
-    var res: Pair<Checkpoint, Checkpoint>?=null
-
-    if (schedule.getList().isEmpty() || schedule.getList().size < 2) {
-        return null
-    }
-
-    var maxDistance = Float.NEGATIVE_INFINITY
-
-    //tìm điểm có latitude nhỏ nhất
-    for (i in schedule.getList().indices) {
-        val checkpoint = schedule.getList()[i]
-        if (checkpoint != null) {
-            for (j in schedule.getList().indices){
-                if (i==j)
-                    continue
-                val checkpoint2 = schedule.getList()[j]
-                if (checkpoint2!=null&&checkpoint.distanceTo(checkpoint2)>maxDistance){
-                    maxDistance=checkpoint.distanceTo(checkpoint2)
-                    res=Pair(Checkpoint(checkpoint),Checkpoint(checkpoint2))
-                }
-            }
-        }
-    }
-
-    return res
-
-}
-
-fun shortestPathAlgo(schedule: Schedule): Pair<Float,Schedule>? {
-    //tìm đường đi tối ưu
-    val extremePoints = findExtremePoints(schedule = schedule) ?: return null
-
-    val visited = mutableMapOf<Checkpoint,Boolean>()
-    var current = extremePoints.first
-    var totalDistance = 0f
-    var travel = LinkedList<Checkpoint>()
-    travel.add(current)
-
-    //a* algorithm visit all nodes
-    while (current!=extremePoints.second){
-        visited[current]=true
-
-
-        totalDistance+=minDist
-        current = nextCheckpoint
-        travel.add(Checkpoint(current))
-    }
-
-    val scheduleRes = Schedule()
-    scheduleRes.getList().clear()
-    scheduleRes.getList().addAll(travel)
-
-    return Pair(totalDistance,scheduleRes)
-}
+//private fun findExtremePoints(schedule: Schedule): Pair<Checkpoint, Checkpoint>? {
+//    var res: Pair<Checkpoint, Checkpoint>?=null
+//
+//    if (schedule.getList().isEmpty() || schedule.getList().size < 2) {
+//        return null
+//    }
+//
+//    var maxDistance = Float.NEGATIVE_INFINITY
+//
+//    //tìm điểm có latitude nhỏ nhất
+//    for (i in schedule.getList().indices) {
+//        val checkpoint = schedule.getList()[i]
+//        if (checkpoint != null) {
+//            for (j in schedule.getList().indices){
+//                if (i==j)
+//                    continue
+//                val checkpoint2 = schedule.getList()[j]
+//                if (checkpoint2!=null&&checkpoint.distanceTo(checkpoint2)>maxDistance){
+//                    maxDistance=checkpoint.distanceTo(checkpoint2)
+//                    res=Pair(Checkpoint(checkpoint),Checkpoint(checkpoint2))
+//                }
+//            }
+//        }
+//    }
+//
+//    return res
+//
+//}
+//
+//fun shortestPathAlgo(schedule: Schedule): Pair<Float,Schedule>? {
+//    //tìm đường đi tối ưu
+//    val extremePoints = findExtremePoints(schedule = schedule) ?: return null
+//
+//    val visited = mutableMapOf<Checkpoint,Boolean>()
+//    var current = extremePoints.first
+//    var totalDistance = 0f
+//    var travel = LinkedList<Checkpoint>()
+//    travel.add(current)
+//
+//    //a* algorithm visit all nodes
+//    while (current!=extremePoints.second){
+//        visited[current]=true
+//
+//
+//        totalDistance+=minDist
+//        current = nextCheckpoint
+//        travel.add(Checkpoint(current))
+//    }
+//
+//    val scheduleRes = Schedule()
+//    scheduleRes.getList().clear()
+//    scheduleRes.getList().addAll(travel)
+//
+//    return Pair(totalDistance,scheduleRes)
+//}
