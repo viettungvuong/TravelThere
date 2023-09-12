@@ -10,15 +10,11 @@ import com.google.type.DateTime
 import java.util.Date
 import java.util.LinkedList
 
-class Checkpoint() {
+class Checkpoint(placeLocation: PlaceLocation) {
     var placeLocationState = mutableStateOf<PlaceLocation?>(null)
 
-    constructor(placeLocation: PlaceLocation): this(){
+    init {
         placeLocationState.value = placeLocation
-    }
-
-    constructor(other: Checkpoint): this(){
-        this.placeLocationState.value = other.placeLocationState.value
     }
 
     fun distanceTo(other: Checkpoint): Float {
@@ -29,13 +25,17 @@ class Checkpoint() {
         return placeLocationState.value!!
     }
 
+    fun setLocation(placeLocation: PlaceLocation){
+        this.placeLocationState.value = placeLocation
+    }
+
     override fun toString(): String {
         return placeLocationState.value!!.getPos().toString()
     }
 }
 
 class Schedule() {
-    private val checkpointList = mutableStateListOf<Checkpoint?>()
+    private val checkpointList = mutableStateListOf<Checkpoint>()
     val distances = mutableStateListOf<Float>()
     val countMap = mutableStateMapOf<Category,Int>()//map để đếm có bao nhiêu trong category
 
@@ -50,13 +50,8 @@ class Schedule() {
         this.date = date
     }
 
-    fun getList(): SnapshotStateList<Checkpoint?> {
+    fun getList(): SnapshotStateList<Checkpoint> {
         return checkpointList
-    }
-
-    fun addNullCheckpoint(){
-        checkpointList.add(null)
-        distances.add(0f)
     }
 
     //set thì không null

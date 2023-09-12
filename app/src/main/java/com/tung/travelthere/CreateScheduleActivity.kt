@@ -132,21 +132,16 @@ class CreateScheduleActivity : ComponentActivity() {
     private fun CreateSchedule() {
         @Composable
         fun SearchDialog(
-            index: Int,
             schedule: Schedule,
             showDialog: Boolean,
             searchViewModel: SearchViewModel,
             setShowDialog: (Boolean) -> Unit,
-            setLocation: (PlaceLocation) -> Unit,
-            setTimesInWeek: (Int) -> Unit
         ) {
             var distance by remember { mutableStateOf(0f) }
-            var indexState = remember { mutableStateOf(index) }
             var chosenState = remember { mutableStateOf(mutableSetOf<Category>()) }
 
             fun clear() {
                 distance = 0f
-                indexState.value = 0
                 searchViewModel.matchedQuery.clear()
             }
 
@@ -201,17 +196,19 @@ class CreateScheduleActivity : ComponentActivity() {
                                                 5.dp
                                             )
                                             .clickable(onClick = {
-                                                //đặt ở checkpoint[index] trong list
                                                 val checkpoint = Checkpoint(location)
-                                                schedule.setCheckpoint(
-                                                    checkpoint = checkpoint,
-                                                    index = indexState.value
-                                                )
 
-                                                setLocation(schedule.getList()[indexState.value]!!.getLocation())
-                                                //callback đặt địa điểm cho checkpoint
+                                                if (schedule.getList().isNotEmpty()){
+                                                    val prevCheckpoint = schedule.getList().last()
 
-                                                setTimesInWeek(visitTimes(location)) //đếm số lần đến điểm này trong 1 tuần qua
+                                                    //thêm distance
+                                                    schedule.distances.add(checkpoint.distanceTo(prevCheckpoint)/1000)
+                                                }
+                                                schedule.getList().add(checkpoint)
+
+                                                for (category in location.getCategoriesList()){
+                                                    schedule.countMap[category]=(schedule.countMap[category]?:0)+1
+                                                }
 
                                                 clear()
                                                 setShowDialog(false) //đóng hộp thoại lại
@@ -253,9 +250,9 @@ class CreateScheduleActivity : ComponentActivity() {
                                                 ) {
                                                     //tính toán khoảng cách từ điểm này đến checkpoint trước
                                                     distance = 0f
-                                                    if (index > 0 && schedule.getList()[index - 1] != null) {
+                                                    if (schedule.getList().size > 0 && schedule.getList().last() != null) {
                                                         distance =
-                                                            schedule.getList()[index - 1]!!.getLocation()
+                                                            schedule.getList().last().getLocation()
                                                                 .distanceTo(location) / 1000
                                                     }
 
@@ -412,42 +409,32 @@ class CreateScheduleActivity : ComponentActivity() {
                                 )
                             }
                         }
-
-                        SearchDialog(
-                            index = index,
-                            schedule = schedule,
-                            showDialog = showDialog.value,
-                            searchViewModel = searchViewModel,
-                            setShowDialog = { showDialog.value = it },
-                            setLocation = {
-                                location = it
-                            },
-                            setTimesInWeek = {
-                                timesInAWeek.value = it
-                            })
-
                     }
 
 
                 }
 
-                Row(modifier = Modifier.padding(vertical = 5.dp)) {
-                    var distance = schedule.distances[index]
+                if (index<schedule.distances.size){
+                    Row(modifier = Modifier.padding(vertical = 5.dp)) {
+                        var distance = schedule.distances[index]
+                        //khoảng cách
 
-                    if (distance > 0f) {
-                        Icon(
-                            imageVector = Icons.Default.Place,
-                            contentDescription = "City",
-                            tint = Color.Black,
-                            modifier = Modifier.scale(0.8f)
-                        )
+                        if (distance > 0f) {
+                            Icon(
+                                imageVector = Icons.Default.Place,
+                                contentDescription = "City",
+                                tint = Color.Black,
+                                modifier = Modifier.scale(0.8f)
+                            )
 
-                        Spacer(modifier = Modifier.width(5.dp))
+                            Spacer(modifier = Modifier.width(5.dp))
 
-                        //phần distance
-                        Text(text = "${roundDecimal(distance.toDouble(), 2)} km", fontSize = 15.sp)
+                            //phần distance
+                            Text(text = "${roundDecimal(distance.toDouble(), 2)} km", fontSize = 15.sp)
+                        }
                     }
                 }
+
 
                 if (timesInAWeek.value > 0) {
                     val text = buildAnnotatedString {
@@ -596,20 +583,16 @@ class CreateScheduleActivity : ComponentActivity() {
                     modifier = Modifier
                         .height(40.dp)
                         .clickable {
-                            if (AppController.currentSchedule.value
-                                    .getList()
-                                    .isEmpty() ||
-                                AppController.currentSchedule.value
-                                    .getList()
-                                    .last() != null
-                            ) {
-                                AppController.currentSchedule.value.addNullCheckpoint()
-                                //thêm null checkpoint
-                                keyboardController?.hide()
-                            }
-
+                            showDialog.value = true
+                            keyboardController?.hide()
                         })
             }
+
+            SearchDialog(
+                schedule = AppController.currentSchedule.value,
+                showDialog = showDialog.value,
+                searchViewModel = searchViewModel,
+                setShowDialog = { showDialog.value = it })
 
             categoryCount(schedule = AppController.currentSchedule.value)
 
@@ -660,7 +643,7 @@ class CreateScheduleActivity : ComponentActivity() {
             }
 
             //hiện từng checkpoint
-            LazyColumn(modifier = Modifier.weight(0.5f)) {
+            LazyColumn() {
                 itemsIndexed(AppController.currentSchedule.value.getList()) { index, item ->
                     Checkpoint(index, AppController.currentSchedule.value, showDialog)
                 }
