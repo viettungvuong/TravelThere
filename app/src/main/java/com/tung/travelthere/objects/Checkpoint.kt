@@ -10,22 +10,23 @@ import com.google.type.DateTime
 import java.util.Date
 import java.util.LinkedList
 
-class Checkpoint(placeLocation: PlaceLocation) {
+class Checkpoint() {
     var placeLocationState = mutableStateOf<PlaceLocation?>(null)
 
-    init {
+    constructor(placeLocation: PlaceLocation): this(){
         placeLocationState.value = placeLocation
     }
+
+    constructor(other: Checkpoint): this(){
+        this.placeLocationState.value = other.placeLocationState.value
+    }
+
     fun distanceTo(other: Checkpoint): Float {
         return placeLocationState.value!!.distanceTo(other.placeLocationState.value!!)
     }
 
     fun getLocation(): PlaceLocation {
         return placeLocationState.value!!
-    }
-
-    fun setLocation(placeLocation: PlaceLocation){
-        this.placeLocationState.value = placeLocation
     }
 
     override fun toString(): String {

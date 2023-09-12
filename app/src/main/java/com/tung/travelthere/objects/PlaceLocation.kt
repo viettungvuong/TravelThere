@@ -79,7 +79,6 @@ fun convertCategoryToStr(category: Category): String{
 open class PlaceLocation protected constructor(private val name: String, private val pos: Position, val cityName: String): java.io.Serializable{
     private var categories: MutableMap<Category, Boolean> = mutableMapOf() //các category của địa điểm này (dùng map để việc filter theo category nhanh hơn)
     private var categoriesSet: MutableSet<Category> = mutableSetOf() //dùng khi liệt kê
-    private lateinit var firstCategory: Category
     var recommendsCount = 0
 
     var address: String?=null //địa chỉ
@@ -119,7 +118,7 @@ open class PlaceLocation protected constructor(private val name: String, private
     }
 
     fun getRepCategory(): Category{
-        return firstCategory //category đại diện
+        return categoriesSet.first() //category đại diện
     }
 
     fun getCategoriesList(): List<Category>{

@@ -57,13 +57,13 @@ class ChooseCity : ComponentActivity() {
     private fun pickCity(city: String) {
         AppController.currentPosition= AppController.UserPlace()
 
-        AppController.currentPosition.cityName = city
-        AppController.currentPosition.countryName = "Vietnam"
+        AppController.currentPosition!!.cityName = city
+        AppController.currentPosition!!.countryName = "Vietnam"
 
         City.getSingleton().setName(city) //đặt tên cho thành phố hiện tại
         City.getSingleton().setCountry("Vietnam")
 
-        AppController.currentPosition.currentLocation = null
+        AppController.currentPosition!!.currentLocation = null
         //đặt vị trí giả định
 
         Toast.makeText(this,"Please wait",Toast.LENGTH_LONG).show()

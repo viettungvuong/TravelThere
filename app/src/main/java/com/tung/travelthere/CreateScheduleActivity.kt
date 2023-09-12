@@ -7,6 +7,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
@@ -21,7 +22,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
@@ -228,7 +232,9 @@ class CreateScheduleActivity : ComponentActivity() {
                                                 },
                                                 tint = colorBlue,
                                                 contentDescription = null,
-                                                modifier = Modifier.size(20.dp).padding(vertical = 2.dp, horizontal = 2.dp)
+                                                modifier = Modifier
+                                                    .size(20.dp)
+                                                    .padding(vertical = 2.dp, horizontal = 2.dp)
                                             )
 
                                             //tên địa điểm
@@ -519,10 +525,10 @@ class CreateScheduleActivity : ComponentActivity() {
 
         val showDialog = remember { mutableStateOf(false) } //có hiện dialog không
         val keyboardController = LocalSoftwareKeyboardController.current
+        var optimalSchedule = remember { mutableStateOf<Pair<Float,Schedule>?>(null) }
 
-
-        val startPos = if (AppController.currentPosition.currentLocation!=null){
-            AppController.currentPosition.currentLocation!!.convertToLatLng()
+        val startPos = if (AppController.currentPosition!!.currentLocation!=null){
+            AppController.currentPosition!!.currentLocation!!.convertToLatLng()
         }
         else{
             LatLng(10.7628409,106.6799075)
@@ -530,6 +536,10 @@ class CreateScheduleActivity : ComponentActivity() {
 
         val cameraPositionState = rememberCameraPositionState {
             position = CameraPosition.fromLatLngZoom(startPos, 8f)
+        }
+
+        LaunchedEffect(AppController.currentSchedule){
+            optimalSchedule.value = shortestPathAlgo(AppController.currentSchedule.value)
         }
 
         Column() {
@@ -557,13 +567,29 @@ class CreateScheduleActivity : ComponentActivity() {
                 }
             }
 
+            if (optimalSchedule.value!=null){
+                Box(modifier = Modifier
+                    .padding(vertical = 5.dp)
+                    .border(width = 2.dp, shape = RectangleShape, brush = Brush.linearGradient())
+                    .padding(5.dp)){
+                    Column {
+                        Text("Optimal schedule", fontWeight = FontWeight.Bold)
+
+                        Box(modifier = Modifier.padding(vertical = 2.dp)){
+                            Text("Distance ${optimalSchedule.value!!.first} km")
+                        }
+
+                        scheduleView(schedule = optimalSchedule.value!!.second)
+                    }
+                }
+            }
+
 
             //để căn giữa nút cộng
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-
                 Icon(imageVector = Icons.Default.Add,
                     tint = Color(0xff468a55),
                     contentDescription = null,
@@ -647,55 +673,7 @@ class CreateScheduleActivity : ComponentActivity() {
     @Composable
     private fun ViewSchedules() {
         //adapter schedule
-        @Composable
-        fun scheduleView(schedule: Schedule){
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        vertical = 10.dp,
-                        horizontal = 10.dp
-                    )
-                    .clickable(onClick = {
-                    }), elevation = 10.dp
-            ) {
-                Column {
-                    Text(modifier = Modifier.padding(5.dp), text = formatterDateOnly.format(schedule.date), fontWeight = FontWeight.Bold)
-                    LazyRow {
-                        itemsIndexed(schedule.getList()){
-                                index, checkpoint ->
-                            if (checkpoint!=null){
-                                Row(){
-                                    Icon(
-                                        imageVector = Icons.Default.Place,
-                                        contentDescription = null,
-                                        tint = Color.Red,
-                                        modifier = Modifier.scale(0.8f)
-                                    )
 
-                                    Spacer(modifier = Modifier.width(10.dp))
-
-                                    Text(
-                                        text = "${checkpoint.getLocation().getName()}"
-                                    )
-
-                                    if (index!=schedule.getList().lastIndex&&schedule.getList()[index+1]==null){
-                                        Text(
-                                            text = "→",
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 20.sp,
-                                            color = Color.Red
-                                        )
-                                    }
-                                }
-                            }
-
-                        }
-                    }
-                }
-
-            }
-        }
 
         LazyColumn() {
             items(AppController.schedules){
@@ -748,3 +726,52 @@ fun fetchSchedules(){
         }
 }
 
+@Composable
+fun scheduleView(schedule: Schedule){
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(
+                vertical = 10.dp,
+                horizontal = 10.dp
+            )
+            .clickable(onClick = {
+            }), elevation = 10.dp
+    ) {
+        Column {
+            Text(modifier = Modifier.padding(5.dp), text = formatterDateOnly.format(schedule.date), fontWeight = FontWeight.Bold)
+            LazyRow {
+                itemsIndexed(schedule.getList()){
+                        index, checkpoint ->
+                    if (checkpoint!=null){
+                        Row(){
+                            Icon(
+                                imageVector = Icons.Default.Place,
+                                contentDescription = null,
+                                tint = Color.Red,
+                                modifier = Modifier.scale(0.8f)
+                            )
+
+                            Spacer(modifier = Modifier.width(10.dp))
+
+                            Text(
+                                text = "${checkpoint.getLocation().getName()}"
+                            )
+
+                            if (index!=schedule.getList().lastIndex&&schedule.getList()[index+1]==null){
+                                Text(
+                                    text = "→",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 20.sp,
+                                    color = Color.Red
+                                )
+                            }
+                        }
+                    }
+
+                }
+            }
+        }
+
+    }
+}

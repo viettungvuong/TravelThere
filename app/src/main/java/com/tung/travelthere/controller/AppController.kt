@@ -131,7 +131,6 @@ class AppController {
     }
 
     companion object{
-
         lateinit var currentPosition: UserPlace //địa điểm hiện tại
         
         @JvmField
