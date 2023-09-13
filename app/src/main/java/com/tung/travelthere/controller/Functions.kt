@@ -8,6 +8,8 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.location.Geocoder
+import android.location.Location
+import android.location.LocationRequest
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.ui.graphics.Color
@@ -16,6 +18,9 @@ import androidx.palette.graphics.Palette
 import androidx.test.core.app.ActivityScenario.launch
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.tasks.CancellationToken
+import com.google.android.gms.tasks.CancellationTokenSource
+import com.google.android.gms.tasks.OnTokenCanceledListener
 import com.tung.travelthere.ChooseCity
 import com.tung.travelthere.RegisterLoginActivity
 import com.tung.travelthere.objects.Checkpoint
@@ -50,60 +55,53 @@ fun getCurrentPosition(
 ) {
     AppController.currentPosition = AppController.UserPlace() //initialize
 
-    runBlocking {
-        val job = launch {
-            val result = withTimeoutOrNull(5000) {
-                //chạy quá 20s thì thôi bỏ
-                val executionTime = measureTimeMillis {
-                    fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-                        if (location != null) {
-                            AppController.currentPosition.currentLocation =
-                                Position(location.latitude, location.longitude)
+    fusedLocationClient.getCurrentLocation(
+        LocationRequest.QUALITY_BALANCED_POWER_ACCURACY,
+        object : CancellationToken() {
+            override fun onCanceledRequested(p0: OnTokenCanceledListener) =
+                CancellationTokenSource().token
 
-                            val geocoder = Geocoder(context, Locale.getDefault())
-                            val addresses =
-                                geocoder.getFromLocation(location.latitude, location.longitude, 1)
-                            if (addresses != null && addresses.isNotEmpty()) {
-                                var cityName = if (addresses[0].locality == null) {
-                                    addresses[0].adminArea //lấy tên thành phố theo tên tỉnh
-                                } else {
-                                    addresses[0].locality
-                                }
-                                if (cityName == "Thành phố Hồ Chí Minh")
-                                    cityName = "Ho Chi Minh City"
-                                val countryName = addresses[0].countryName
-
-                                AppController.currentPosition.cityName = cityName
-                                AppController.currentPosition.countryName = countryName
-
-                                City.getSingleton()
-                                    .setName(cityName) //đặt tên cho thành phố hiện tại
-                                City.getSingleton().setCountry(countryName)
-
-                                callback()
-                            }
-                        }
-                    }
-                }
-                "Get location in $executionTime ms"
-            }
-
-            if (result == null) { //chạy quá 20s rồi
-                Toast.makeText(
-                    context,
-                    "Location Service takes too long to get location",
-                    Toast.LENGTH_SHORT
-                ).show()
+            override fun isCancellationRequested() = false
+        })
+        .addOnSuccessListener { location: Location? ->
+            if (location == null) {
+                Toast.makeText(context, "Cannot get location.", Toast.LENGTH_SHORT)
+                    .show()
                 val intent = Intent(context, ChooseCity::class.java)
                 context.startActivity(intent)
-                //cho người dùng tự chọn thành phố
+            } else {
+                AppController.currentPosition.currentLocation =
+                    Position(location.latitude, location.longitude)
+
+                val geocoder = Geocoder(context, Locale.getDefault())
+                val addresses =
+                    geocoder.getFromLocation(
+                        location.latitude,
+                        location.longitude,
+                        1
+                    )
+                if (addresses != null && addresses.isNotEmpty()) {
+                    var cityName = if (addresses[0].locality == null) {
+                        addresses[0].adminArea //lấy tên thành phố theo tên tỉnh
+                    } else {
+                        addresses[0].locality
+                    }
+                    if (cityName == "Thành phố Hồ Chí Minh")
+                        cityName = "Ho Chi Minh City"
+                    val countryName = addresses[0].countryName
+
+                    AppController.currentPosition.cityName = cityName
+                    AppController.currentPosition.countryName = countryName
+
+                    City.getSingleton()
+                        .setName(cityName) //đặt tên cho thành phố hiện tại
+                    City.getSingleton().setCountry(countryName)
+
+                    callback()
+                }
             }
+
         }
-
-        job.join() //load địa điểm
-    }
-
-
 }
 
 
@@ -113,7 +111,7 @@ fun roundDecimal(value: Double, places: Int): Double {
 
 fun restartApp(activity: Activity) {
     val intent = Intent(
-        getApplicationContext(),
+        activity,
         RegisterLoginActivity::class.java
     )
     activity.startActivity(intent)
@@ -133,11 +131,11 @@ fun dateAfterDays(date: Date, days: Int): String {
 
 //tìm khoảng cách xa nhất theo latitude và longitude
 private fun findExtremePoints(schedule: Schedule): Pair<Checkpoint, Checkpoint>? {
-    var res: Pair<Checkpoint, Checkpoint>?=null
+    var res: Pair<Checkpoint, Checkpoint>? = null
 
     var checkpoints = mutableListOf<Checkpoint>()
-    for (checkpoint in schedule.getList()){
-        if (checkpoint!=null){
+    for (checkpoint in schedule.getList()) {
+        if (checkpoint != null) {
             checkpoints.add(checkpoint)
         }
     }
@@ -151,13 +149,13 @@ private fun findExtremePoints(schedule: Schedule): Pair<Checkpoint, Checkpoint>?
     for (i in checkpoints.indices) {
         val checkpoint = checkpoints[i]
         if (checkpoint != null) {
-            for (j in checkpoints.indices){
-                if (i==j)
+            for (j in checkpoints.indices) {
+                if (i == j)
                     continue
                 val checkpoint2 = checkpoints[j]
-                if (checkpoint.distanceTo(checkpoint2)>maxDistance){
-                    maxDistance=checkpoint.distanceTo(checkpoint2)
-                    res=Pair(Checkpoint(checkpoint),Checkpoint(checkpoint2))
+                if (checkpoint.distanceTo(checkpoint2) > maxDistance) {
+                    maxDistance = checkpoint.distanceTo(checkpoint2)
+                    res = Pair(Checkpoint(checkpoint), Checkpoint(checkpoint2))
                 }
             }
         }
@@ -167,7 +165,7 @@ private fun findExtremePoints(schedule: Schedule): Pair<Checkpoint, Checkpoint>?
 
 }
 
-fun shortestPathAlgo(schedule: Schedule): Pair<Float,Schedule>? {
+fun shortestPathAlgo(schedule: Schedule): Pair<Float, Schedule>? {
     //tìm đường đi tối ưu
     val extremePoints = findExtremePoints(schedule = schedule) ?: return null
 
@@ -177,8 +175,8 @@ fun shortestPathAlgo(schedule: Schedule): Pair<Float,Schedule>? {
 
 
     var checkpoints = mutableListOf<Checkpoint>()
-    for (checkpoint in schedule.getList()){
-        if (checkpoint!=null){
+    for (checkpoint in schedule.getList()) {
+        if (checkpoint != null) {
             checkpoints.add(checkpoint)
         }
     }
@@ -187,20 +185,20 @@ fun shortestPathAlgo(schedule: Schedule): Pair<Float,Schedule>? {
     var n = 0
 
     var minDist = Float.POSITIVE_INFINITY
-    var nextCheckpoint: Checkpoint?=null
+    var nextCheckpoint: Checkpoint? = null
 
-    val visited = mutableMapOf<Checkpoint,Boolean>() //đã đi hay chưa
-    visited[current]=true
+    val visited = mutableMapOf<Checkpoint, Boolean>() //đã đi hay chưa
+    visited[current] = true
     travel.add(current)
 
     var size = checkpoints.size
 
     //greedy algorithm
-    while (n<size-1&&j<size){
-        if (j in 0 until size){
-            if (checkpoints[j]!=current&&((visited[checkpoints[j]]==null)||visited[checkpoints[j]]==false)){
+    while (n < size - 1 && j < size) {
+        if (j in 0 until size) {
+            if (checkpoints[j] != current && ((visited[checkpoints[j]] == null) || visited[checkpoints[j]] == false)) {
                 val dist = current.distanceTo(checkpoints[j])
-                if (dist<minDist){
+                if (dist < minDist) {
                     minDist = dist
                     nextCheckpoint = checkpoints[j]
                 }
@@ -209,19 +207,18 @@ fun shortestPathAlgo(schedule: Schedule): Pair<Float,Schedule>? {
 
         j++
 
-        if (j>=checkpoints.size){
+        if (j >= checkpoints.size) {
             j = 0
 
-            if (nextCheckpoint!=null) {
+            if (nextCheckpoint != null) {
                 current = Checkpoint(nextCheckpoint)
                 visited[current] = true
                 travel.add(Checkpoint(current))
-                totalDistance+=minDist
+                totalDistance += minDist
                 minDist = Float.POSITIVE_INFINITY
                 n++
                 nextCheckpoint = null
-            }
-            else{
+            } else {
                 break
             }
         }
@@ -232,5 +229,5 @@ fun shortestPathAlgo(schedule: Schedule): Pair<Float,Schedule>? {
     scheduleRes.getList().addAll(travel)
 
 
-    return Pair(totalDistance,scheduleRes)
+    return Pair(totalDistance, scheduleRes)
 }
