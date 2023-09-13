@@ -88,10 +88,14 @@ class MainActivity : ComponentActivity() {
         for (filter in Filter.values()) {
             optionStr.add(filterToStr(filter))
         }
-        Log.d("current location",AppController.currentPosition.currentLocation.toString())
+
         if (AppController.currentPosition.currentLocation == null) {
-            optionStr.remove("NEAREST FIRST") //nếu đang trong chế độ không có vị trí thì bỏ 2 filter này ra
-            optionStr.remove("FARTHEST FIRST")
+            optionStr.remove(filterToStr(
+                Filter.FARTHEST_FIRST
+            )) //nếu đang trong chế độ không có vị trí thì bỏ 2 filter này ra
+            optionStr.remove(filterToStr(
+                Filter.NEAREST_FIRST
+            ))
         }
 
         weatherViewModel = WeatherViewModel(this, City.getSingleton())
