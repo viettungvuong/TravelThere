@@ -551,7 +551,7 @@ class CreateScheduleActivity : ComponentActivity() {
                 GoogleMap(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(150.dp),
+                        .height(80.dp),
                     cameraPositionState = cameraPositionState
                 ) {
                     val checkpoints = AppController.currentSchedule.value.getList()
