@@ -744,9 +744,13 @@ fun fetchSchedules(){
                     }
                 }
 
-                AppController.schedules.add(currentSchedule) //thêm schedule vào danh sách schedule
+                AppController.schedules.add(currentSchedule)
             }
+
+            AppController.schedules.sortBy { it.date }
         }
+
+
 }
 
 @OptIn(ExperimentalLayoutApi::class)

@@ -138,7 +138,7 @@ private fun findExtremePoints(schedule: Schedule): Pair<Checkpoint, Checkpoint>?
     var checkpoints = mutableListOf<Checkpoint>()
     for (checkpoint in schedule.getList()){
         if (checkpoint!=null){
-            checkpoints.add(Checkpoint(checkpoint))
+            checkpoints.add(checkpoint)
         }
     }
 
@@ -172,15 +172,15 @@ fun shortestPathAlgo(schedule: Schedule): Pair<Float,Schedule>? {
     val extremePoints = findExtremePoints(schedule = schedule) ?: return null
 
     var current = Checkpoint(extremePoints.first)
+    Log.d("current",current.getLocation().getName())
     var totalDistance = 0f
     var travel = LinkedList<Checkpoint>() //lưu lại đường đi
-    travel.add(Checkpoint(current))
 
 
     var checkpoints = mutableListOf<Checkpoint>()
     for (checkpoint in schedule.getList()){
         if (checkpoint!=null){
-            checkpoints.add(Checkpoint(checkpoint))
+            checkpoints.add(checkpoint)
         }
     }
 
@@ -192,6 +192,7 @@ fun shortestPathAlgo(schedule: Schedule): Pair<Float,Schedule>? {
 
     val visited = mutableMapOf<Checkpoint,Boolean>() //đã đi hay chưa
     visited[current]=true
+    travel.add(current)
 
     //a* algorithm visit all nodes
     while (n<checkpoints.size-1&&j<checkpoints.size){
@@ -212,6 +213,7 @@ fun shortestPathAlgo(schedule: Schedule): Pair<Float,Schedule>? {
 
 
             if (nextCheckpoint!=null) {
+                Log.d("next checkpoint",nextCheckpoint.getLocation().getName())
                 current = Checkpoint(nextCheckpoint)
                 visited[current] = true
                 travel.add(Checkpoint(current))
@@ -228,7 +230,6 @@ fun shortestPathAlgo(schedule: Schedule): Pair<Float,Schedule>? {
     scheduleRes.getList().clear()
     scheduleRes.getList().addAll(travel)
 
-    Log.d("travel optimal schedule",travel.toString())
 
     return Pair(totalDistance,scheduleRes)
 }
