@@ -35,7 +35,7 @@ class Checkpoint() {
         return placeLocationState.value!!
     }
 
-    fun setLocation(placeLocation: PlaceLocation){
+    private fun setLocation(placeLocation: PlaceLocation){
         this.placeLocationState.value = placeLocation
     }
 

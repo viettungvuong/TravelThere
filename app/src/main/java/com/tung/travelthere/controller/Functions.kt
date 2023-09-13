@@ -149,12 +149,12 @@ private fun findExtremePoints(schedule: Schedule): Pair<Checkpoint, Checkpoint>?
     var maxDistance = Float.NEGATIVE_INFINITY
 
     for (i in checkpoints.indices) {
-        val checkpoint = schedule.getList()[i]
+        val checkpoint = checkpoints[i]
         if (checkpoint != null) {
             for (j in checkpoints.indices){
                 if (i==j)
                     continue
-                val checkpoint2 = schedule.getList()[j]
+                val checkpoint2 = checkpoints[j]
                 if (checkpoint.distanceTo(checkpoint2)>maxDistance){
                     maxDistance=checkpoint.distanceTo(checkpoint2)
                     res=Pair(Checkpoint(checkpoint),Checkpoint(checkpoint2))
@@ -172,7 +172,6 @@ fun shortestPathAlgo(schedule: Schedule): Pair<Float,Schedule>? {
     val extremePoints = findExtremePoints(schedule = schedule) ?: return null
 
     var current = Checkpoint(extremePoints.first)
-    Log.d("current",current.getLocation().getName())
     var totalDistance = 0f
     var travel = LinkedList<Checkpoint>() //lưu lại đường đi
 
@@ -194,9 +193,11 @@ fun shortestPathAlgo(schedule: Schedule): Pair<Float,Schedule>? {
     visited[current]=true
     travel.add(current)
 
-    //a* algorithm visit all nodes
-    while (n<checkpoints.size-1&&j<checkpoints.size){
-        if (j>0&&j<checkpoints.size){
+    var size = checkpoints.size
+
+    //greedy algorithm
+    while (n<size-1&&j<size){
+        if (j in 0 until size){
             if (checkpoints[j]!=current&&((visited[checkpoints[j]]==null)||visited[checkpoints[j]]==false)){
                 val dist = current.distanceTo(checkpoints[j])
                 if (dist<minDist){
@@ -211,10 +212,7 @@ fun shortestPathAlgo(schedule: Schedule): Pair<Float,Schedule>? {
         if (j>=checkpoints.size){
             j = 0
 
-
             if (nextCheckpoint!=null) {
-                Log.d("next checkpoint",nextCheckpoint.getLocation().getName())
-
                 current = Checkpoint(nextCheckpoint)
                 visited[current] = true
                 travel.add(Checkpoint(current))
