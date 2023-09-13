@@ -1,7 +1,13 @@
 package com.tung.travelthere
 
+import android.app.AlertDialog
+import android.content.ContentValues
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
+import android.text.InputType
+import android.util.Log
+import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -41,6 +47,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.maps.android.compose.*
@@ -501,6 +508,9 @@ class CreateScheduleActivity : ComponentActivity() {
         }
 
         fun updateSchedule(){ //update lên firebase
+            AppController.schedules.add(Schedule(AppController.currentSchedule.value))
+            //dùng copy constructor để tách biệt ra không reference
+
             val checkpointStr = mutableListOf<String>()
             for (checkpoint in AppController.currentSchedule.value.getList()){
                 checkpointStr.add(checkpoint.toString())
@@ -514,7 +524,6 @@ class CreateScheduleActivity : ComponentActivity() {
             Firebase.firestore.collection("users").document(AppController.auth.currentUser!!.uid)
                 .collection("schedules").add(scheduleData) //update lên firebase
                 .addOnSuccessListener {
-                    AppController.schedules.add(Schedule(AppController.currentSchedule.value)) //thêm vào danh sách các schedule
                     AppController.currentSchedule.value.clear()
                     Toast.makeText(this,"Updated schedule successfully",Toast.LENGTH_SHORT).show()
                 }
@@ -581,7 +590,22 @@ class CreateScheduleActivity : ComponentActivity() {
                             Text("Distance ${roundDecimal((optimalSchedule.value!!.first/1000).toDouble(),2)} km")
                         }
 
-                        scheduleViewHorizontal(schedule = optimalSchedule.value!!.second)
+                        scheduleViewHorizontal(schedule = optimalSchedule.value!!.second, onClick = {
+                            val builder: AlertDialog.Builder = AlertDialog.Builder(this@CreateScheduleActivity)
+                            builder.setTitle("Do you want to save the optimal schedule")
+
+                            builder.setPositiveButton("Yes",
+                                DialogInterface.OnClickListener { dialog, which ->
+                                    AppController.currentSchedule.value = optimalSchedule.value!!.second
+                                    updateSchedule()
+                                    AppController.currentSchedule.value.clear()
+                                })
+
+                            builder.setNegativeButton("Cancel",
+                                DialogInterface.OnClickListener { dialog, which -> dialog.cancel() })
+
+                            builder.show()
+                        })
                     }
                 }
             }
@@ -637,6 +661,8 @@ class CreateScheduleActivity : ComponentActivity() {
             Button(
                 onClick = {
                     updateSchedule()
+
+                    AppController.currentSchedule.value.clear()
                 },
                 colors = ButtonDefaults.buttonColors(backgroundColor = colorThird),
                 modifier = Modifier
@@ -766,7 +792,7 @@ fun scheduleView(schedule: Schedule){
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun scheduleViewHorizontal(schedule: Schedule){
+fun scheduleViewHorizontal(schedule: Schedule, onClick:()->Unit){
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -775,6 +801,7 @@ fun scheduleViewHorizontal(schedule: Schedule){
                 horizontal = 10.dp
             )
             .clickable(onClick = {
+                onClick()
             }), elevation = 10.dp
     ) {
         Column(modifier = Modifier.padding(horizontal = 10.dp)) {

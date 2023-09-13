@@ -210,6 +210,7 @@ fun shortestPathAlgo(schedule: Schedule): Pair<Float,Schedule>? {
         if (j>=checkpoints.size){
             j = 0
 
+
             if (nextCheckpoint!=null) {
                 current = Checkpoint(nextCheckpoint)
                 visited[current] = true

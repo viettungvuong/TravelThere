@@ -64,7 +64,7 @@ class ProfileActivity : ComponentActivity() {
         super.onResume()
 
         //User đang đăng nhập
-        val user = AppController.auth.getCurrentUser() as FirebaseUser
+        val user = AppController.auth.currentUser as FirebaseUser
 
         setContent {
             displayUserProfile(currentUser = user)
