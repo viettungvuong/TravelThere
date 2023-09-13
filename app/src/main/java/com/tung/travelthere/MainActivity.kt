@@ -88,6 +88,7 @@ class MainActivity : ComponentActivity() {
         for (filter in Filter.values()) {
             optionStr.add(filterToStr(filter))
         }
+        Log.d("current location",AppController.currentPosition.currentLocation.toString())
         if (AppController.currentPosition.currentLocation == null) {
             optionStr.remove("NEAREST FIRST") //nếu đang trong chế độ không có vị trí thì bỏ 2 filter này ra
             optionStr.remove("FARTHEST FIRST")
@@ -133,13 +134,8 @@ class MainActivity : ComponentActivity() {
                     Tab(
                         selected = (pagerState.currentPage == index), //current index có phải là index
                         onClick = {
-                            run {
-                                coroutineScope.launch {
-                                    pagerState.animateScrollToPage(
-                                        index
-                                    )
-                                }
-                                coroutineScope.cancel()
+                            coroutineScope.launch {
+                                pagerState.scrollToPage(index)
                             }
                         },
                         text = { Text(text = title) }
