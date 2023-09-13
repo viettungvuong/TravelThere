@@ -151,11 +151,11 @@ private fun findExtremePoints(schedule: Schedule): Pair<Checkpoint, Checkpoint>?
     for (i in checkpoints.indices) {
         val checkpoint = schedule.getList()[i]
         if (checkpoint != null) {
-            for (j in schedule.getList().indices){
+            for (j in checkpoints.indices){
                 if (i==j)
                     continue
                 val checkpoint2 = schedule.getList()[j]
-                if (checkpoint2!=null&&checkpoint.distanceTo(checkpoint2)>maxDistance){
+                if (checkpoint.distanceTo(checkpoint2)>maxDistance){
                     maxDistance=checkpoint.distanceTo(checkpoint2)
                     res=Pair(Checkpoint(checkpoint),Checkpoint(checkpoint2))
                 }
@@ -201,7 +201,7 @@ fun shortestPathAlgo(schedule: Schedule): Pair<Float,Schedule>? {
                 val dist = current.distanceTo(checkpoints[j])
                 if (dist<minDist){
                     minDist = dist
-                    nextCheckpoint = Checkpoint(checkpoints[j])
+                    nextCheckpoint = checkpoints[j]
                 }
             }
         }
@@ -214,15 +214,18 @@ fun shortestPathAlgo(schedule: Schedule): Pair<Float,Schedule>? {
 
             if (nextCheckpoint!=null) {
                 Log.d("next checkpoint",nextCheckpoint.getLocation().getName())
+
                 current = Checkpoint(nextCheckpoint)
                 visited[current] = true
                 travel.add(Checkpoint(current))
                 totalDistance+=minDist
                 minDist = Float.POSITIVE_INFINITY
+                n++
+                nextCheckpoint = null
             }
-            nextCheckpoint = null
-
-            n++
+            else{
+                break
+            }
         }
     }
 
