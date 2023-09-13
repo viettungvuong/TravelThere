@@ -542,6 +542,7 @@ class CreateScheduleActivity : ComponentActivity() {
             if (optimalSchedule.value!=null){
                 optimalSchedule.value!!.second.clear()
             }
+
             optimalSchedule.value = shortestPathAlgo(AppController.currentSchedule.value)
         }
 

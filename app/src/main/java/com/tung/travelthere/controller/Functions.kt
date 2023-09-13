@@ -148,7 +148,6 @@ private fun findExtremePoints(schedule: Schedule): Pair<Checkpoint, Checkpoint>?
 
     var maxDistance = Float.NEGATIVE_INFINITY
 
-    //tìm điểm có latitude nhỏ nhất
     for (i in checkpoints.indices) {
         val checkpoint = schedule.getList()[i]
         if (checkpoint != null) {
@@ -171,7 +170,6 @@ private fun findExtremePoints(schedule: Schedule): Pair<Checkpoint, Checkpoint>?
 fun shortestPathAlgo(schedule: Schedule): Pair<Float,Schedule>? {
     //tìm đường đi tối ưu
     val extremePoints = findExtremePoints(schedule = schedule) ?: return null
-
 
     var current = Checkpoint(extremePoints.first)
     var totalDistance = 0f
@@ -212,12 +210,11 @@ fun shortestPathAlgo(schedule: Schedule): Pair<Float,Schedule>? {
         if (j>=checkpoints.size){
             j = 0
 
-            totalDistance+=minDist
-
             if (nextCheckpoint!=null) {
                 current = Checkpoint(nextCheckpoint)
                 visited[current] = true
                 travel.add(Checkpoint(current))
+                totalDistance+=minDist
                 minDist = Float.POSITIVE_INFINITY
             }
             nextCheckpoint = null
