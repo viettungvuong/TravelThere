@@ -10,15 +10,25 @@ import com.google.type.DateTime
 import java.util.Date
 import java.util.LinkedList
 
-class Checkpoint(placeLocation: PlaceLocation) {
+class Checkpoint() {
     var placeLocationState = mutableStateOf<PlaceLocation?>(null)
 
-    init {
-        placeLocationState.value = placeLocation
+    constructor(placeLocation: PlaceLocation): this(){
+        setLocation(placeLocation)
+    }
+
+    constructor(checkpoint: Checkpoint): this(){
+        setLocation(checkpoint.getLocation())
     }
 
     fun distanceTo(other: Checkpoint): Float {
-        return placeLocationState.value!!.distanceTo(other.placeLocationState.value!!)
+        if (placeLocationState.value!=null){
+            return placeLocationState.value!!.distanceTo(other.placeLocationState.value!!)
+        }
+        else{
+            return 0f
+        }
+
     }
 
     fun getLocation(): PlaceLocation {
@@ -31,6 +41,23 @@ class Checkpoint(placeLocation: PlaceLocation) {
 
     override fun toString(): String {
         return placeLocationState.value!!.getPos().toString()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (other !is Checkpoint){
+            return false
+        }
+        if (placeLocationState.value==null||other.placeLocationState.value==null){
+            return false
+        }
+        return placeLocationState.value!!.getPos()== other.placeLocationState.value!!.getPos()
+    }
+
+    override fun hashCode(): Int {
+        if (placeLocationState.value==null){
+            return 0
+        }
+        return (placeLocationState.value!!.getPos().lat+placeLocationState.value!!.getPos().long).toInt()*31
     }
 }
 

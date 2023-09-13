@@ -198,17 +198,29 @@ class CreateScheduleActivity : ComponentActivity() {
                                             .clickable(onClick = {
                                                 val checkpoint = Checkpoint(location)
 
-                                                if (schedule.getList().isNotEmpty()){
-                                                    val prevCheckpoint = schedule.getList().last()
+                                                if (schedule
+                                                        .getList()
+                                                        .isNotEmpty()
+                                                ) {
+                                                    val prevCheckpoint = schedule
+                                                        .getList()
+                                                        .last()
 
                                                     //thêm distance
-                                                    schedule.distances.add(checkpoint.distanceTo(prevCheckpoint)/1000)
+                                                    schedule.distances.add(
+                                                        checkpoint.distanceTo(
+                                                            prevCheckpoint
+                                                        ) / 1000
+                                                    )
                                                 }
-                                                schedule.getList().add(checkpoint)
+                                                schedule
+                                                    .getList()
+                                                    .add(checkpoint)
 
                                                 //thêm category
-                                                for (category in location.getCategoriesList()){
-                                                    schedule.countMap[category]=(schedule.countMap[category]?:0)+1
+                                                for (category in location.getCategoriesList()) {
+                                                    schedule.countMap[category] =
+                                                        (schedule.countMap[category] ?: 0) + 1
                                                 }
 
                                                 clear()
@@ -520,15 +532,18 @@ class CreateScheduleActivity : ComponentActivity() {
         }
         else{
             LatLng(10.7628409,106.6799075)
-        } //nơi xuất phát
+        } //nơi xuất phát nếu không dùng Location services
 
         val cameraPositionState = rememberCameraPositionState {
             position = CameraPosition.fromLatLngZoom(startPos, 8f)
         }
 
-//        LaunchedEffect(AppController.currentSchedule){
-//            optimalSchedule.value = shortestPathAlgo(AppController.currentSchedule.value)
-//        }
+        LaunchedEffect(AppController.currentSchedule.value.getList().size){
+            if (optimalSchedule.value!=null){
+                optimalSchedule.value!!.second.clear()
+            }
+            optimalSchedule.value = shortestPathAlgo(AppController.currentSchedule.value)
+        }
 
         Column() {
             val checkpoints = AppController.currentSchedule.value.getList()
@@ -555,22 +570,20 @@ class CreateScheduleActivity : ComponentActivity() {
                 }
             }
 
-//            if (optimalSchedule.value!=null){
-//                Box(modifier = Modifier
-//                    .padding(vertical = 5.dp)
-//                    .border(width = 2.dp, shape = RectangleShape, brush = Brush.linearGradient())
-//                    .padding(5.dp)){
-//                    Column {
-//                        Text("Optimal schedule", fontWeight = FontWeight.Bold)
-//
-//                        Box(modifier = Modifier.padding(vertical = 2.dp)){
-//                            Text("Distance ${optimalSchedule.value!!.first} km")
-//                        }
-//
-//                        scheduleView(schedule = optimalSchedule.value!!.second)
-//                    }
-//                }
-//            }
+            if (optimalSchedule.value!=null){
+                Box(modifier = Modifier
+                    .padding(vertical = 5.dp)){
+                    Column {
+                        Text("Optimal schedule", fontWeight = FontWeight.Bold)
+
+                        Box(modifier = Modifier.padding(vertical = 2.dp)){
+                            Text("Distance ${roundDecimal((optimalSchedule.value!!.first/1000).toDouble(),2)} km")
+                        }
+
+                        scheduleViewHorizontal(schedule = optimalSchedule.value!!.second)
+                    }
+                }
+            }
 
 
             //để căn giữa nút cộng
@@ -658,7 +671,6 @@ class CreateScheduleActivity : ComponentActivity() {
     private fun ViewSchedules() {
         //adapter schedule
 
-
         LazyColumn() {
             items(AppController.schedules){
                 schedule ->  scheduleView(schedule = schedule)
@@ -710,6 +722,7 @@ fun fetchSchedules(){
         }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun scheduleView(schedule: Schedule){
     Card(
@@ -724,9 +737,9 @@ fun scheduleView(schedule: Schedule){
     ) {
         Column {
             Text(modifier = Modifier.padding(5.dp), text = formatterDateOnly.format(schedule.date), fontWeight = FontWeight.Bold)
-            LazyRow {
-                itemsIndexed(schedule.getList()){
-                        index, checkpoint ->
+            FlowColumn{
+                for (i in schedule.getList().indices){
+                    val checkpoint = schedule.getList()[i]
                     if (checkpoint!=null){
                         Row(){
                             Icon(
@@ -741,18 +754,49 @@ fun scheduleView(schedule: Schedule){
                             Text(
                                 text = "${checkpoint.getLocation().getName()}"
                             )
-
-                            if (index!=schedule.getList().lastIndex&&schedule.getList()[index+1]==null){
-                                Text(
-                                    text = "→",
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 20.sp,
-                                    color = Color.Red
-                                )
-                            }
                         }
                     }
+                }
+            }
+        }
 
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun scheduleViewHorizontal(schedule: Schedule){
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(
+                vertical = 10.dp,
+                horizontal = 10.dp
+            )
+            .clickable(onClick = {
+            }), elevation = 10.dp
+    ) {
+        Column(modifier = Modifier.padding(horizontal = 10.dp)) {
+            Text(modifier = Modifier.padding(5.dp), text = formatterDateOnly.format(schedule.date), fontWeight = FontWeight.Bold)
+            LazyRow{
+                items(schedule.getList()){
+                    val checkpoint = it
+                    if (checkpoint!=null){
+                        Row(modifier = Modifier.padding(horizontal = 5.dp)){
+                            Icon(
+                                imageVector = Icons.Default.Place,
+                                contentDescription = null,
+                                tint = Color.Red,
+                                modifier = Modifier.scale(0.8f)
+                            )
+
+                            Spacer(modifier = Modifier.width(2.dp))
+
+                            Text(
+                                text = "${checkpoint.getLocation().getName()}"
+                            )
+                        }
+                    }
                 }
             }
         }
